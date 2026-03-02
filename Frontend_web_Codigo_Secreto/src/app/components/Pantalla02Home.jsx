@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import "./Escritorio.css"; 
 
 import { ManilaFolder, RedStamp, FBISeal } from "./ScreenFrame";
-import { Crosshair, ShoppingBag, MessageSquare, Trophy, ArrowRight, LogIn } from "lucide-react";
+import { Crosshair, ShoppingBag, MessageSquare, Trophy, Archive, ArrowRight, LogIn } from "lucide-react";
 
 export function Pantalla02Home() {
   const navigate = useNavigate();
@@ -136,6 +136,13 @@ export function Pantalla02Home() {
                 <Trophy size={28} className="mb-2 text-[#8b2020]" />
                 <p className="title-special-small" style={{fontSize: '18px'}}>Hoja de Servicio</p>
                 <p className="subtitle-courier" style={{fontSize: '11px', color: '#a04040'}}>LOGROS DEL AGENTE</p>
+            </div>
+
+            {/* Nota Historial*/}
+            <div className="doc-paper doc-historial" onClick={() => navigate("/historial")}>
+                <Archive size={28} className="mb-2 text-[#331d20]" />
+                <p className="title-special-small" style={{fontSize: '18px'}}>Historial</p>
+                <p className="subtitle-courier" style={{fontSize: '11px', color: '#331d20'}}>REGISTRO DE MISIONES ANTERIORES</p>
             </div>
           </div>
 

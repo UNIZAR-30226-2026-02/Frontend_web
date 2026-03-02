@@ -196,11 +196,10 @@
 /* 8. DOCUMENTOS LATERALES  */
 .doc-paper {
   position: relative;
-  padding: 1.8rem;
+  padding: 1.1rem;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: visible;
-  /* Sombras de contacto más pesadas */
   filter: drop-shadow(10px 12px 15px rgba(0,0,0,0.5));
 }
 
@@ -253,6 +252,22 @@
   clip-path: polygon(0% 0%, 100% 0%, 100% 80%, 80% 100%, 0% 100%);
 }
 
+.doc-historial { 
+  background-color: #472f31ea;
+  transform: rotate(10deg) translateY(15px);
+  clip-path: polygon(2% 2%, 98% 1%, 99% 110%, 1% 97%);
+}
+
+.doc-historial::after {
+  content: "";
+  position: absolute;
+  inset: 2;
+  background: 
+    linear-gradient(90deg, transparent 49%, rgba(0,0,0,0.1) 50%, rgba(255,255,255,0.2) 51%, transparent 52%),
+    linear-gradient(0deg, transparent 49%, rgba(0,0,0,0.1) 50%, rgba(255,255,255,0.2) 51%, transparent 52%);
+  z-index: 3;
+}
+
 /* Mancha de café en la Hoja de Servicio */
 .doc-achievements::after {
   content: "";
@@ -263,7 +278,7 @@
   height: 45px;
   background: radial-gradient(circle, rgba(74,48,24,0.1) 0%, transparent 70%);
   border-radius: 40% 60% 50% 50%;
-  z-index: 3;
+  z-index: 10;
 }
 
 .doc-paper:hover {
@@ -274,7 +289,7 @@
 
 .doc-paper > * {
   position: relative;
-  z-index: 10;
+  z-index: 15;
 }
 
 /* 9. ICONOS Y COLORES */
@@ -313,15 +328,15 @@
 /* 2. POST-IT DE NOTAS */
 .post-it {
   position: absolute;
-  bottom: 30px;
+  bottom: 70px;
   right: -30px;
   width: 110px;
   height: 110px;
   background: #fdf276;
   padding: 10px;
-  transform: rotate(8deg);
+  transform: rotate(-2deg);
   box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
-  z-index: 60;
+  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: center;
