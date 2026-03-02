@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import "./Escritorio.css"; 
 
 import { ManilaFolder, RedStamp, FBISeal } from "./ScreenFrame";
-import { Crosshair, ShoppingBag, MessageSquare, Trophy, Archive, ArrowRight, LogIn } from "lucide-react";
+import { Crosshair, ShoppingBag, MessageSquare, Trophy, Archive, ArrowRight, LogIn, Lock, Globe, Search} from "lucide-react";
 
 export function Pantalla02Home() {
   const navigate = useNavigate();
@@ -74,33 +74,47 @@ export function Pantalla02Home() {
                     <ArrowRight className={`transition-transform ${joinOpen ? "rotate-90" : ""}`} size={20} />
                   </div>
 
-                  {/* Panel Desplegable de Unirse: FALTA MISIÓN PÚBLICA */}
-                  {joinOpen && (
-                    <div className="join-options-panel">
-                      <p className="subtitle-courier" style={{ marginBottom: '10px', fontWeight: 'bold' }}>
-                        INGRESE CREDENCIALES DE ACCESO (CÓDIGO):
-                      </p>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          className="code-input"
-                          placeholder="FBI-XXXX"
-                          value={privateCode}
-                          onChange={(e) => setPrivateCode(e.target.value.toUpperCase())}
-                          maxLength={10}
-                          autoFocus
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                        <button 
-                          className="bg-[#8b2020] text-white px-4 py-2 font-['Special_Elite'] text-xs hover:bg-[#cc3333] transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleJoinMission();
-                          }}
-                        >
-                          VALIDAR
-                        </button>
+                  {/* Panel Desplegable de Unirse*/}
+                 {joinOpen && (
+                    <div className="join-grid-container">
+            
+                      <div className="join-sub-card private">
+                        <div className="join-label-box">
+                          <Lock size={14} className="icon-red" />
+                          <span className="join-label-text" style={{ color: '#e8dcc8' }}>MISIÓN PRIVADA</span>
+                        </div>
+                        <p className="join-desc-text">Introduce credenciales de acceso:</p>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <input
+                            type="text"
+                            className="code-input"
+                            placeholder="FBI-XXXX"
+                            value={privateCode}
+                            onChange={(e) => setPrivateCode(e.target.value.toUpperCase())}
+                            maxLength={8}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <button className="btn-validate" onClick={(e) => { e.stopPropagation(); navigate("/lobby"); }}>
+                            <ArrowRight size={16} />
+                          </button>
+                        </div>
                       </div>
+                                        
+                      {/* tarjeta Pública */}
+                      <div className="join-sub-card public" onClick={(e) => { e.stopPropagation(); navigate("/misiones-publicas"); }}>
+                        <div>
+                          <div className="join-label-box">
+                            <Globe size={14} className="icon-green" />
+                            <span className="join-label-text" style={{ color: '#3a2a10' }}>MISIÓN PÚBLICA</span>
+                          </div>
+                          <p className="join-desc-text">Explora operaciones activas en la red:</p>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
+                          <Search size={14} className="icon-green" />
+                          <span className="subtitle-courier" style={{ fontSize: '10px', color: '#2a5a3a' }}>BUSCAR TERMINALES →</span>
+                        </div>
+                      </div>  
+
                     </div>
                   )}
                 </div>
