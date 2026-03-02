@@ -15,7 +15,7 @@ export function ScreenFrame({ title, subtitle, children }) {
 
 /* ====== Subcomponentes reutilizables de estética FBI ====== */
 
-export function ManilaFolder({ children, className = "" }) {
+export function ManilaFolder({ children, className = "", showTab = true, showClip = false }) {
   return (
     <div className={`relative ${className} my-8`}>
       
@@ -29,10 +29,17 @@ export function ManilaFolder({ children, className = "" }) {
       {/*Carpeta Principal */}
       <div className="relative group">
         
-        {/* Pestaña de la carpeta */}
-        <div className="absolute -top-6 left-0 h-8 w-40 bg-[#c4a060] rounded-t-xl shadow-[-2px_-2px_5px_rgba(0,0,0,0.1)] border-t border-x border-white/20 flex items-center px-4">
-           <span className="font-['Courier'] text-[10px] text-[#3a2a10] opacity-70 uppercase tracking-tighter">Subject: Classified</span>
-        </div>
+        {/* Paper clip opcional */}
+        {showClip && (
+          <div className="absolute -top-10 left-7 w-4 h-15 border-2 border-[#a6a6a6] rounded-lg transform rotate-5 z-50 shadow-sm bg-rgba(200,200,200,0.1)" />
+        )}
+        
+        {/* Pestaña de la carpeta - opcional */}
+        {showTab && (
+          <div className="absolute -top-6 left-0 h-8 w-40 bg-[#c4a060] rounded-t-xl shadow-[-2px_-2px_5px_rgba(0,0,0,0.1)] border-t border-x border-white/20 flex items-center px-4">
+             <span className="font-['Courier'] text-[10px] text-[#3a2a10] opacity-70 uppercase tracking-tighter">Subject: Classified</span>
+          </div>
+        )}
 
         {/* Cuerpo de la carpeta */}
         <div

@@ -8,7 +8,7 @@ import logo from '../../assets/logo.png';
 
 export function Pantalla01Login() {
   const navigate = useNavigate();
-   const iniciarSesionConGoogle = () => {
+  const iniciarSesionConGoogle = () => {
     // Aquí irá la lógica real de autenticación con Google OAuth
     // Para pruebas, navegamos al home de momento
     navigate("/home");
