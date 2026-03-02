@@ -16,7 +16,7 @@ export function Layout() {
 
   return (
     <div
-      className="min-h-screen flex flex-col relative overflow-x-hidden"
+      className="min-h-screen flex flex-col relative"
       style={{
         // Imagen de fondo de madera.
         backgroundImage: `url(${woodTexture})`,
@@ -28,10 +28,7 @@ export function Layout() {
     >
       {/* CAPA DE SOMBRA PERIMETRAL (Vignette) 
           Esto oscurece los bordes para que parezca una mesa bajo una lámpara */}
-      <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.5)_100%)]" />
-
-      {/* Sombreado perimetral (Vignette) para dar profundidad */}
-      <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
+      <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.5)_100%)]" />
 
       {/* ====== Iconos persistentes en las esquinas ====== */}
       {!hideIcons && (
@@ -82,7 +79,7 @@ export function Layout() {
       )}
 
       {/* ====== CONTENIDO PRINCIPAL ====== */}
-      <main className="flex-1 relative z-10 overflow-x-hidden">
+      <main className="flex-1 relative z-10 bg-transparent">
         <Outlet />
       </main>
     </div>
