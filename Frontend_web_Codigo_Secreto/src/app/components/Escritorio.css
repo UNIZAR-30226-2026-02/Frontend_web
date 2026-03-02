@@ -115,7 +115,7 @@
 
 /* 5. TARJETAS DE MISIÓN (BOTONES) */
 .mission-card {
-  background: #2a2218;
+  background: #2a221899;
   border: 1px solid rgba(74, 58, 32, 0.5);
   padding: 1.25rem;
   cursor: pointer;
@@ -177,7 +177,7 @@
 
 .title-special { font-family: 'Special Elite', cursive; color: #e8dcc8; font-size: 20px; margin: 0; }
 .title-special-dark { font-family: 'Special Elite', cursive; color: #3a2a10; font-size: 16px; margin: 0; }
-.subtitle-courier { font-family: 'Courier Prime', monospace; color: #887a63; font-size: 15px; margin: 0; }
+.subtitle-courier { font-family: 'Courier Prime', monospace; color: #cbb089; font-size: 15px; margin: 0; }
 
 .code-input {
   flex: 1;
@@ -196,11 +196,13 @@
 /* 8. DOCUMENTOS LATERALES  */
 .doc-paper {
   position: relative;
-  padding: 1.1rem;
+  padding: 1.8rem;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   overflow: visible;
   filter: drop-shadow(10px 12px 15px rgba(0,0,0,0.5));
+  margin-top: -30px; 
+  z-index: 5;
 }
 
 
