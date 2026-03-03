@@ -2,7 +2,7 @@
  * Pantalla con el listado de partidas públicas que no han sido iniciadas todavía.
  */
 
-import { ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader, TapeStrip } from "./ScreenFrame";
+import { ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader, TapeStrip } from "../components/ScreenFrame";
 import { Search, Users, Clock, ArrowLeft, Filter } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";

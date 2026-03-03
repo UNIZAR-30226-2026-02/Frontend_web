@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
-import "./Escritorio.css"; 
+import "../components/Escritorio.css"; 
 
-import { ManilaFolder, RedStamp, FBISeal } from "./ScreenFrame";
+import { ManilaFolder, RedStamp, FBISeal } from "../components/ScreenFrame";
 import { Crosshair, ShoppingBag, MessageSquare, Trophy, Archive, ArrowRight, LogIn, Lock, Globe, Search} from "lucide-react";
 
 export function Pantalla02Home() {

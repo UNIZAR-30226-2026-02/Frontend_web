@@ -1,9 +1,9 @@
 import { createBrowserRouter } from "react-router";
 
 import { Layout } from "./components/Layout";
-import { Pantalla01Login } from "./components/Pantalla01Login";
-import { Pantalla02Home } from "./components/Pantalla02Home";
-import { Pantalla03MisionesPublicas } from "./components/Pantalla03MisionesPublicas";
+import { Pantalla01Login } from "./pantallas/Pantalla01Login";
+import { Pantalla02Home } from "./pantallas/Pantalla02Home";
+import { Pantalla03MisionesPublicas } from "./pantallas/Pantalla03MisionesPublicas";
 
 export const router = createBrowserRouter([
   {

@@ -2,7 +2,7 @@
  * Pantalla de Login con Google OAuth. Es la pantalla que aparece nada más abrir la aplicación.
  */
 
-import { ScreenFrame, ManilaFolder, RedStamp, FBISeal, TapeStrip } from "./ScreenFrame";
+import { ScreenFrame, ManilaFolder, RedStamp, FBISeal, TapeStrip } from "../components/ScreenFrame";
 import { useNavigate } from "react-router";
 import logo from '../../assets/logo.png';
 
