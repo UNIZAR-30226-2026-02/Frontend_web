@@ -198,6 +198,8 @@
 .join-sub-card.private {
   background: #2a2218;
   border: 1px solid rgba(74, 58, 32, 0.5);
+  overflow: hidden; /* Evita que el brillo o el input sobresalgan */
+  /* min-width: 0;     /* Permite que el flex-item se encoja si es necesario */
 }
 
 .join-sub-card.public {
@@ -270,6 +272,8 @@
 .subtitle-courier { font-family: 'Courier Prime', monospace; color: #cbb089; font-size: 15px; margin: 0; }
 
 .code-input {
+  width: 100%;             /* Ocupa el 100% del ancho de la tarjeta */
+  box-sizing: border-box;  /* El padding no "empuja" hacia afuera */
   flex: 1;
   background: #000;
   border: 0.5px solid #4a3a20;
