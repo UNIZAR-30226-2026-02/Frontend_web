@@ -2,6 +2,8 @@ import { createBrowserRouter } from "react-router";
 
 import { Layout } from "./components/Layout";
 import { Pantalla01Login } from "./components/Pantalla01Login";
+import { Pantalla02Home } from "./components/Pantalla02Home";
+import { Pantalla03MisionesPublicas } from "./components/Pantalla03MisionesPublicas";
 
 export const router = createBrowserRouter([
   {
@@ -10,6 +12,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: Pantalla01Login },
       { path: "login", Component: Pantalla01Login },
+      { path: "home", Component: Pantalla02Home },
+      { path: "misiones-publicas", Component: Pantalla03MisionesPublicas },
     ],
   },
 ]);
