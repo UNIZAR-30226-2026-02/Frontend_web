@@ -86,7 +86,7 @@ export function Pantalla03MisionesPublicas() {
                 return (
                   <div
                     key={m.id}
-                    onClick={() => !isFull && navigate("/lobby")}
+                    onClick={() => !isFull && navigate("/partida-agente")}
                     className={`bg-[#f0e4c8]/50 border border-[#c4a060]/25 rounded-sm p-3 sm:p-4 flex items-center justify-between transition-all ${
                       isFull ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-[#f5edd0]/70 hover:border-[#c4a060]/50 hover:-translate-y-0.5"
                     }`}
