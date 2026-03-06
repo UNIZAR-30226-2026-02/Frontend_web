@@ -129,12 +129,14 @@
     gap: 0.75rem; 
     margin-bottom: 1rem; 
     align-items: flex-start;
+    padding-right: 6rem;
 }
 
 @media (min-width: 640px) {
     .agent-top-bar {
         flex-direction: row;
         align-items: center;
+        padding-right: 8rem;
     }
 }
 
@@ -285,6 +287,10 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    position: fixed;
+    top: 4rem;
+    right: 0.75rem;
+    z-index: 50;
 }
 
 /* Icono */
@@ -298,7 +304,7 @@
 .timer-clock-text {
     font-family: var(--font-courier);
     color: #d4b878;
-    font-size: 24px;
+    font-size: 18px;
 }
 
 /* ROLE BADGE ROW*/

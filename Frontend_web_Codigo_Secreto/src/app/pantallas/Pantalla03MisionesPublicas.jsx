@@ -7,6 +7,7 @@ import { Search, Users, Clock, ArrowLeft, Filter } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
+// Datos de prueba: TODO: integrar con backend utilizando useEffect.
 const missions = [
   { id: 1, name: "Operación Medusa", host: "ProAgente99", players: "6/8", theme: "Cyberpunk", timer: "60s", time: "02:34", status: "ESPERANDO" },
   { id: 2, name: "Proyecto Cóndor", host: "EspíaMaestro", players: "4/8", theme: "Naturaleza", timer: "90s", time: "15:02", status: "ESPERANDO" },

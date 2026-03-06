@@ -5,14 +5,17 @@
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { BookOpen } from "lucide-react";
 import woodTexture from '../../assets/wood.png';
-// Pantallas en las que no se van a mostrar los iconos persistentes de las esquinas (foto de agente, 
-// manual operativo y contador de balas).
-const hideOverlay = ["/","/login"];
+// Pantallas en las que NO se van a mostrar los iconos persistentes de las esquinas 
+// (foto de agente ni contador de balas).
+  const hideProfileAndBulletsRoutes = ["/","/login", "/partida-agente"];
+  // Pantallas en las que NO se quiere mostrar el icono del manual.
+  const hideManualRoutes = ["/","/login"];
 
 export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const hideIcons = hideOverlay.some(r => location.pathname === r);
+  const hideProfileAndBullets = hideProfileAndBulletsRoutes.some(r => location.pathname === r);
+  const hideManual = hideManualRoutes.some(r => location.pathname === r);
 
   return (
     <div
@@ -31,7 +34,7 @@ export function Layout() {
       <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.5)_100%)]" />
 
       {/* ====== Iconos persistentes en las esquinas ====== */}
-      {!hideIcons && (
+      {!hideProfileAndBullets && (
         <>
           {/* Agent photo — top left → Profile */}
           <button
@@ -53,17 +56,6 @@ export function Layout() {
             </div>
           </button>
 
-          {/* Manual Operativo — top right → Settings */}
-          <button
-            onClick={() => navigate("/settings")}
-            className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50 group cursor-pointer"
-            title="Manual Operativo"
-          >
-            <div className="bg-[#2a2218]/90 border border-[#5a4a30]/40 rounded-sm p-1.5 sm:p-2 shadow-[2px_3px_10px_rgba(0,0,0,0.5)] group-hover:bg-[#3a3020]/90 transition-colors">
-              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-[#c4a060] group-hover:text-[#d4b878] transition-colors" />
-            </div>
-          </button>
-
           {/* Bullet count — top right, below manual */}
           <div className="fixed top-14 right-3 sm:top-16 sm:right-4 z-50">
             <div className="flex items-center gap-1.5 bg-[#1a1208]/90 border border-[#5a4a20]/30 rounded-sm px-2 py-1 shadow-[1px_2px_6px_rgba(0,0,0,0.4)]">
@@ -75,6 +67,21 @@ export function Layout() {
               <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 11 }}>500</span>
             </div>
           </div>
+        </>
+      )}
+
+      {!hideManual && (
+        <>
+          {/* Manual Operativo — top right → Settings */}
+          <button
+            onClick={() => navigate("/settings")}
+            className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50 group cursor-pointer"
+            title="Manual Operativo"
+          >
+            <div className="bg-[#2a2218]/90 border border-[#5a4a30]/40 rounded-sm p-1.5 sm:p-2 shadow-[2px_3px_10px_rgba(0,0,0,0.5)] group-hover:bg-[#3a3020]/90 transition-colors">
+              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-[#c4a060] group-hover:text-[#d4b878] transition-colors" />
+            </div>
+          </button>
         </>
       )}
 
