@@ -7,9 +7,9 @@ import { BookOpen } from "lucide-react";
 import woodTexture from '../../assets/wood.png';
 // Pantallas en las que NO se van a mostrar los iconos persistentes de las esquinas 
 // (foto de agente ni contador de balas).
-  const hideProfileAndBulletsRoutes = ["/","/login", "/partida-agente"];
+  const hideProfileAndBulletsRoutes = ["/","/login", "/partida-agente","/manual"];
   // Pantallas en las que NO se quiere mostrar el icono del manual.
-  const hideManualRoutes = ["/","/login"];
+  const hideManualRoutes = ["/","/login","/manual"];
 
 export function Layout() {
   const location = useLocation();
@@ -74,7 +74,7 @@ export function Layout() {
         <>
           {/* Manual Operativo — top right → Settings */}
           <button
-            onClick={() => navigate("/settings")}
+            onClick={() => navigate("/manual")}
             className="fixed top-3 right-3 sm:top-4 sm:right-4 z-50 group cursor-pointer"
             title="Manual Operativo"
           >

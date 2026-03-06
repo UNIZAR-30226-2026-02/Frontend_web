@@ -1,0 +1,302 @@
+/* Fichero con componentes CSS específicos para la Pantalla06Manual (Manual) */
+
+/* Contenedor Principal */
+.settings-container {
+    max-width: 48rem; /* max-w-3xl */
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 2rem; /* pt-8 */
+}
+
+@media (min-width: 640px) {
+    .settings-container {
+        padding-top: 1rem; /* sm:pt-4 */
+    }
+}
+
+/* Botón Volver */
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #8a7a60;
+    transition: color 150ms;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+.back-btn:hover { color: #d4b878; }
+
+.back-btn-icon {
+    width: 1rem; height: 1rem;
+    transition: transform 150ms;
+}
+.back-btn:hover .back-btn-icon {
+    transform: translateX(-0.25rem);
+}
+
+.back-btn-text {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+}
+
+/* Interior de la Carpeta Manila */
+.folder-content {
+    padding: 1rem; /* p-4 */
+    position: relative;
+}
+@media (min-width: 640px) { .folder-content { padding: 1.5rem; } }
+@media (min-width: 1024px) { .folder-content { padding: 2rem; } }
+
+/* Pestaña de la carpeta (Tab) */
+.folder-tab {
+    position: absolute;
+    top: 0;
+    left: 1.5rem;
+    background-color: #b89055;
+    padding: 0.375rem 1rem;
+    border-bottom-right-radius: 0.125rem;
+    border-bottom-left-radius: 0.125rem;
+    border-left: 1px solid #a08040;
+    border-right: 1px solid #a08040;
+    border-bottom: 1px solid #a08040;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
+.folder-tab-text {
+    font-family: 'Courier Prime', monospace;
+    color: #2a1a08;
+    font-size: 9px;
+}
+
+/* Cabecera del documento */
+.settings-header-area {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+.settings-subtitle {
+    font-family: 'Courier Prime', monospace;
+    color: #6a5a40;
+    margin-top: 0.25rem;
+    font-size: 11px;
+}
+
+/* Grid Principal */
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+@media (min-width: 1024px) {
+    .settings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* --- REGLAS DEL JUEGO --- */
+.rules-card {
+    padding: 1rem;
+}
+@media (min-width: 640px) { .rules-card { padding: 1.25rem; } }
+
+.diagram-container {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background-color: #1a1a1a;
+    border-radius: 0.125rem;
+    border: 1px solid #333;
+}
+.diagram-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+.diagram-cell {
+    height: 0.75rem;
+    border-radius: 0.125rem;
+}
+@media (min-width: 640px) { .diagram-cell { height: 1rem; } }
+
+/* Colores de las celdas del diagrama */
+.cell-red { background-color: rgba(139, 32, 32, 0.5); }
+.cell-blue { background-color: rgba(42, 58, 90, 0.5); }
+.cell-black { background-color: rgba(17, 17, 17, 0.8); border: 1px solid #333; }
+.cell-neutral { background-color: rgba(85, 85, 85, 0.2); }
+
+.diagram-caption {
+    font-family: 'Courier Prime', monospace;
+    color: #666;
+    text-align: center;
+    font-size: 9px;
+}
+
+/* Lista de Reglas */
+.rules-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.rule-row {
+    display: flex;
+    gap: 0.75rem;
+}
+.rule-num {
+    font-family: 'Courier Prime', monospace;
+    color: #8b2020;
+    flex-shrink: 0;
+    font-size: 12px;
+}
+.rule-text {
+    font-family: 'Courier Prime', monospace;
+    color: #ccc;
+    font-size: 11px;
+}
+
+/* Leyenda inferior */
+.legend-container {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #333;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.legend-box {
+    width: 1rem; height: 1rem;
+    border-radius: 0.125rem;
+    border-width: 2px;
+    border-style: solid;
+}
+/* Modificadores Leyenda */
+.legend-box-red { border-color: #cc3333; background-color: rgba(139, 32, 32, 0.5); }
+.legend-box-blue { border-color: #3366cc; background-color: rgba(42, 58, 90, 0.5); }
+.legend-box-neutral { border-color: rgba(119, 119, 119, 0.4); background-color: rgba(85, 85, 85, 0.2); }
+.legend-box-black { border-color: #333; background-color: rgba(0, 0, 0, 0.5); }
+
+.legend-text {
+    font-family: 'Courier Prime', monospace;
+    color: #888;
+    font-size: 10px;
+}
+
+/* --- AUDIO Y ABOUT --- */
+.audio-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+.audio-card {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+@media (min-width: 640px) { .audio-card { padding: 1.25rem; } }
+
+/* Sliders */
+.slider-group {
+    display: flex;
+    flex-direction: column;
+}
+.slider-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+.slider-label-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.slider-label {
+    font-family: 'Courier Prime', monospace;
+    color: #e8dcc8;
+    font-size: 12px;
+}
+.slider-value {
+    font-family: 'Courier Prime', monospace;
+    color: #d4b878;
+    font-size: 12px;
+}
+
+/* Track del slider (Personalizado) */
+.slider-track {
+    position: relative;
+    height: 0.75rem;
+    background-color: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+.slider-fill {
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    border-radius: 9999px;
+}
+.music-fill { background-image: linear-gradient(to right, #2a3a5a, #5090c0); }
+.sfx-fill { background-image: linear-gradient(to right, #8b2020, #cc5050); }
+
+.slider-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Caja "Acerca de" */
+.about-box {
+    background-color: #f5edd8;
+    border: 1px solid rgba(160, 128, 80, 0.3);
+    border-radius: 0.125rem;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.about-icon {
+    width: 1.25rem; height: 1.25rem;
+    color: #8a7a60;
+    flex-shrink: 0;
+}
+.about-title {
+    font-family: 'Courier Prime', monospace;
+    color: #5a4a30;
+    font-size: 11px;
+}
+.about-copyright {
+    font-family: 'Courier Prime', monospace;
+    color: #8a7a60;
+    font-size: 9px;
+}
+
+/* Pie de la Carpeta */
+.folder-footer {
+    margin-top: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.footer-doc-text {
+    font-family: 'Courier Prime', monospace;
+    color: rgba(138, 122, 96, 0.5);
+    font-size: 9px;
+}
+.stamp-rotate {
+    transform: rotate(3deg);
+}

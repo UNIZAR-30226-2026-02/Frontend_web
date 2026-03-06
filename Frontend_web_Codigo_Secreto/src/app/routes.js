@@ -5,6 +5,7 @@ import { Pantalla01Login } from "./pantallas/Pantalla01Login";
 import { Pantalla02Home } from "./pantallas/Pantalla02Home";
 import { Pantalla03MisionesPublicas } from "./pantallas/Pantalla03MisionesPublicas";
 import { Pantalla04PartidaAgente } from "./pantallas/Pantalla04PartidaAgente";
+import { Pantalla06Manual } from "./pantallas/Pantalla06Manual";
 
 export const router = createBrowserRouter([
   {
@@ -16,6 +17,7 @@ export const router = createBrowserRouter([
       { path: "home", Component: Pantalla02Home },
       { path: "misiones-publicas", Component: Pantalla03MisionesPublicas },
       { path: "partida-agente", Component: Pantalla04PartidaAgente },
+      { path: "manual", Component: Pantalla06Manual },
     ],
   },
 ]);
