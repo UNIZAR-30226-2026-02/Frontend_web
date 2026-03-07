@@ -5,6 +5,9 @@
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { BookOpen } from "lucide-react";
 import woodTexture from '../../assets/wood.png';
+/*import { UserProvider } from "./components/UserContext";
+*/
+
 // Pantallas en las que NO se van a mostrar los iconos persistentes de las esquinas 
 // (foto de agente ni contador de balas).
   const hideProfileAndBulletsRoutes = ["/","/login", "/partida-agente","/manual"];
@@ -16,6 +19,25 @@ export function Layout() {
   const navigate = useNavigate();
   const hideProfileAndBullets = hideProfileAndBulletsRoutes.some(r => location.pathname === r);
   const hideManual = hideManualRoutes.some(r => location.pathname === r);
+
+  /*EXTRAEMOS LOS DATOS DEL CONTEXTO GLOBLAL
+  const { user, isLoading } = useContext(UserContext);
+
+  // PANTALLA DE CARGA (Mientras el backend valida la cookie)
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#2a1204]">
+        <span className="font-['Courier_Prime',monospace] text-[#c4a060]">
+          VERIFICANDO CREDENCIALES...
+        </span>
+      </div>
+    );
+  }
+
+  // LÓGICA PARA INICIALES Y BALAS (Con fallback por si user es null)
+  const initials = user?.alias ? user.alias.substring(0, 2).toUpperCase() : "??";
+  const balas = user?.balas ?? 0;
+  */
 
   return (
     <div
@@ -34,7 +56,7 @@ export function Layout() {
       <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.5)_100%)]" />
 
       {/* ====== Iconos persistentes en las esquinas ====== */}
-      {!hideProfileAndBullets && (
+      {!hideProfileAndBullets /*&& user*/ && (  // Solo se muestra si hay sesión.
         <>
           {/* Agent photo — top left → Profile */}
           <button
@@ -65,6 +87,12 @@ export function Layout() {
                 <circle cx="12" cy="20" r="1.5" fill="#8a6a30" />
               </svg>
               <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 11 }}>500</span>
+              {/* BALAS DINÁMICAS              
+              <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 11 }}>
+                {balas}
+              </span>
+              */}
+              
             </div>
           </div>
         </>
