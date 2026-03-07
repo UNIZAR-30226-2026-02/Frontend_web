@@ -87,7 +87,6 @@ export function Pantalla03MisionesPublicas() {
                 return (
                   <div
                     key={m.id}
-                    onClick={() => !isFull && navigate("/partida-agente")}
                     className={`bg-[#f0e4c8]/50 border border-[#c4a060]/25 rounded-sm p-3 sm:p-4 flex items-center justify-between transition-all ${
                       isFull ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-[#f5edd0]/70 hover:border-[#c4a060]/50 hover:-translate-y-0.5"
                     }`}
@@ -111,12 +110,13 @@ export function Pantalla03MisionesPublicas() {
                         <span className="font-['Courier_Prime',monospace] text-[#3a2a10]" style={{ fontSize: 11 }}>{m.time}</span>
                       </div>
                       {isFull ? (
-                        <div className="bg-[#5a2a2a]/20 border border-[#8a4a4a]/30 rounded-sm px-2 py-0.5">
+                        <div className="flex bg-[#5a2a2a]/20 border border-[#8a4a4a]/30 rounded-sm px-2 py-2">
                           <span className="font-['Courier_Prime',monospace] text-[#8b2020]" style={{ fontSize: 8 }}>LLENA</span>
                         </div>
                       ) : (
-                        <div className="bg-[#2a5a2a]/20 border border-[#4a8a4a]/30 rounded-sm px-2 py-0.5">
-                          <span className="font-['Courier_Prime',monospace] text-[#2a5a2a]" style={{ fontSize: 8 }}>UNIRSE</span>
+                        <div onClick={() => !isFull && navigate("/lobby")}
+                          className="flex bg-[#2a5a2a]/20 border border-[#4a8a4a]/30 rounded-sm px-2 py-2">
+                          <span className="font-['Courier_Prime',monospace] text-[#2a5a2a]" style={{ fontSize: 12 }}>UNIRSE</span>
                         </div>
                       )}
                     </div>
