@@ -1,3 +1,7 @@
+/*
+ * Pantalla del lobby (antes de entrar a una partida).
+ */
+
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader } from "../components/ScreenFrame";
 import { Crown, User, Copy, ArrowLeft, Eye, Fingerprint } from "lucide-react";
 import { useState } from "react";

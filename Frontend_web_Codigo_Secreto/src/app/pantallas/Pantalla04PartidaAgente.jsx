@@ -1,3 +1,7 @@
+/*
+ * Pantalla para la partida desde el punto de vista del agente.
+ */
+
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
 import { 

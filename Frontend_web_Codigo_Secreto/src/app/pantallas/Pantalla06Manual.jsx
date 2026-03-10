@@ -1,3 +1,7 @@
+/*
+ * Pantalla para el manual.
+ */
+
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader, SubsectionLabel } from "../components/ScreenFrame";
 import { Volume2, Music, Info, BookOpen, ArrowLeft } from "lucide-react";
 import { useState } from "react";

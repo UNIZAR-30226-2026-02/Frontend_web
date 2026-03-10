@@ -1,3 +1,7 @@
+/*
+ * Pantalla de inicio (Home).
+ */
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import "../components/Escritorio.css"; 
