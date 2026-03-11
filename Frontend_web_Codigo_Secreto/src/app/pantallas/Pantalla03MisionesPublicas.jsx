@@ -23,6 +23,51 @@ export function Pantalla03MisionesPublicas() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTheme, setFilterTheme] = useState(null); 
 
+  /*// Estados para manejar los datos del servidor.
+  const [missions, setMissions] = useState([]); // Empieza vacío
+  const [isLoading, setIsLoading] = useState(true); // Empieza cargando
+  const [error, setError] = useState(null); // Por si falla la red
+  */
+
+  /* // Función que se ejecuta al cargar la pantalla para mostrar los datos contenidos en
+  // la base de datos sobre las partidas públicas abiertas.
+  useEffect(() => {
+    // Definimos la función asíncrona
+    const fetchMisiones = async () => {
+      try {
+        // TODO: poner URL real de la API.
+        const response = await fetch("http://localhost:3000/api/partidas/publicas");
+        
+        if (!response.ok) throw new Error("Acceso denegado a los servidores del FBI");
+        
+        const data = await response.json();
+
+        // Adaptar los datos obtenidos de la base de datos para mostrarlos por pantalla
+        // con el formato requerido.
+        const misionesFormateadas = data.map(partida => ({
+          id: partida.id_partida,
+          name: `Operación ${partida.codigo_partida}`, // O si tienes un campo nombre real
+          host: partida.creador_tag || "Agente Desconocido",
+          players: `${partida.jugadores_actuales}/${partida.maxJugadores}`,
+          theme: partida.tema_nombre || "Clásico", 
+          timer: `${partida.tiempoEspera}s`,
+          time: "00:00", // El tiempo que lleva creada (se puede calcular con fechaCreacion).
+          status: partida.jugadores_actuales >= partida.maxJugadores ? "LLENA" : "ESPERANDO"
+        }));
+
+        setMissions(misionesFormateadas);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false); // Terminar de cargar, haya ido bien o mal
+      }
+    };
+
+    // Ejecutamos la función
+    fetchMisiones();
+  }, []); // [] para que se ejecute solo una vez, al cargar la pantalla.
+  */
+
   const filtered = missions.filter(m => {
     const matchSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase()) || m.host.toLowerCase().includes(searchQuery.toLowerCase());
     const matchTheme = !filterTheme || m.theme === filterTheme;
@@ -137,6 +182,78 @@ export function Pantalla03MisionesPublicas() {
                 </p>
               </div>
             )}
+{/* Código que va a sustituir al 'Mission list' de arriba.
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 text-[#8a7a60] animate-spin mb-4" />
+                <p className="font-['Courier_Prime',monospace] text-[#8a7a60]" style={{ fontSize: 12 }}>
+                  INTERCEPTANDO COMUNICACIONES...
+                </p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-8 bg-[#5a2a2a]/10 border border-[#8b2020]/30 rounded-sm">
+                <p className="font-['Courier_Prime',monospace] text-[#8b2020]" style={{ fontSize: 12 }}>
+                  ERROR DE CONEXIÓN: {error}
+                </p>
+              </div>
+            ) : (
+              /* Mission list  (solo se muestra si no está cargando y no hay error) 
+              <div className="space-y-2.5">
+                {filtered.map((m) => {  // Bucle que recorre uno a uno los componentes de 
+                  const isFull = m.status === "LLENA";
+                  return (
+                    <div
+                      key={m.id}
+                      onClick={() => !isFull && navigate(`/lobby/${m.id}`)} // TODO: adaptar a la URL desde la que se acceda a la partida.
+                      className={`bg-[#f0e4c8]/50 border border-[#c4a060]/25 rounded-sm p-3 sm:p-4 flex items-center justify-between transition-all ${
+                        isFull ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-[#f5edd0]/70 hover:border-[#c4a060]/50 hover:-translate-y-0.5"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                        <div className="w-2 h-2 rounded-full flex-shrink-0 bg-[#50a050] shadow-[0_0_5px_rgba(80,160,80,0.4)]" />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-['Courier_Prime',monospace] text-[#3a2a10] truncate" style={{ fontSize: 13 }}>{m.name}</p>
+                          <p className="font-['Courier_Prime',monospace] text-[#8a7a60] mt-0.5" style={{ fontSize: 9 }}>
+                            Anfitrión: {m.host} — Tema: {m.theme} — Turno: {m.timer}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 ml-3 flex-shrink-0">
+                        <div className="flex items-center gap-1">
+                          <Users className="w-3.5 h-3.5 text-[#5a4a30]" />
+                          <span className="font-['Courier_Prime',monospace] text-[#5a4a30]" style={{ fontSize: 11 }}>{m.players}</span>
+                        </div>
+                        <div className="flex items-center gap-1 bg-[#3a2a10]/10 rounded-sm px-2 py-1">
+                          <Clock className="w-3 h-3 text-[#5a4a30]" />
+                          <span className="font-['Courier_Prime',monospace] text-[#3a2a10]" style={{ fontSize: 11 }}>{m.time}</span>
+                        </div>
+                        {isFull ? (
+                          <div className="bg-[#5a2a2a]/20 border border-[#8a4a4a]/30 rounded-sm px-2 py-0.5">
+                            <span className="font-['Courier_Prime',monospace] text-[#8b2020]" style={{ fontSize: 8 }}>LLENA</span>
+                          </div>
+                        ) : (
+                          <div className="bg-[#2a5a2a]/20 border border-[#4a8a4a]/30 rounded-sm px-2 py-0.5">
+                            <span className="font-['Courier_Prime',monospace] text-[#2a5a2a]" style={{ fontSize: 8 }}>UNIRSE</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {filtered.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="font-['Courier_Prime',monospace] text-[#8a7a60]" style={{ fontSize: 12 }}>
+                      No se encontraron misiones disponibles.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+
+*/}
+            
 
             <div className="mt-6 flex items-center justify-between flex-wrap gap-2">
               <span className="font-['Courier_Prime',monospace] text-[#8a7a60]/50" style={{ fontSize: 8 }}>
