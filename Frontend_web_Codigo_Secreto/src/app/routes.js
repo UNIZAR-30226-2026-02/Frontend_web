@@ -9,6 +9,7 @@ import { Pantalla04PartidaAgente } from "./pantallas/Pantalla04PartidaAgente";
 import { Pantalla06Manual } from "./pantallas/Pantalla06Manual";
 import { Pantalla07Lobby } from "./pantallas/Pantalla07Lobby";
 import { Pantalla08Social } from "./pantallas/Pantalla08Social";
+import { Pantalla09PartidaJefe } from "./pantallas/Pantalla09PartidaJefe";
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
       { path: "manual", Component: Pantalla06Manual },
       { path: "lobby", Component: Pantalla07Lobby },
       { path: "social", Component: Pantalla08Social },
+      { path: "partida-jefe", Component: Pantalla09PartidaJefe },
     ],
   },
 ]);
