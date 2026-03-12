@@ -7,7 +7,7 @@ import { Skull, Clock, Send, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
-//TODO: integrar con backend para chat real
+//TODO: integrar con backend para chat real , pistas reales...
 const chatMessages = [
   { user: "LoboÁrtico", time: "11:42", text: "¿Qué opinan de esa pista?" },
   { user: "NightFox_99", time: "11:44", text: "Creo que ESTRELLA encaja" },
@@ -120,10 +120,51 @@ export function Pantalla09PartidaJefe() {
             </div>
           </ManilaFolder>
 
-          {/* Dar pista */}
+        </div>
+
+        <div className="side-panels-column">
+
+            {/* Chat */}
+            <DarkCard className="chat-panel-container">
+            <div className="chat-header-border">
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span className="chat-title-elite">CANAL ENCRIPTADO</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", backgroundColor: "rgba(139, 32, 32, 0.2)", border: "1px solid rgba(139, 32, 32, 0.3)", borderRadius: "2px", padding: "0.125rem 0.5rem" }}>
+                    <EyeOff style={{ width: "0.75rem", height: "0.75rem", color: "#e08080" }} />
+                    <span style={{ fontFamily: "var(--font-courier)", color: "#e08080", fontSize: "8px" }}>SOLO LECTURA</span>
+                </div>
+                </div>
+                <p className="chat-subtitle-courier">Chat de agentes — Equipo Rojo</p>
+            </div>
+
+            <div className="chat-messages-scroll-area">
+                {chatMessages.map((m, i) => (
+                <div key={i} className="message-row">
+                    <div className="message-bubble bubble-default">
+                    <div className="message-meta-info">
+                        <span className="message-username">{m.user}</span>
+                        <span className="message-timestamp">{m.time}</span>
+                    </div>
+                    <p className="message-content-text">{m.text}</p>
+                    </div>
+                </div>
+                ))}
+            </div>
+
+            <div style={{ padding: "0.75rem", borderTop: "1px solid #3a3a3a", backgroundColor: "rgba(26, 26, 26, 0.5)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", opacity: 0.5 }}>
+                <EyeOff style={{ width: "1rem", height: "1rem", color: "#666", flexShrink: 0 }} />
+                <p style={{ fontFamily: "var(--font-courier)", color: "#555", fontStyle: "italic", fontSize: "10px" }}>
+                    El Jefe de Espionaje no puede participar en el chat
+                </p>
+                </div>
+            </div>
+            </DarkCard>
+
+            {/* Dar pista */}
           <DarkCard style={{ padding: "1.25rem" }}>
             <h3 style={{ fontFamily: "var(--font-special-elite)", color: "var(--theme-gold)", letterSpacing: "0.1em", fontSize: "14px", marginBottom: "0.75rem" }}>
-              {clueSent ? "PISTA ENVIADA" : "DAR PISTA"}
+              {clueSent ? "   PISTA ENVIADA" : "   DAR PISTA"}
             </h3>
             
             {clueSent ? (
@@ -139,7 +180,7 @@ export function Pantalla09PartidaJefe() {
                 </div>
               </div>
             ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: "0.75rem", alignItems: "flex-end" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 <div>
                   <label style={{ fontFamily: "var(--font-courier)", color: "#888", display: "block", marginBottom: "0.25rem", fontSize: "10px" }}>PALABRA CLAVE:</label>
                   <input 
@@ -156,7 +197,7 @@ export function Pantalla09PartidaJefe() {
                 </div>
                 <div>
                   <label style={{ fontFamily: "var(--font-courier)", color: "#888", display: "block", marginBottom: "0.25rem", fontSize: "10px" }}>CANTIDAD:</label>
-                  <div style={{ display: "flex", gap: "0.375rem" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.375rem" }}>
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                       <button 
                         key={n} 
@@ -186,45 +227,7 @@ export function Pantalla09PartidaJefe() {
             )}
           </DarkCard>
         </div>
-
-        {/* Chat */}
-        <DarkCard className="chat-panel-container">
-          <div className="chat-header-border">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span className="chat-title-elite">CANAL ENCRIPTADO</span>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", backgroundColor: "rgba(139, 32, 32, 0.2)", border: "1px solid rgba(139, 32, 32, 0.3)", borderRadius: "2px", padding: "0.125rem 0.5rem" }}>
-                <EyeOff style={{ width: "0.75rem", height: "0.75rem", color: "#e08080" }} />
-                <span style={{ fontFamily: "var(--font-courier)", color: "#e08080", fontSize: "8px" }}>SOLO LECTURA</span>
-              </div>
-            </div>
-            <p className="chat-subtitle-courier">Chat de agentes — Equipo Rojo</p>
-          </div>
-
-          <div className="chat-messages-scroll-area">
-            {chatMessages.map((m, i) => (
-              <div key={i} className="message-row">
-                <div className="message-bubble bubble-default">
-                  <div className="message-meta-info">
-                    <span className="message-username">{m.user}</span>
-                    <span className="message-timestamp">{m.time}</span>
-                  </div>
-                  <p className="message-content-text">{m.text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ padding: "0.75rem", borderTop: "1px solid #3a3a3a", backgroundColor: "rgba(26, 26, 26, 0.5)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", opacity: 0.5 }}>
-              <EyeOff style={{ width: "1rem", height: "1rem", color: "#666", flexShrink: 0 }} />
-              <p style={{ fontFamily: "var(--font-courier)", color: "#555", fontStyle: "italic", fontSize: "10px" }}>
-                El Jefe de Espionaje no puede participar en el chat
-              </p>
-            </div>
-          </div>
-        </DarkCard>
-      </div>
-
+    </div>
       <div className="agent-footer-row">
         <RedStamp text="TOP SECRET" className="classified-stamp-effect" />
       </div>
