@@ -1,3 +1,6 @@
+/*
+ * Pantalla de juego, vista del Jefe de Espionaje. Es la pantalla que se muestra durante la partida, con el tablero y la información clasificada.
+ */
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp } from "../components/ScreenFrame";
 import { boardWords, colorMap } from "../components/gameData";
 import { Skull, Clock, Send, EyeOff } from "lucide-react";
