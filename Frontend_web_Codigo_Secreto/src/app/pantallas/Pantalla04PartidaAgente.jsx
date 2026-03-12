@@ -3,7 +3,14 @@
  */
 
 import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router"; 
+// Imports para la conexión WebSocket con STOMP entre frontend y backend
+/*
+import React, { useState, useMemo, useEffect, useRef } from "react"; // añadimos useEffect para ejecutar codigo al cargar la pantalla y useRef para que la pantalla no se recargue cada vez que se reciba un mensaje nuevo
+import { Client } from '@stomp/stompjs'; // Importación de STOMP
+import SockJS from 'sockjs-client';
+import { useNavigate, useParams } from "react-router"; // añadimos useParams que es para extraer variables de la URL (como el id de partida)*/
+
 import { 
   Clock, Send as SendIcon, Fingerprint, Check, 
   Vote, Skull, AlertTriangle 
@@ -24,9 +31,74 @@ const chatMessages = [
 
 export function Pantalla04PartidaAgente() {
   const navigate = useNavigate();
+  //const { idPartida } = useParams(); // saco num partida de la url
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState(chatMessages);
 
+  /* Integración backend
+  const [messages, setMessages] = useState([]); // Iniciamos vacío
+  const stompClientRef = useRef(null); // Conexión con el servidor
+
+  //Obtener el token de JSON esto para que el backend sepa con quién habla
+  const token = localStorage.getItem("token");
+
+  // El useEffect se ejecuta automáticamente al abrir la pantalla.
+  useEffect(() => { 
+    if (!idPartida || !token) return; // Si no tenemos partida o token, no intentamos conectar
+
+    const client = new Client({
+      // Usamos SockJS como fallback igual que en backend
+      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      // Pasamos el token 
+      connectHeaders: {
+        Authorization: `Bearer ${token}`
+      },
+      debug: (str) => console.log(str),
+      reconnectDelay: 5000, // se intenta reconectar cada 5 segs
+      onConnect: () => {
+        console.log("Conectado al servidor WebSocket"); //TODO: Cambiar mensaje por algo que acordemos todos
+        // Suscribirse al chat de la partida
+        // El equipo se "suscribe" a la sala de chat porque los chats son separados (ej: /topic/partida/{id}/chat/rojo)
+        client.subscribe(`/topic/partida/${idPartida}/chat`, (message) => {
+          const nuevoMensaje = JSON.parse(message.body); //convierte msj en texto pano
+          setMessages((prev) => [...prev, nuevoMensaje]); // lo añade a la lista
+        });
+      },
+      onStompError: (frame) => {
+        console.error('Error STOMP:', frame.headers['message']);
+      }
+    });
+
+    client.activate(); //enciende conexión
+    stompClientRef.current = client;
+
+    //si sale de la pantalla, desconecta : NO SÉ SI ESTO SERÁ BUENO PARAC CROSS PLATFORM
+    return () => {
+      if (client.active) {
+        client.deactivate();
+      }
+    };
+  }, [idPartida, token]);
+
+  // Envío de mensajes
+  const handleSendMessage = () => {
+    if (!chatInput.trim() || !stompClientRef.current?.connected) return; // se ejecuta cuando pulsamos enviar, comprueba que mesnaje no vacío y que conexion está viva
+
+    const payload = {
+      texto: chatInput,
+      // El backend identificará al usuario por el JWT, pero puedes enviar info extra si lo necesitas
+    };
+
+    stompClientRef.current.publish({
+      // Prefijo /app va a @MessageMapping en Spring Boot (esperemos)
+      destination: `/app/chat/${idPartida}`, 
+      body: JSON.stringify(payload) //convertir a JSON 
+    });
+
+    setChatInput("");
+  };
+
+*/
   // Estados del juego
   const [selectedCard, setSelectedCard] = useState(null); // Formato "row-col"
   const [votesUsed, setVotesUsed] = useState(0);
@@ -238,7 +310,7 @@ export function Pantalla04PartidaAgente() {
             <p className="chat-subtitle-courier">Chat de equipo — Equipo Rojo</p>
           </div>
 
-          {/* Messages */}
+          {/* Messages: TODO: Cambiar campos de m. por los que vengan del backend */}
           <div className="chat-messages-scroll-area">
             {messages.map((m, i) => (
               <div key={i} className={`message-row ${m.user === "Tú" ? "message-own" : ""}`}>
@@ -334,3 +406,19 @@ export function Pantalla04PartidaAgente() {
     </ScreenFrame>
   );
 }
+
+//TODO : Para que el chat haga scroll hasta abajo cada vez que llegue un mensaje nuevo, podríamos usar un useEffect que dependa de messages y haga scroll al final del contenedor. Algo así:
+/*// Apunta al final del chat
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Se dispara automáticamente CADA VEZ que cambia el array 'messages'
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  //Luego añadir al final del contenedor de mensajes:
+  <div ref={messagesEndRef} />*/
