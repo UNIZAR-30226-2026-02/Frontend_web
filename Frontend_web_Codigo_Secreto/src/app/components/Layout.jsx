@@ -10,9 +10,9 @@ import woodTexture from '../../assets/wood.png';
 
 // Pantallas en las que NO se van a mostrar los iconos persistentes de las esquinas 
 // (foto de agente ni contador de balas).
-  const hideProfileAndBulletsRoutes = ["/","/login", "/partida-agente","/manual"];
+  const hideProfileAndBulletsRoutes = ["/","/login", "/partida-agente","/manual", "/nombre-usuario-nuevo"];
   // Pantallas en las que NO se quiere mostrar el icono del manual.
-  const hideManualRoutes = ["/","/login","/manual"];
+  const hideManualRoutes = ["/","/login","/manual", "/nombre-usuario-nuevo"];
 
 export function Layout() {
   const location = useLocation();

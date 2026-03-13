@@ -5,6 +5,11 @@
 import { ScreenFrame, ManilaFolder, RedStamp, FBISeal, TapeStrip } from "../components/ScreenFrame";
 import { useNavigate } from "react-router";
 import logo from '../../assets/logo.png';
+//import React from 'react';
+//import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+
+// Client ID del cliente web generado en Google Cloud Console.
+//const GOOGLE_CLIENT_ID = "TU_CLIENT_ID_AQUI.apps.googleusercontent.com";
 
 export function Pantalla01Login() {
   const navigate = useNavigate();
@@ -13,8 +18,59 @@ export function Pantalla01Login() {
     // Para pruebas, navegamos al home de momento
     navigate("/home");
   };
+
+  /* Sustituir por 'iniciarSesionConGoogle'. Conexión con el botón oficial de google y procesamiento
+     de la respuesta.
+  const handleGoogleSuccess = async (respuestaGoogle) => {
+    // Obtenemos el idToken seguro que nos da Google
+    const idToken = respuestaGoogle.credential;
+
+    try {
+      // Usamos fetch nativo para hablar con nuestro backend Spring Boot
+      const res = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ idToken: idToken })
+      });
+
+      // Evaluamos la respuesta según nuestro contrato de arquitectura
+      if (res.status === 200) {
+        // Caso A: Usuario existente. El backend nos da el JWT.
+        const data = await res.json();
+        localStorage.setItem("token", data.token); // Guardamos el JWT en localStorage.
+        console.log("Acceso concedido. Redirigiendo al Home...");
+        navigate("/home");
+
+      } else if (res.status === 404) {
+        // Caso B: Usuario nuevo. Aún no hay token, necesita elegir un Tag.
+        console.log("Usuario no registrado. Redirigiendo a creación de perfil...");
+        // Mandamos el idToken en el estado de la ruta para usarlo en la siguiente pantalla
+        navigate("/nombre-usuario-nuevo", { state: { idToken: idToken } });
+        
+      } else {
+        // Otros errores (ej. 400 Bad Request)
+        console.error("El servidor rechazó las credenciales.");
+        alert("Acceso denegado por el servidor central.");
+      }
+
+    } catch (error) {
+      console.error("Infracción de seguridad o caída del servidor:", error);
+      alert("Error de comunicación con el servidor central.");
+    }
+  };
+
+  const handleGoogleError = () => {
+    console.error("Fallo al conectar con los satélites de Google.");
+    alert("Error de comunicación con Google.");
+  };
+  */
+
+
   // ------ Interfaz gráfica ------
   return (
+    // <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
     <ScreenFrame title="ACCESO CLASIFICADO">
       <div className="flex items-center justify-center min-h-[80vh]">
         <ManilaFolder className="w-full max-w-xl">
@@ -59,10 +115,23 @@ export function Pantalla01Login() {
               </button>
             </div>
 
+            {/* Form. Sustituir por el form de arriba.Incluye el botón de Google oficial.
+            <div className="max-w-sm mx-auto flex justify-center py-2">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  theme="outline" // Encaja bien con el fondo claro de la carpeta
+                  size="large"
+                  text="signin_with"
+                  shape="rectangular"
+                />
+              </div>
+              */}
+
             {/* Bottom stamps */}
             <div className="flex items-center justify-between mt-6 flex-wrap gap-2">
               <RedStamp text="TOP SECRET" className="rotate-[-4deg]" />
-              <span className="font-['Courier_Prime',monospace] text-[#8a7a60]/50" style={{ fontSize: 8 }}>
+              <span className="font-['Courier_Prime',monospace] text-[#403E3B]/50" style={{ fontSize: 8 }}>
                 NIVEL DE SEGURIDAD: ULTRA — REF: FBI-2976-XK
               </span>
             </div>
@@ -70,5 +139,6 @@ export function Pantalla01Login() {
         </ManilaFolder>
       </div>
     </ScreenFrame>
+    // </GoogleOAuthProvider>
   );
 }
