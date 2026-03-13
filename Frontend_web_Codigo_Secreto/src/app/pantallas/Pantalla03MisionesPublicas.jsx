@@ -35,8 +35,16 @@ export function Pantalla03MisionesPublicas() {
     // Definimos la función asíncrona
     const fetchMisiones = async () => {
       try {
+
+        // Recuperar el JWT del localStorage.
+        const token = localStorage.getItem("token");
         // TODO: poner URL real de la API.
-        const response = await fetch("http://localhost:3000/api/partidas/publicas");
+        const response = await fetch("http://localhost:3000/api/partidas/publicas", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
         
         if (!response.ok) throw new Error("Acceso denegado a los servidores del FBI");
         
