@@ -12,6 +12,7 @@ import { Pantalla07Lobby } from "./pantallas/Pantalla07Lobby";
 import { Pantalla08Social } from "./pantallas/Pantalla08Social";
 import { Pantalla09PartidaJefe } from "./pantallas/Pantalla09PartidaJefe";
 import { Pantalla10Logros } from "./pantallas/Pantalla10Logros";
+import { Pantalla11Perfil } from "./pantallas/Pantalla11Perfil";
 
 export const router = createBrowserRouter([
   {
@@ -28,7 +29,8 @@ export const router = createBrowserRouter([
       { path: "social", Component: Pantalla08Social },
       { path: "partida-jefe", Component: Pantalla09PartidaJefe },
       { path: "nombre-usuario-nuevo", Component: Pantalla05NombreUsuarioNuevo },
-      {path: "logros", Component: Pantalla10Logros}
+      { path: "logros", Component: Pantalla10Logros},
+      { path: "perfil", Component: Pantalla11Perfil }
     ],
   },
 ]);

@@ -60,7 +60,7 @@ export function Layout() {
         <>
           {/* Agent photo — top left → Profile */}
           <button
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/perfil")}
             className="fixed top-3 left-3 sm:top-4 sm:left-4 z-50 group cursor-pointer"
             title="Expediente del Agente"
           >
