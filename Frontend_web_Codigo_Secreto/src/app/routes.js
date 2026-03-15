@@ -13,6 +13,7 @@ import { Pantalla08Social } from "./pantallas/Pantalla08Social";
 import { Pantalla09PartidaJefe } from "./pantallas/Pantalla09PartidaJefe";
 import { Pantalla10Logros } from "./pantallas/Pantalla10Logros";
 import { Pantalla11Perfil } from "./pantallas/Pantalla11Perfil";
+import { Pantalla12CrearPartida } from "./pantallas/Pantalla12CrearPartida";
 
 export const router = createBrowserRouter([
   {
@@ -30,7 +31,8 @@ export const router = createBrowserRouter([
       { path: "partida-jefe", Component: Pantalla09PartidaJefe },
       { path: "nombre-usuario-nuevo", Component: Pantalla05NombreUsuarioNuevo },
       { path: "logros", Component: Pantalla10Logros},
-      { path: "perfil", Component: Pantalla11Perfil }
+      { path: "perfil", Component: Pantalla11Perfil },
+      { path: "crear-mision", Component: Pantalla12CrearPartida },
     ],
   },
 ]);

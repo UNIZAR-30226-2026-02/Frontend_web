@@ -882,3 +882,138 @@
   gap: 1rem; /* Este es el espacio entre Chat y Voto */
   height: 100%;
 }
+
+/* CREACIÓN DE MISIÓN*/
+
+
+/* Card selection states */
+.selected-card {
+  ring: 2px solid #5090c0; /* adjust ring utility if needed */
+}
+.icon-selected { color: #80a0d0; }
+.icon-muted { color: #666; }
+.card-title {
+  font-family: 'Special Elite', cursive;
+  color: #e8dcc8;
+  font-size: 13px;
+}
+.card-subtitle {
+  font-family: 'Courier Prime', monospace;
+  color: #888;
+  margin-top: 0.25rem;
+  font-size: 9px;
+}
+.selected-indicator {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  color: #50a060;
+}
+.selected-text {
+  font-family: 'Courier Prime', monospace;
+  font-size: 8px;
+}
+
+/* Code box  PARECCIDO AL INPUT DE HOME*/
+.code-box {
+  background-color: #f5edd8;
+  border: 2px solid rgba(160, 128, 80, 0.4);
+  border-radius: 0.125rem;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.code-label {
+  font-family: 'Courier Prime', monospace;
+  color: #8a7a60;
+  display: block;
+  font-size: 9px;
+}
+.code-value {
+  font-family: 'Courier Prime', monospace;
+  color: #3a2a10;
+  letter-spacing: 0.3em;
+  font-size: 18px;
+}
+.code-copy-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #8a7a60;
+  cursor: pointer;
+}
+.code-copy-icon:hover { color: #5a4a30; }
+
+/* SELECTORES TIEMPO */
+.timer-card {
+  padding: 0.75rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 150ms;
+}
+.selected-timer {
+  ring: 2px solid #d4b878; 
+}
+.timer-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0 auto 0.25rem;
+  color: #666;
+}
+.timer-icon.selected { color: #d4b878; }
+.timer-value {
+  font-family: 'Courier Prime', monospace;
+  color: #e8dcc8;
+  font-size: 15px;
+}
+
+/* Tarjetas tema */
+.theme-card {
+  padding: 0.75rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 150ms;
+}
+.selected-theme {
+  ring: 2px solid #8b2020;
+}
+.theme-emoji {
+  font-size: 1.5rem;
+}
+.theme-name {
+  font-family: 'Courier Prime', monospace;
+  color: #e8dcc8;
+  margin-top: 0.25rem;
+  font-size: 11px;
+}
+
+/* Crear misión botón */
+.create-mission-btn {
+  width: 100%;
+  margin-top: 1.5rem;
+  background-color: #2a2a2a;
+  color: white;
+  padding: 1rem 0;
+  border-radius: 0.125rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  transition: background-color 150ms;
+  cursor: pointer;
+  border: none;
+}
+.create-mission-btn:hover {
+  background-color: #3a3a3a;
+}
+.create-mission-text {
+  font-family: 'Special Elite', cursive;
+  letter-spacing: 0.2em;
+  font-size: clamp(14px, 2.5vw, 18px);
+}
+
+/* Footer stamp */
+.footer-stamp {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: flex-end;
+}
