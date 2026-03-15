@@ -14,6 +14,7 @@ import { Pantalla09PartidaJefe } from "./pantallas/Pantalla09PartidaJefe";
 import { Pantalla10Logros } from "./pantallas/Pantalla10Logros";
 import { Pantalla11Perfil } from "./pantallas/Pantalla11Perfil";
 import { Pantalla12CrearPartida } from "./pantallas/Pantalla12CrearPartida";
+import { Pantalla13Tienda } from "./pantallas/Pantalla13Tienda";
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { path: "logros", Component: Pantalla10Logros},
       { path: "perfil", Component: Pantalla11Perfil },
       { path: "crear-mision", Component: Pantalla12CrearPartida },
+      { path: "tienda", Component: Pantalla13Tienda },
     ],
   },
 ]);

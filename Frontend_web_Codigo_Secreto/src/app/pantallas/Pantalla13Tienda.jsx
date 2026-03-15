@@ -1,5 +1,5 @@
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader, SubsectionLabel } from "../components/ScreenFrame";
-import { BulletIcon } from "../components/iconoBala";
+import { IconoBala } from "../components/iconoBala";
 import { Package, Palette, Check, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router";
 
@@ -24,7 +24,7 @@ export function Pantalla13Tienda() {
   return (
     <ScreenFrame title="MERCADO NEGRO">
       <div className="max-w-4xl mx-auto pt-8 sm:pt-4">
-        <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 text-[#8a7a60] hover:text-[#d4b878] transition-colors cursor-pointer mb-4 group">
+        <button onClick={() => navigate("/home")} className="flex items-center gap-2 text-[#8a7a60] hover:text-[#d4b878] transition-colors cursor-pointer mb-4 group">
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 11 }}>VOLVER AL ESCRITORIO</span>
         </button>
@@ -32,7 +32,7 @@ export function Pantalla13Tienda() {
         {/* Balance badge */}
         <div className="flex justify-end mb-4">
           <div className="flex items-center gap-2 bg-[#1a1208]/80 border border-[#5a4a20]/30 rounded-sm px-4 py-2 shadow-[2px_3px_10px_rgba(0,0,0,0.4)]">
-            <BulletIcon size={16} />
+            <IconoBala size={16} />
             <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 16 }}>500</span>
             <span className="font-['Courier_Prime',monospace] text-[#a08060]" style={{ fontSize: 10 }}>BALAS</span>
           </div>
@@ -70,7 +70,7 @@ export function Pantalla13Tienda() {
                   ) : (
                     <>
                       <div className="flex items-center justify-center gap-1 mt-2">
-                        <BulletIcon size={13} />
+                        <IconoBala size={13} />
                         <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 13 }}>{t.price}</span>
                       </div>
                       <button className="mt-2 w-full bg-[#8b2020]/80 hover:bg-[#8b2020] text-white py-1.5 rounded-sm transition-colors cursor-pointer">
@@ -91,7 +91,7 @@ export function Pantalla13Tienda() {
                   <p className="font-['Special_Elite',cursive] text-[#e8dcc8]" style={{ fontSize: 12 }}>{p.name}</p>
                   <p className="font-['Courier_Prime',monospace] text-[#888] mt-1" style={{ fontSize: 9 }}>{p.count}</p>
                   <div className="flex items-center justify-center gap-1 mt-2">
-                    <BulletIcon size={13} />
+                    <IconoBala size={13} />
                     <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 13 }}>{p.price}</span>
                   </div>
                   <button className="mt-2 w-full bg-[#5a4a20]/80 hover:bg-[#5a4a20] text-[#e8dcc8] py-1.5 rounded-sm transition-colors cursor-pointer">
