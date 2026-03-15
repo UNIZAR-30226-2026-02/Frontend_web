@@ -1,0 +1,59 @@
+/* Estilo de la Fotografía Polaroid */
+.polaroid-container {
+  background-color: #f0e8d4;
+  padding: 0.5rem;
+  padding-bottom: 1.75rem;
+  box-shadow: 3px 4px 12px rgba(0, 0, 0, 0.4);
+  transform: rotate(-2deg);
+  transition: transform 0.3s ease;
+  width: 100px;
+}
+
+.polaroid-container:hover {
+  transform: rotate(-1deg);
+}
+
+.polaroid-foto {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Selector de Avatares */
+.selector-avatar-popover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.75rem;
+  z-index: 30;
+  width: 280px;
+}
+
+.selector-avatar-contenido {
+  background-color: #2a2218;
+  border: 1px solid rgba(90, 74, 48, 0.5);
+  border-radius: 2px;
+  box-shadow: 4px 6px 20px rgba(0, 0, 0, 0.6);
+  padding: 1rem;
+  position: relative;
+}
+
+/* Flecha del popover */
+.selector-flecha {
+  position: absolute;
+  top: -0.5rem;
+  left: 2rem;
+  width: 1rem;
+  height: 1rem;
+  background-color: #2a2218;
+  transform: rotate(45deg);
+  border-left: 1px solid rgba(90, 74, 48, 0.5);
+  border-top: 1px solid rgba(90, 74, 48, 0.5);
+}
+
+/* Fuentes auxiliares */
+.fuente-courier { font-family: 'Courier Prime', monospace; }
+.fuente-elite { font-family: 'Special Elite', cursive; }
