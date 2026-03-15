@@ -65,7 +65,7 @@ export function Pantalla10Logros() {
         
         {/* Botón para retroceder al Dashboard : ESTO A LO MEJOR HABRÍA UE HACER UNA CLASE GENÉRICA PORQUE SE REPITE*/}
         <button 
-          onClick={() => navegar("/dashboard")} 
+          onClick={() => navegar("/home")} 
           className="flex items-center gap-2 text-[#8a7a60] hover:text-[#d4b878] transition-colors cursor-pointer mb-4 group font-courier"
           style={{ fontSize: 11 }}
         >

@@ -31,7 +31,7 @@ export function Pantalla09PartidaJefe() {
       {/* Barra superior */}
       <div className="agent-top-bar">
         <div className="top-bar-stats-group">
-          <button onClick={() => navigate("/dashboard")} className="abort-mission-btn">
+          <button onClick={() => navigate("/home")} className="abort-mission-btn">
             <span>ABORTAR</span>
           </button>
           

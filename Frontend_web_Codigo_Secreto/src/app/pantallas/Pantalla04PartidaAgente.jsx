@@ -393,7 +393,7 @@ export function Pantalla04PartidaAgente() {
           </DarkCard>
 
           {/* Botón Abortar */}
-          <button onClick={() => navigate("/dashboard")} className="abort-mission-btn">
+          <button onClick={() => navigate("/home")} className="abort-mission-btn">
             <span>ABORTAR MISIÓN</span>
           </button>
             </div>
