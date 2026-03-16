@@ -3,12 +3,12 @@
  */
 
 import { ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader, TapeStrip } from "../components/ScreenFrame";
-import { Search, Users, Clock, ArrowLeft, Filter } from "lucide-react";
-import { useState } from "react";
+import { Search, Users, Clock, ArrowLeft, Filter, Loader2 } from "lucide-react"; 
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 
 // Datos de prueba: TODO: integrar con backend utilizando useEffect.
-const missions = [
+/*const missions = [
   { id: 1, name: "Operación Medusa", host: "ProAgente99", players: "6/8", theme: "Cyberpunk", timer: "60s", time: "02:34", status: "ESPERANDO" },
   { id: 2, name: "Proyecto Cóndor", host: "EspíaMaestro", players: "4/8", theme: "Naturaleza", timer: "90s", time: "15:02", status: "ESPERANDO" },
   { id: 3, name: "Código Fenix", host: "CodigoSecreto", players: "3/6", theme: "Espacio", timer: "60s", time: "00:45", status: "ESPERANDO" },
@@ -16,34 +16,32 @@ const missions = [
   { id: 5, name: "Misión Fantasma", host: "SilentViper", players: "5/10", theme: "Fantasía", timer: "60s", time: "03:47", status: "ESPERANDO" },
   { id: 6, name: "Proyecto Sombra", host: "LoboÁrtico", players: "8/8", theme: "Naturaleza", timer: "90s", time: "20:15", status: "LLENA" },
   { id: 7, name: "Operación Delta", host: "PhantomX", players: "2/4", theme: "Espacio", timer: "30s", time: "01:10", status: "ESPERANDO" },
-];
+];*/
 
 export function Pantalla03MisionesPublicas() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTheme, setFilterTheme] = useState(null); 
 
-  /*// Estados para manejar los datos del servidor.
+  // Estados para manejar los datos del servidor.
   const [missions, setMissions] = useState([]); // Empieza vacío
   const [isLoading, setIsLoading] = useState(true); // Empieza cargando
   const [error, setError] = useState(null); // Por si falla la red
-  */
+  
 
-  /* // Función que se ejecuta al cargar la pantalla para mostrar los datos contenidos en
+  // Función que se ejecuta al cargar la pantalla para mostrar los datos contenidos en
   // la base de datos sobre las partidas públicas abiertas.
   useEffect(() => {
     // Definimos la función asíncrona
     const fetchMisiones = async () => {
       try {
 
-        // Recuperar el JWT del localStorage.
-        const token = localStorage.getItem("token");
-        // TODO: poner URL real de la API.
-        const response = await fetch("http://localhost:3000/api/partidas/publicas", {
+        // URL del backend de donde recibir el listado de partidas.
+        const response = await fetch("http://localhost:8080/api/partidas/publicas", {
           method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`
-          }
+          // Adjuntar la cookie HttpOnly con el JWT automáticamente para ser validado
+          // por el backend (por el CORS).
+          credentials: "include"
         });
         
         if (!response.ok) throw new Error("Acceso denegado a los servidores del FBI");
@@ -52,16 +50,27 @@ export function Pantalla03MisionesPublicas() {
 
         // Adaptar los datos obtenidos de la base de datos para mostrarlos por pantalla
         // con el formato requerido.
-        const misionesFormateadas = data.map(partida => ({
-          id: partida.id_partida,
-          name: `Operación ${partida.codigo_partida}`, // O si tienes un campo nombre real
-          host: partida.creador_tag || "Agente Desconocido",
-          players: `${partida.jugadores_actuales}/${partida.maxJugadores}`,
-          theme: partida.tema_nombre || "Clásico", 
-          timer: `${partida.tiempoEspera}s`,
-          time: "00:00", // El tiempo que lleva creada (se puede calcular con fechaCreacion).
-          status: partida.jugadores_actuales >= partida.maxJugadores ? "LLENA" : "ESPERANDO"
-        }));
+        const misionesFormateadas = data.map(partida => {
+          // Contamos cuántos jugadores hay en la lista 'jugadores' (si viene nula, son 0)
+          const numJugadoresActuales = partida.jugadores ? partida.jugadores.length : 0;
+          
+          // Extraemos el anfitrión (asumiendo que es el primer jugador de la lista)
+          const hostName = (partida.jugadores && partida.jugadores.length > 0) 
+                            ? partida.jugadores[0].tag 
+                            : "Agente Desconocido";
+
+          return {
+            id: partida.idPartida, // (camelCase)
+            name: `Operación ${partida.codigoPartida}`,
+            host: hostName, 
+            players: `${numJugadoresActuales}/${partida.maxJugadores}`, 
+            theme: partida.nombreTema || "Clásico", 
+            // TODO: revisar si se pone el tiempo de espera o no.
+            timer: "60s", // El DTO no tiene tiempoEspera, así que ponemos un valor fijo por ahora
+            time: "00:00", 
+            status: numJugadoresActuales >= partida.maxJugadores ? "LLENA" : "ESPERANDO" // O usar partida.estado
+          };
+        });
 
         setMissions(misionesFormateadas);
       } catch (err) {
@@ -74,7 +83,7 @@ export function Pantalla03MisionesPublicas() {
     // Ejecutamos la función
     fetchMisiones();
   }, []); // [] para que se ejecute solo una vez, al cargar la pantalla.
-  */
+  
 
   const filtered = missions.filter(m => {
     const matchSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase()) || m.host.toLowerCase().includes(searchQuery.toLowerCase());
@@ -133,7 +142,8 @@ export function Pantalla03MisionesPublicas() {
               </div>
             </div>
 
-            {/* Mission list */}
+{/*
+            // Mision list (inicial, sin conexión con backend).
             <div className="space-y-2.5">
               {filtered.map((m) => {
                 const isFull = m.status === "LLENA";
@@ -189,8 +199,9 @@ export function Pantalla03MisionesPublicas() {
                   No se encontraron misiones disponibles
                 </p>
               </div>
-            )}
-{/* Código que va a sustituir al 'Mission list' de arriba.
+            )}*/}
+
+            {/* Mission list */}
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 text-[#8a7a60] animate-spin mb-4" />
@@ -205,8 +216,8 @@ export function Pantalla03MisionesPublicas() {
                 </p>
               </div>
             ) : (
-              /* Mission list  (solo se muestra si no está cargando y no hay error) 
               <div className="space-y-2.5">
+                {/* Mission list  (solo se muestra si no está cargando y no hay error) */}
                 {filtered.map((m) => {  // Bucle que recorre uno a uno los componentes de 
                   const isFull = m.status === "LLENA";
                   return (
@@ -258,10 +269,6 @@ export function Pantalla03MisionesPublicas() {
                 )}
               </div>
             )}
-
-
-*/}
-            
 
             <div className="mt-6 flex items-center justify-between flex-wrap gap-2">
               <span className="font-['Courier_Prime',monospace] text-[#8a7a60]/50" style={{ fontSize: 8 }}>

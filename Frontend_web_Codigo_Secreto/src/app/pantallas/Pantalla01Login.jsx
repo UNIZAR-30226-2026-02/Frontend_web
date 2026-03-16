@@ -36,8 +36,10 @@ export function Pantalla01Login() {
           "Content-Type": "application/json",
         },
         // IMPORTANTÍSIMO: Necesario para que el navegador guarde la cookie HttpOnly
+        // que recibirá el frontend con el JWT (por el CORS).
         credentials: "include", 
-        // Cambiado a id_google para coincidir con el DTO del backend
+        // Aunque el DTO del backend utiliza Camel Case (idGoogle), se ha configurado
+        // Jackson para que reciba Snake_case (id_google).
         body: JSON.stringify({ id_google: idToken }) 
       });
 

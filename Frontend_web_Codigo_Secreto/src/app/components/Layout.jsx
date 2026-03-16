@@ -5,19 +5,22 @@
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { BookOpen } from "lucide-react";
 import woodTexture from '../../assets/wood.png';
+import { IconoBala } from "../components/iconoBala";
 /*import { UserProvider } from "./components/UserContext";
 */
 
 // Pantallas en las que NO se van a mostrar los iconos persistentes de las esquinas 
 // (foto de agente ni contador de balas).
-  const hideProfileAndBulletsRoutes = ["/","/login", "/partida-agente","/manual", "/nombre-usuario-nuevo"];
+  const hideProfileRoutes = ["/","/login", "/partida-agente","/manual", "/nombre-usuario-nuevo"];
+  const hideBulletsRoutes = ["/","/login", "/partida-agente","/manual", "/nombre-usuario-nuevo", "/tienda"];
   // Pantallas en las que NO se quiere mostrar el icono del manual.
   const hideManualRoutes = ["/","/login","/manual", "/nombre-usuario-nuevo"];
 
 export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const hideProfileAndBullets = hideProfileAndBulletsRoutes.some(r => location.pathname === r);
+  const hideProfile = hideProfileRoutes.some(r => location.pathname === r);
+  const hideBullets = hideBulletsRoutes.some(r => location.pathname === r);
   const hideManual = hideManualRoutes.some(r => location.pathname === r);
 
   /*EXTRAEMOS LOS DATOS DEL CONTEXTO GLOBLAL
@@ -56,7 +59,7 @@ export function Layout() {
       <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.5)_100%)]" />
 
       {/* ====== Iconos persistentes en las esquinas ====== */}
-      {!hideProfileAndBullets /*&& user*/ && (  // Solo se muestra si hay sesión.
+      {!hideProfile /*&& user*/ && (  // Solo se muestra si hay sesión.
         <>
           {/* Agent photo — top left → Profile */}
           <button
@@ -77,16 +80,16 @@ export function Layout() {
               <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#cc3333] rounded-full border border-[#8b2020] shadow-[0_0_6px_rgba(200,50,50,0.5)]" />
             </div>
           </button>
+        </>
+      )}
 
+      {!hideBullets && (
+        <>
           {/* Bullet count — top right, below manual */}
           <div className="fixed top-14 right-3 sm:top-16 sm:right-4 z-50">
             <div className="flex items-center gap-1.5 bg-[#1a1208]/90 border border-[#5a4a20]/30 rounded-sm px-2 py-1 shadow-[1px_2px_6px_rgba(0,0,0,0.4)]">
-              <svg width={12} height={12} viewBox="0 0 24 24" fill="none">
-                <rect x="8" y="12" width="8" height="10" rx="1" fill="#c4a060" stroke="#8a6a30" strokeWidth="0.8" />
-                <path d="M9 12 L12 2 L15 12 Z" fill="#d4b878" stroke="#a08040" strokeWidth="0.6" />
-                <circle cx="12" cy="20" r="1.5" fill="#8a6a30" />
-              </svg>
-              <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 11 }}>500</span>
+              <IconoBala size={15} />
+              <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 13 }}>500</span>
               {/* BALAS DINÁMICAS              
               <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 11 }}>
                 {balas}
