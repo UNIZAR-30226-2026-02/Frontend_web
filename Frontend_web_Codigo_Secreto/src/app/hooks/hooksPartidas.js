@@ -53,7 +53,7 @@ export function useChatEquipo(idPartida, equipo, onMensaje) {
       connectHeaders: { Authorization: `Bearer ${token}` },
       onConnect: () => {
         client.subscribe(
-          `/topic/partidas/${idPartida}/chat/${equipo.toLowerCase()}`,
+          `/api/partidas/${idPartida}/chat/${equipo.toLowerCase()}`,
           (msg) => onMensaje(JSON.parse(msg.body))
         );
       },
@@ -69,7 +69,7 @@ export function useChatEquipo(idPartida, equipo, onMensaje) {
   const enviarMensaje = useCallback((texto) => {
     if (!clientRef.current?.connected) return;
     clientRef.current.publish({
-      destination: `/app/partidas/${idPartida}/chat`,
+      destination: `/api/partidas/${idPartida}/chat`,
       body: JSON.stringify({ idPartida, mensaje: texto }),
     });
   }, [idPartida]);

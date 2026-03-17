@@ -4,6 +4,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router"; 
+//import { useChatEquipo } from "../hooks/hooksPartidas";
 // Imports para la conexión WebSocket con STOMP entre frontend y backend
 /*
 import React, { useState, useMemo, useEffect, useRef } from "react"; // añadimos useEffect para ejecutar codigo al cargar la pantalla y useRef para que la pantalla no se recargue cada vez que se reciba un mensaje nuevo
@@ -33,7 +34,18 @@ export function Pantalla04PartidaAgente() {
   const navigate = useNavigate();
   //const { idPartida } = useParams(); // saco num partida de la url
   const [chatInput, setChatInput] = useState("");
-  const [messages, setMessages] = useState(chatMessages);
+  const [messages, setMessages] = useState(chatMessages); // Al inicio no hay mensajes.
+
+  // Referencia para el scroll automático del chat
+  const messagesEndRef = useRef(null);
+  // Función para scrollear hacia abajo el chat.
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  // Efecto que se dispara cada vez que la lista 'messages' crece
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   /* Integración backend
   const [messages, setMessages] = useState([]); // Iniciamos vacío
