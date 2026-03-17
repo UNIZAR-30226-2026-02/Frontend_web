@@ -223,10 +223,9 @@ export function Pantalla03MisionesPublicas() {
                   return (
                     <div
                       key={m.id}
-                      onClick={() => !isFull && navigate(`/lobby/${m.id}`)} // TODO: adaptar a la URL desde la que se acceda a la partida.
                       className={`bg-[#f0e4c8]/50 border border-[#c4a060]/25 rounded-sm p-3 sm:p-4 flex items-center justify-between transition-all ${
-                        isFull ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-[#f5edd0]/70 hover:border-[#c4a060]/50 hover:-translate-y-0.5"
-                      }`}
+                      isFull ? "opacity-50" : "" // Grisácea si está llena.
+                    }`}
                     >
                       <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                         <div className="w-2 h-2 rounded-full flex-shrink-0 bg-[#50a050] shadow-[0_0_5px_rgba(80,160,80,0.4)]" />
@@ -251,8 +250,11 @@ export function Pantalla03MisionesPublicas() {
                             <span className="font-['Courier_Prime',monospace] text-[#8b2020]" style={{ fontSize: 8 }}>LLENA</span>
                           </div>
                         ) : (
-                          <div className="bg-[#2a5a2a]/20 border border-[#4a8a4a]/30 rounded-sm px-2 py-0.5">
-                            <span className="font-['Courier_Prime',monospace] text-[#2a5a2a]" style={{ fontSize: 8 }}>UNIRSE</span>
+                          <div 
+                            onClick={() => navigate("/lobby")}  // TODO: poner endpoint real del backend.
+                            className="flex bg-[#2a5a2a]/20 border border-[#4a8a4a]/30 rounded-sm px-2 py-2 cursor-pointer hover:bg-[#2a5a2a]/40 transition-colors"
+                          >
+                            <span className="font-['Courier_Prime',monospace] text-[#2a5a2a] hover:text-[#1a3a1a]" style={{ fontSize: 12 }}>UNIRSE</span>
                           </div>
                         )}
                       </div>

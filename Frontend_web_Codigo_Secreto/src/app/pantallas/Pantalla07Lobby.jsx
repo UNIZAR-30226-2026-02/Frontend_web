@@ -154,17 +154,6 @@ export function Pantalla07Lobby() {
             ))}
           </div>
 
-          {/* Start buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-1 gap-3">
-            <button onClick={() => navigate("/agent")} className="bg-[#2a5a2a] hover:bg-[#3a6a3a] text-white py-4 rounded-sm shadow-[0_4px_16px_rgba(0,0,0,0.4)] transition-colors flex items-center justify-center gap-3 cursor-pointer">
-              <Fingerprint className="w-5 h-5 text-[#80c090]" />
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-[#50ff50] rounded-full animate-pulse shadow-[0_0_8px_rgba(80,255,80,0.5)]" />
-                <span className="font-['Special_Elite',cursive] tracking-[0.15em] sm:tracking-[0.2em]" style={{ fontSize: 'clamp(12px, 2vw, 16px)' }}>ENTRAR A LA PARTIDA</span>
-              </div>
-            </button>
-          </div>
-
           <div className="mt-5 flex justify-end">
             <RedStamp text="CONFIDENTIAL" className="rotate-[-3deg]" />
           </div>
