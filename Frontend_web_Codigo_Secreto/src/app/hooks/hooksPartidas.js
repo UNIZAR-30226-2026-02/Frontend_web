@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
@@ -6,7 +6,7 @@ const WS_URL = 'http://localhost:8080/ws';
 
 //PARA EL LOBBY
 
-export function useLobbyWebSocket(idPartida, onLobbyUpdate, onPartidaIniciada) {
+/*export function useLobbyWebSocket(idPartida, onLobbyUpdate, onPartidaIniciada) {
   const clientRef = useRef(null);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export function useLobbyWebSocket(idPartida, onLobbyUpdate, onPartidaIniciada) {
   }, [idPartida]);
 
   return clientRef;
-}
+}*/
 
 
 //PARA EL CHAT
@@ -53,7 +53,7 @@ export function useChatEquipo(idPartida, equipo, onMensaje) {
       connectHeaders: { Authorization: `Bearer ${token}` },
       onConnect: () => {
         client.subscribe(
-          `/api/partidas/${idPartida}/chat/${equipo.toLowerCase()}`,
+          `/topic/partidas/${idPartida}/chat/${equipo.toLowerCase()}`,
           (msg) => onMensaje(JSON.parse(msg.body))
         );
       },
@@ -69,7 +69,7 @@ export function useChatEquipo(idPartida, equipo, onMensaje) {
   const enviarMensaje = useCallback((texto) => {
     if (!clientRef.current?.connected) return;
     clientRef.current.publish({
-      destination: `/api/partidas/${idPartida}/chat`,
+      destination: `/app/partidas/${idPartida}/chat`,
       body: JSON.stringify({ idPartida, mensaje: texto }),
     });
   }, [idPartida]);

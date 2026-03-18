@@ -2,9 +2,10 @@
  * Pantalla para la partida desde el punto de vista del agente.
  */
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router"; 
-//import { useChatEquipo } from "../hooks/hooksPartidas";
+import { useParams } from "react-router"; // Importamos useParams para sacar el id de la URL
+import { useChatEquipo } from "../hooks/hooksPartidas";
 // Imports para la conexión WebSocket con STOMP entre frontend y backend
 /*
 import React, { useState, useMemo, useEffect, useRef } from "react"; // añadimos useEffect para ejecutar codigo al cargar la pantalla y useRef para que la pantalla no se recargue cada vez que se reciba un mensaje nuevo
@@ -33,19 +34,38 @@ const chatMessages = [
 export function Pantalla04PartidaAgente() {
   const navigate = useNavigate();
   //const { idPartida } = useParams(); // saco num partida de la url
+  const { idPartida } = useParams(); // Añadido para extraer de la URL
+
   const [chatInput, setChatInput] = useState("");
-  const [messages, setMessages] = useState(chatMessages); // Al inicio no hay mensajes.
+  
+  // const [messages, setMessages] = useState(chatMessages); // Al inicio no hay mensajes.
+  const [messages, setMessages] = useState([]); // Estado inicializado vacío para los WebSockets
 
   // Referencia para el scroll automático del chat
-  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
   // Función para scrollear hacia abajo el chat.
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   };
   // Efecto que se dispara cada vez que la lista 'messages' crece
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Uso de hooksPartidas para usar WebSockets en el chat.
+  const equipo = "rojo"; // Por defecto, fijado para encajar con la UI
+  const { enviarMensaje } = useChatEquipo(idPartida, equipo, (mensajeRecibido) => {
+    // Cuando entra un mensaje por el topic, lo formateamos y lo añadimos a la lista
+    const msgFormateado = {
+      // Ajusta 'id_jugador_partida' según lo devuelva tu ChatMessageDTO
+      user: mensajeRecibido.id_jugador_partida || "Agente", 
+      time: new Date().toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" }),
+      text: mensajeRecibido.mensaje
+    };
+    setMessages(prev => [...prev, msgFormateado]);
+  });
 
   /* Integración backend
   const [messages, setMessages] = useState([]); // Iniciamos vacío
@@ -172,12 +192,21 @@ export function Pantalla04PartidaAgente() {
     }
   };
 
+  /* COMENTADO: Versión antigua que inyectaba mensajes localmente
   const handleSendMessage = () => {
     if (!chatInput.trim()) return;
     setMessages(prev => [
       ...prev,
       { user: "Tú", time: new Date().toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" }), text: chatInput }
     ]);
+    setChatInput("");
+  };
+  */
+
+  // Llama a enviarMensaje del hook de WebSockets
+  const handleSendMessage = () => {
+    if (!chatInput.trim()) return;
+    enviarMensaje(chatInput); // Se manda por WebSockets al backend
     setChatInput("");
   };
 
@@ -323,7 +352,7 @@ export function Pantalla04PartidaAgente() {
           </div>
 
           {/* Messages: TODO: Cambiar campos de m. por los que vengan del backend */}
-          <div className="chat-messages-scroll-area">
+          <div className="chat-messages-scroll-area" ref={chatContainerRef}>
             {messages.map((m, i) => (
               <div key={i} className={`message-row ${m.user === "Tú" ? "message-own" : ""}`}>
                 {/* Bubble */}
