@@ -10,7 +10,7 @@ export const UserContext = createContext();
 
 // Creamos el UserProvider al que accede App.jsx para envolver toda la aplicación.
 export function UserProvider({ children }) {
-  const [user, setUser] = useState(null); // Aquí guardamos: { alias, balas, rango... }
+  const [user, setUser] = useState(null); // Aquí guardamos: {id_google, tag, fotoPerfil, balas, partidas_jugadas, victorias, numAciertos, numFallos}
   const [isLoading, setIsLoading] = useState(true); // Para la pantalla de carga inicial
 
   // Se ejecuta al refrescar la página (F5) o abrir la app
@@ -18,7 +18,9 @@ export function UserProvider({ children }) {
     checkSession();
   }, []);
 
-  // Función para preguntar al backend: "¿Tengo una cookie de sesión válida?"
+  // TODO: añadirla a la API. 
+  // Función para preguntar al backend: "¿Tengo una cookie de sesión válida?" y recuperar
+  // todos los datos del jugador logueado, si lo hay.
   const checkSession = async () => {
     try {
       // TODO: añadir la URI del backend.
@@ -43,6 +45,12 @@ export function UserProvider({ children }) {
     }
   };
 
+  // Función que se llama desde Pantalla01Login tras loguear al usuario con éxito, 
+  // guardando toda su información.
+  const loginUsuario = (datosJugador) => {
+    setUser(datosJugador);
+  };
+
   // Función para actualizar balas globalmente (ej: al comprar en la Tienda o 
   // al ganar una partida)
   const updateBullets = (amount) => {
@@ -51,16 +59,17 @@ export function UserProvider({ children }) {
     }
   };
 
+  // TODO: conectarla con el backend.
   // Función para cerrar sesión (Limpiamos el estado en React)
   const logout = async () => {
-    // TODO: añadir la URI del backend.
     // Le avisamos al backend para que destruya la cookie
     await fetch("http://AÑADIR_URI/logout", { method: "POST", credentials: "include" });
     setUser(null);
   };
 
   return (
-    <UserContext.Provider value={{ user, isLoading, updateBullets, logout, checkSession }}>
+    // Funciones y datos que se exponen al exterior.
+    <UserContext.Provider value={{ user, isLoading, loginUsuario,updateBullets, logout, checkSession }}>
       {children}
     </UserContext.Provider>
   );

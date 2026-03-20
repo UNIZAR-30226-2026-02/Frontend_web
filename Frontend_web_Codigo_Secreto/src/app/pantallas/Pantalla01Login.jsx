@@ -5,14 +5,18 @@
 import { ScreenFrame, ManilaFolder, RedStamp, FBISeal, TapeStrip } from "../components/ScreenFrame";
 import { useNavigate } from "react-router";
 import logo from '../../assets/logo.png';
-import React from 'react';
+import { useContext } from 'react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { loginConGoogle } from "../api/apiLogin";
+import { UserContext } from "../components/UserContext";
 
 // Client ID del cliente web generado en Google Cloud Console.
 const GOOGLE_CLIENT_ID = "271645130319-f9agsfadvl8njoaoitevnaspuchj5fb9.apps.googleusercontent.com";
 
 export function Pantalla01Login() {
   const navigate = useNavigate();
+  // Se extrae la función 'loginUsuario' del UserContext para poder acceder al contexto.
+  const { loginUsuario } = useContext(UserContext);
   
   // Función antigua (Comentada para no perder el trabajo)
   /*
@@ -29,37 +33,39 @@ export function Pantalla01Login() {
     const idToken = respuestaGoogle.credential;
 
     try {
-      // Usamos fetch nativo para hablar con nuestro backend Spring Boot
-      const res = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // IMPORTANTÍSIMO: Necesario para que el navegador guarde la cookie HttpOnly
-        // que recibirá el frontend con el JWT (por el CORS).
-        credentials: "include", 
-        // Aunque el DTO del backend utiliza Camel Case (idGoogle), se ha configurado
-        // Jackson para que reciba Snake_case (id_google).
-        body: JSON.stringify({ id_google: idToken }) 
-      });
+      
+      // Se hace la petición al backend, enviando el id de Google del usuario y 
+      // recibiendo su respuesta, usando la función del fichero 'apiLogin.js'.
+      const res = await loginConGoogle(idToken);
 
-      // Evaluamos la respuesta según nuestro contrato de arquitectura
-      if (res.status === 200) {
-        // Caso A: Usuario existente. El backend nos da el JWT.
-        // La cookie 'token_sesion' ya se ha guardado en el navegador automáticamente.
-        console.log("Acceso concedido. Redirigiendo al Home...");
-        navigate("/home");
-
-      } else if (res.status === 404) {
-        // Caso B: Usuario nuevo. Aún no hay token, necesita elegir un Tag.
-        console.log("Usuario no registrado. Redirigiendo a creación de perfil...");
-        // Mandamos el idToken en el estado de la ruta para usarlo en la siguiente pantalla
+      // Evaluamos la respuesta según nuestro contrato de API.
+      if(res.esNuevo === true){
+        // El usuario es nuevo y tiene que configurar su tag.
+        console.log("Usuario no registrado. Redirigiendo a la creación de tag...");
+        // Pasamos el ID de Google a la siguiente pantalla para que pueda usarlo al registrar el Tag.
         navigate("/nombre-usuario-nuevo", { state: { idToken: idToken } });
-        
-      } else {
-        // Otros errores (ej. 400 Bad Request)
-        console.error("El servidor rechazó las credenciales.");
-        alert("Acceso denegado por el servidor central.");
+
+      } else{
+
+        // El usuario ya existe.
+        console.log("Acceso concedido. Redirigiendo al Home...");
+        // Guardar el JWT en sessionStorage, para los WebSockets.
+        if (res.jwt) {
+          sessionStorage.setItem('jwt_token', res.jwt);
+        }       
+        // Se guardan los datos del jugador logueado en el UserContext.
+        loginUsuario(res.jugador);
+
+        // IMPORTANTE: para la reconexión.
+        if (res.jugador.partidaActivaId) {
+          // El jugador tiene una partida en curso y se le redirige a ella directamente.
+          console.log("Partida en curso detectada. Reconectando...");
+          navigate(`/partida/${res.jugador.partidaActivaId}`);
+
+        } else {
+          // El jugador no tiene ninguna partida en curso. Redirección normal al Home.
+          navigate("/home");
+        }
       }
 
     } catch (error) {

@@ -2,32 +2,35 @@
  * Pantalla inicial para que un nuevo usuario escriba su nombre único.
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { ScreenFrame, ManilaFolder, RedStamp, FBISeal, TapeStrip } from "../components/ScreenFrame";
 import { useNavigate, useLocation } from "react-router";
+import { registroNuevoUsuario } from "../api/apiLogin";
+import { UserContext } from "../components/UserContext";
 
 export function Pantalla05NombreUsuarioNuevo() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Se extrae la función 'loginUsuario' del UserContext para poder acceder al contexto.
+  const { loginUsuario } = useContext(UserContext);
   
-  // TODO: descomentar
   // Recuperamos el idToken enviado desde la Pantalla01Login, que había proporcionado
-  // Google para el usuario actual. Es necesario para enviarselo al backend.
-  //const idToken = location.state?.idToken;
+  // Google para el usuario actual. Es necesario para enviárselo al backend.
+  const idToken = location.state?.idToken;
 
   const [tag, setTag] = useState('');
   const [errorMensaje, setErrorMensaje] = useState('');
   const [cargando, setCargando] = useState(false);
 
-  // TODO: descomentar
   // Medida de seguridad: Si alguien entra a esta URL directamente sin venir de Google, 
   // se le redirige al login
-  /*useEffect(() => {
+  useEffect(() => {
     if (!idToken) {
       console.warn("Intento de acceso sin idToken de Google. Redirigiendo al Login.");
       navigate("/");
     }
-  }, [idToken, navigate]);*/
+  }, [idToken, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Evita que la página se recargue al enviar el formulario
@@ -43,35 +46,30 @@ export function Pantalla05NombreUsuarioNuevo() {
     try {
       // Llamada al endpoint de registro de AuthController.java para crear el nuevo usuario 
       // enviándole su token de Google y el nombre (tag) único que ha elegido.
-      // TODO: concretar URL de la API.
-      const res = await fetch("http://localhost:8080/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          idToken: idToken,
-          tag: tag.trim() 
-        })
-      });
+      const res = await registroNuevoUsuario(idToken, tag.trim());
 
-      if (res.status === 201 || res.status === 200) {
-        // Caso de éxito: El usuario se ha guardado en BD y nos devuelven el JWT
-        const data = await res.json();
-        localStorage.setItem("token", data.token); // Guardamos el JWT en localStorage.
-        console.log("Agente registrado con éxito. Redirigiendo al Home...");
-        navigate("/home");
+      // Caso de éxito: El usuario se ha guardado en BD y nos devuelven el JWT
+  
+      // Guardar el JWT en sessionStorage, para los WebSockets. 
+      if (res.jwt) {
+        sessionStorage.setItem('jwt_token', res.jwt);
+      }       
+      // Se guardan los datos del jugador logueado en el UserContext.
+      loginUsuario(res.jugador);
 
-      } else if (res.status === 409) {
-        // Caso de conflicto: Ese Tag ya lo tiene otro jugador
-        setErrorMensaje("Este nombre en clave ya está asignado a otro agente. Elige otro.");
-      } else {
-        setErrorMensaje("Error en el servidor central. Inténtalo de nuevo.");
-      }
+      console.log("Agente registrado con éxito. Redirigiendo al Home...");
+      navigate("/home");
 
     } catch (error) {
+      // Caso de error. Se identifica cuál ha sido el error.
       console.error("Fallo de conexión:", error);
-      setErrorMensaje("Error de comunicación con el servidor central.");
+
+      if (error.message === "TAG_DUPLICADO") {
+        setErrorMensaje("Este nombre en clave ya está asignado a otro agente. Elige otro.");
+      } else {
+        // Error genérico o de caída del servidor
+        setErrorMensaje("Error de comunicación con el servidor central.");
+      }
     } finally {
       setCargando(false);
     }
