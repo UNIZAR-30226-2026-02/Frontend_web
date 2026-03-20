@@ -6,7 +6,7 @@ const WS_URL = 'http://localhost:8080/ws';
 
 //PARA EL LOBBY
 
-/*export function useLobbyWebSocket(idPartida, onLobbyUpdate, onPartidaIniciada) {
+export function useLobbyWebSocket(idPartida, onLobbyUpdate, onPartidaIniciada) {
   const clientRef = useRef(null);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ const WS_URL = 'http://localhost:8080/ws';
   }, [idPartida]);
 
   return clientRef;
-}*/
+}
 
 
 //PARA EL CHAT

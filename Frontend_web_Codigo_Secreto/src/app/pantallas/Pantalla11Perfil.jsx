@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import { 
   Trophy, Target, Flame, Eye, Crown, Edit3, 
-  Check, LogOut, ArrowLeft, X, Camera 
+  Check, LogOut, ArrowLeft, X, Camera, AlertTriangle
 } from "lucide-react";
 import { useNavigate } from "react-router";
 
@@ -52,7 +52,21 @@ export function Pantalla11Perfil() {
   const [avatarSeleccionado, setAvatarSeleccionado] = useState(1);
   const [mostrarSelector, setMostrarSelector] = useState(false);
 
+  // Estado para controlar la visibilidad del popup de desactivación.
+  const [mostrarPopupDesactivar, setMostrarPopupDesactivar] = useState(false);
+
   const avatarActual = OPCIONES_AVATAR.find(a => a.id === avatarSeleccionado);
+
+  // TODO: lógica de desactivación de cuenta
+  /*const manejarDesactivacionCuenta = async () => {
+    await apiDesactivarCuenta()
+    console.log("Desactivando cuenta del agente...");
+    setMostrarPopupDesactivar(false);
+    
+    // Limpiar sesión y volver al login
+    sessionStorage.removeItem('jwt_token');
+    navegar("/");
+  };*/
 
   return (
     <ScreenFrame title="PERFIL DEL AGENTE">

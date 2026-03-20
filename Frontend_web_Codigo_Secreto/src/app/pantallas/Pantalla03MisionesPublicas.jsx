@@ -4,18 +4,16 @@
 
 import { ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader, TapeStrip } from "../components/ScreenFrame";
 import { Search, Users, Clock, ArrowLeft, Filter, Loader2 } from "lucide-react"; 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
+import { usePartidasPublicas } from "../hooks/hooksListaPartidasPublicas";
 
-// Datos de prueba: TODO: integrar con backend utilizando useEffect.
-/*const missions = [
-  { id: 1, name: "Operación Medusa", host: "ProAgente99", players: "6/8", theme: "Cyberpunk", timer: "60s", time: "02:34", status: "ESPERANDO" },
-  { id: 2, name: "Proyecto Cóndor", host: "EspíaMaestro", players: "4/8", theme: "Naturaleza", timer: "90s", time: "15:02", status: "ESPERANDO" },
-  { id: 3, name: "Código Fenix", host: "CodigoSecreto", players: "3/6", theme: "Espacio", timer: "60s", time: "00:45", status: "ESPERANDO" },
-  { id: 4, name: "Operación Trueno", host: "NightFox_99", players: "7/8", theme: "Cyberpunk", timer: "120s", time: "08:12", status: "ESPERANDO" },
-  { id: 5, name: "Misión Fantasma", host: "SilentViper", players: "5/10", theme: "Fantasía", timer: "60s", time: "03:47", status: "ESPERANDO" },
-  { id: 6, name: "Proyecto Sombra", host: "LoboÁrtico", players: "8/8", theme: "Naturaleza", timer: "90s", time: "20:15", status: "LLENA" },
-  { id: 7, name: "Operación Delta", host: "PhantomX", players: "2/4", theme: "Espacio", timer: "30s", time: "01:10", status: "ESPERANDO" },
+// Datos de prueba sin conexión con backend.
+/*const data = [
+  { id_partida: 1, tagCreador: "ProAgente99", nombreTema: "Cyberpunk", tiempoEspera: 60, maxJugadores: 8, jugadoresActuales: 6 },
+  { id_partida: 2, tagCreador: "EspíaMaestro", nombreTema: "Naturaleza", tiempoEspera: 90, maxJugadores: 8, jugadoresActuales: 4 },
+  { id_partida: 3, tagCreador: "CodigoSecreto", nombreTema: "Espacio", tiempoEspera: 60, maxJugadores: 6, jugadoresActuales: 3 },
+  { id_partida: 4, tagCreador: "NightFox_99", nombreTema: "Cyberpunk", tiempoEspera: 120, maxJugadores: 8, jugadoresActuales: 8 }
 ];*/
 
 export function Pantalla03MisionesPublicas() {
@@ -28,65 +26,37 @@ export function Pantalla03MisionesPublicas() {
   const [isLoading, setIsLoading] = useState(true); // Empieza cargando
   const [error, setError] = useState(null); // Por si falla la red
   
+  // Se define qué hacer cuando llegan datos nuevos. Se usa useCallback para
+  // evitar que se desconecte el WebSocket al actualizar el estado.
+  const handleMisionesActualizadas = useCallback((data) => {
+    const misionesFormateadas = data.map(partida => ({
+      id: partida.id_partida,
+      name: `Partida de ${partida.tag}`,
+      //host: partida.tag, 
+      players: `${partida.jugadoresActuales}/${partida.maxJugadores}`, 
+      theme: partida.nombre, 
+      timer: `${partida.tiempoEspera}s`, 
+      status: partida.jugadoresActuales >= partida.maxJugadores ? "LLENA" : "ESPERANDO"
+    }));
 
-  // Función que se ejecuta al cargar la pantalla para mostrar los datos contenidos en
-  // la base de datos sobre las partidas públicas abiertas.
-  useEffect(() => {
-    // Definimos la función asíncrona
-    const fetchMisiones = async () => {
-      try {
+    setMissions(misionesFormateadas);
+    setIsLoading(false);
+    setError(null);
+  }, []);
 
-        // URL del backend de donde recibir el listado de partidas.
-        const response = await fetch("http://localhost:8080/api/partidas/publicas", {
-          method: "GET",
-          // Adjuntar la cookie HttpOnly con el JWT automáticamente para ser validado
-          // por el backend (por el CORS).
-          credentials: "include"
-        });
-        
-        if (!response.ok) throw new Error("Acceso denegado a los servidores del FBI");
-        
-        const data = await response.json();
+  // Se define qué hacer si hay un error de conexión.
+  const handleError = useCallback((mensajeError) => {
+    setError(mensajeError);
+    setIsLoading(false);
+  }, []);
 
-        // Adaptar los datos obtenidos de la base de datos para mostrarlos por pantalla
-        // con el formato requerido.
-        const misionesFormateadas = data.map(partida => {
-          // Contamos cuántos jugadores hay en la lista 'jugadores' (si viene nula, son 0)
-          const numJugadoresActuales = partida.jugadores ? partida.jugadores.length : 0;
-          
-          // Extraemos el anfitrión (asumiendo que es el primer jugador de la lista)
-          const hostName = (partida.jugadores && partida.jugadores.length > 0) 
-                            ? partida.jugadores[0].tag 
-                            : "Agente Desconocido";
-
-          return {
-            id: partida.idPartida, // (camelCase)
-            name: `Operación ${partida.codigoPartida}`,
-            host: hostName, 
-            players: `${numJugadoresActuales}/${partida.maxJugadores}`, 
-            theme: partida.nombreTema || "Clásico", 
-            // TODO: revisar si se pone el tiempo de espera o no.
-            timer: "60s", // El DTO no tiene tiempoEspera, así que ponemos un valor fijo por ahora
-            time: "00:00", 
-            status: numJugadoresActuales >= partida.maxJugadores ? "LLENA" : "ESPERANDO" // O usar partida.estado
-          };
-        });
-
-        setMissions(misionesFormateadas);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false); // Terminar de cargar, haya ido bien o mal
-      }
-    };
-
-    // Ejecutamos la función
-    fetchMisiones();
-  }, []); // [] para que se ejecute solo una vez, al cargar la pantalla.
+  // Se invoca a 'hooksListaPartidasPublicas.js' para realizar el useEffect y la comunicación
+  // con el backend a través de WebSockets.
+  usePartidasPublicas(handleMisionesActualizadas, handleError);
   
-
+  // Filtrado de misiones para la barra de búsqueda.
   const filtered = missions.filter(m => {
-    const matchSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase()) || m.host.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchTheme = !filterTheme || m.theme === filterTheme;
     return matchSearch && matchTheme;
   });
@@ -142,65 +112,6 @@ export function Pantalla03MisionesPublicas() {
               </div>
             </div>
 
-{/*
-            // Mision list (inicial, sin conexión con backend).
-            <div className="space-y-2.5">
-              {filtered.map((m) => {
-                const isFull = m.status === "LLENA";
-                return (
-                  <div
-                    key={m.id}
-                    
-                    className={`bg-[#f0e4c8]/50 border border-[#c4a060]/25 rounded-sm p-3 sm:p-4 flex items-center justify-between transition-all ${
-                      isFull ? "opacity-50" : "" // Grisácea si está llena.
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                      <div className="w-2 h-2 rounded-full flex-shrink-0 bg-[#50a050] shadow-[0_0_5px_rgba(80,160,80,0.4)]" />
-                      <div className="min-w-0 flex-1">
-                        <p className="font-['Courier_Prime',monospace] text-[#3a2a10] truncate" style={{ fontSize: 13 }}>{m.name}</p>
-                        <p className="font-['Courier_Prime',monospace] text-[#8a7a60] mt-0.5" style={{ fontSize: 9 }}>
-                          Anfitrión: {m.host} — Tema: {m.theme} — Turno: {m.timer}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 ml-3 flex-shrink-0">
-                      <div className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5 text-[#5a4a30]" />
-                        <span className="font-['Courier_Prime',monospace] text-[#5a4a30]" style={{ fontSize: 11 }}>{m.players}</span>
-                      </div>
-                      <div className="flex items-center gap-1 bg-[#3a2a10]/10 rounded-sm px-2 py-1">
-                        <Clock className="w-3 h-3 text-[#5a4a30]" />
-                        <span className="font-['Courier_Prime',monospace] text-[#3a2a10]" style={{ fontSize: 11 }}>{m.time}</span>
-                      </div>
-                      
-                      {isFull ? (
-                        <div className="flex bg-[#5a2a2a]/20 border border-[#8a4a4a]/30 rounded-sm px-2 py-2 cursor-not-allowed">
-                          <span className="font-['Courier_Prime',monospace] text-[#8b2020]" style={{ fontSize: 8 }}>LLENA</span>
-                        </div>
-                      ) : (
-                        <div 
-                          onClick={() => navigate("/lobby")}
-                          className="flex bg-[#2a5a2a]/20 border border-[#4a8a4a]/30 rounded-sm px-2 py-2 cursor-pointer hover:bg-[#2a5a2a]/40 transition-colors"
-                        >
-                          <span className="font-['Courier_Prime',monospace] text-[#2a5a2a] hover:text-[#1a3a1a]" style={{ fontSize: 12 }}>UNIRSE</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {filtered.length === 0 && (
-              <div className="text-center py-8">
-                <p className="font-['Courier_Prime',monospace] text-[#8a7a60]" style={{ fontSize: 12 }}>
-                  No se encontraron misiones disponibles
-                </p>
-              </div>
-            )}*/}
-
             {/* Mission list */}
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-12">
@@ -231,8 +142,8 @@ export function Pantalla03MisionesPublicas() {
                         <div className="w-2 h-2 rounded-full flex-shrink-0 bg-[#50a050] shadow-[0_0_5px_rgba(80,160,80,0.4)]" />
                         <div className="min-w-0 flex-1">
                           <p className="font-['Courier_Prime',monospace] text-[#3a2a10] truncate" style={{ fontSize: 13 }}>{m.name}</p>
-                          <p className="font-['Courier_Prime',monospace] text-[#8a7a60] mt-0.5" style={{ fontSize: 9 }}>
-                            Anfitrión: {m.host} — Tema: {m.theme} — Turno: {m.timer}
+                          <p className="font-['Courier_Prime',monospace] text-[#5C5446] mt-0.5" style={{ fontSize: 10 }}>
+                            Tema: {m.theme} — Turno: {m.timer}
                           </p>
                         </div>
                       </div>
@@ -241,13 +152,15 @@ export function Pantalla03MisionesPublicas() {
                           <Users className="w-3.5 h-3.5 text-[#5a4a30]" />
                           <span className="font-['Courier_Prime',monospace] text-[#5a4a30]" style={{ fontSize: 11 }}>{m.players}</span>
                         </div>
-                        <div className="flex items-center gap-1 bg-[#3a2a10]/10 rounded-sm px-2 py-1">
+                        {/* COMENTADO: Este dato de tiempo transcurrido (time) ya no se recibe en la API */}
+                        {/* <div className="flex items-center gap-1 bg-[#3a2a10]/10 rounded-sm px-2 py-1">
                           <Clock className="w-3 h-3 text-[#5a4a30]" />
                           <span className="font-['Courier_Prime',monospace] text-[#3a2a10]" style={{ fontSize: 11 }}>{m.time}</span>
-                        </div>
+                        </div> 
+                        */}
                         {isFull ? (
-                          <div className="bg-[#5a2a2a]/20 border border-[#8a4a4a]/30 rounded-sm px-2 py-0.5">
-                            <span className="font-['Courier_Prime',monospace] text-[#8b2020]" style={{ fontSize: 8 }}>LLENA</span>
+                          <div className="flex bg-[#5a2a2a]/20 border border-[#8a4a4a]/30 rounded-sm px-2 py-2">
+                            <span className="font-['Courier_Prime',monospace] text-[#8b2020]" style={{ fontSize: 12 }}>LLENA</span>
                           </div>
                         ) : (
                           <div 

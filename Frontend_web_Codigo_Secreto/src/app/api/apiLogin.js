@@ -63,3 +63,6 @@ export async function registroNuevoUsuario(idToken, tag) {
 
 
 // RF-XX: Logout -> POST /api/auth/logout
+
+// RF-XX: Desactivar cuenta -> POST /api/auth/desactivar
+
