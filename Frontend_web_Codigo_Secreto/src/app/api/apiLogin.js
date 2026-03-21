@@ -63,6 +63,36 @@ export async function registroNuevoUsuario(idToken, tag) {
 
 
 // RF-XX: Logout -> POST /api/auth/logout
+// Invalida la sesión del usuario en el servidor y pide al navegador que destruya la cookie.
+export async function logoutUsuario() {
+  const res = await fetch(`${BASE_URL}/auth/logout`, {
+    method: "POST",
+    credentials: "include" // Necesario para enviar la cookie actual y que el backend sepa a quién desloguear
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Error al cerrar sesión en el servidor.');
+  }
+
+  // TODO: revisar lo que devuelve el backend.
+  return res.ok; 
+}
 
 // RF-XX: Desactivar cuenta -> POST /api/auth/desactivar
+// Desactiva la cuenta del usuario autenticado y restablece sus valores por defecto.
+export async function desactivarCuentaUsuario() {
+  const res = await fetch(`${BASE_URL}/auth/desactivar`, {
+    method: "PUT",
+    credentials: "include" // Necesario para enviar la cookie y que el backend sepa a quién desactivar
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Error al desactivar la cuenta en el servidor.');
+  }
+
+  // TODO: revisar lo que devuelve el backend.
+  return res.ok; 
+}
 

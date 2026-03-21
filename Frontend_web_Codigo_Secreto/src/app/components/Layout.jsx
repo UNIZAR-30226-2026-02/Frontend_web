@@ -6,8 +6,9 @@ import { Outlet, useLocation, useNavigate } from "react-router";
 import { BookOpen } from "lucide-react";
 import woodTexture from '../../assets/wood.png';
 import { IconoBala } from "../components/iconoBala";
-/*import { UserProvider } from "./components/UserContext";
-*/
+import { UserContext } from "./UserContext";
+import { useContext } from "react";
+
 
 // Pantallas en las que NO se van a mostrar los iconos persistentes de las esquinas 
 // (foto de agente ni contador de balas).
@@ -23,7 +24,6 @@ export function Layout() {
   const hideBullets = hideBulletsRoutes.some(r => location.pathname === r);
   const hideManual = hideManualRoutes.some(r => location.pathname === r);
 
-  /*EXTRAEMOS LOS DATOS DEL CONTEXTO GLOBLAL
   const { user, isLoading } = useContext(UserContext);
 
   // PANTALLA DE CARGA (Mientras el backend valida la cookie)
@@ -38,9 +38,9 @@ export function Layout() {
   }
 
   // LÓGICA PARA INICIALES Y BALAS (Con fallback por si user es null)
-  const initials = user?.alias ? user.alias.substring(0, 2).toUpperCase() : "??";
+  //const initials = user?.alias ? user.alias.substring(0, 2).toUpperCase() : "??";
   const balas = user?.balas ?? 0;
-  */
+  
 
   return (
     <div
@@ -89,12 +89,15 @@ export function Layout() {
           <div className="fixed top-14 right-3 sm:top-16 sm:right-4 z-50">
             <div className="flex items-center gap-1.5 bg-[#1a1208]/90 border border-[#5a4a20]/30 rounded-sm px-2 py-1 shadow-[1px_2px_6px_rgba(0,0,0,0.4)]">
               <IconoBala size={15} />
+              {/* Balas de prueba */}
               <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 13 }}>500</span>
-              {/* BALAS DINÁMICAS              
+              {/* TODO: descomentar para conectar con backend.
+                  BALAS DINÁMICAS            
               <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 11 }}>
                 {balas}
               </span>
-              */}
+              */} 
+              
               
             </div>
           </div>
