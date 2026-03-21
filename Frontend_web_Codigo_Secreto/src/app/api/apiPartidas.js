@@ -1,13 +1,35 @@
+/*
+ * Fichero en el que se implementan las funciones de comunicación con el backend
+ * mediante API REST, referentes a las partidas.
+ */
+
 const BASE_URL = 'http://localhost:8080/api';
 
-// Obtener temas activos (para el selector de la Pantalla12CrearPartida)
+// Obtener TODOS los temas activos del sistema (para el selector de la Pantalla12CrearPartida)
 export async function obtenerTemasActivos() {
   const res = await fetch(`${BASE_URL}/temas/activos`, {
+    method: 'GET',
     credentials: 'include',
   });
   if (!res.ok) throw new Error('Error al obtener temas');
   return res.json();
 }
+
+// Obtener los temas propios del jugador logueado. -> GET /api/jugadores/temas
+export async function obtenerTemasJugador() {
+  const response = await fetch(`${API_BASE_URL}/jugadores/temas`, {
+    method: 'GET',
+    credentials: 'include' // Necesario para enviar la cookie que contiene el JWT.
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al obtener los temas del jugador");
+  }
+
+  return response.json();
+}
+
+// -------------- CREACIÓN DE PARTIDA --------------
 
 // RF-12: Crear partida -> POST /api/partidas
 export async function crearPartida(datos) {
@@ -24,31 +46,28 @@ export async function crearPartida(datos) {
   return res.json(); // LobbyStatusDTO
 }
 
-// RF-12: Listar partidas públicas -> GET /api/partidas/publicas
-export async function listarPartidasPublicas() {
-  const res = await fetch(`${BASE_URL}/partidas/publicas`, {
-    credentials: 'include',
-  });
-  if (!res.ok) throw new Error('Error al obtener partidas públicas');
-  return res.json(); // List<LobbyStatusDTO>
-}
+// -----------------------------------------------------
 
-// RF-12: Unirse a partida -> POST /api/partidas/{id}/unirse
-// codigoPartida es null para partidas públicas
-export async function unirsePartida(idPartida, codigoPartida = null) {
-  const body = codigoPartida ? { codigoPartida } : {};
-  const res = await fetch(`${BASE_URL}/partidas/${idPartida}/unirse`, {
+// -------------- LISTA PARTIDAS PÚBLICAS --------------
+
+// Al pulsar el botón de UNIRSE, se envía esta información al backend.
+export async function unirsePartidaPublica(idPartida) {
+  const response = await fetch(`${API_BASE_URL}/api/partidas/${idPartida}/unirse/publica`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify(body),
+    credentials: 'include' // Necesario para enviar la cookie que contiene el JWT.
   });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message || 'Error al unirse a la partida');
+
+  if (!response.ok) {
+    throw new Error("No se pudo unir a la partida");
   }
-  return res.json(); // JugadorPartidaDTO
+
+  // Si el backend devuelve algo (como el estado del lobby), podrías hacer return response.json()
+  // Si devuelve un 200 OK vacío, con esto basta.
+  return response.ok; 
 }
+// -----------------------------------------------------
+
+// TODO: revisar las funciones de aquí abajo
 
 // RF-21: Elegir equipo -> PUT /api/partidas/{id}/equipo
 // REQUIERE añadir este endpoint en el backend (ver instrucciones al final)

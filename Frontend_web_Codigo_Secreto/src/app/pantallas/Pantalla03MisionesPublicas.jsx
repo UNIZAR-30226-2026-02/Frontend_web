@@ -6,8 +6,8 @@ import { ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader, TapeStrip } f
 import { Search, Users, Clock, ArrowLeft, Filter, Loader2 } from "lucide-react"; 
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { usePartidasPublicas } from "../hooks/hooksListaPartidasPublicas";
-import { obtenerTemasJugador, unirsePartidaPublica } from "../api/apiListaPartidasPublicas";
+import { usePartidasPublicas } from "../hooks/hooksPartidas";
+import { obtenerTemasJugador, unirsePartidaPublica } from "../api/apiPartidas";
 
 // Datos de prueba sin conexión con backend.
 /*const data = [
@@ -35,7 +35,7 @@ export function Pantalla03MisionesPublicas() {
   useEffect(() => {
     const fetchTemas = async () => {
       try {
-        // Se llama a la función de 'apiListaPartidasPublicas.js' para pedir los temas al backend.
+        // Se llama a la función de 'apiPartidas.js' para pedir los temas al backend.
         const temas = await obtenerTemasJugador();
         setMisTemas(temas);
       } catch (err) {
@@ -71,14 +71,14 @@ export function Pantalla03MisionesPublicas() {
     setIsLoading(false);
   }, []);
 
-  // Se invoca a 'hooksListaPartidasPublicas.js' para realizar el useEffect y la comunicación
+  // Se invoca a 'hooksPartidas.js' para realizar el useEffect y la comunicación
   // con el backend a través de WebSockets.
   usePartidasPublicas(handleMisionesActualizadas, handleError);
   
   // Función para manejar el evento de unirse a una partida
   const handleUnirse = async (idPartida) => {
     try {
-      // Se llama a la función de 'apiListaPartidasPublicas.js' para notificar al backend.
+      // Se llama a la función de 'apiPartidas.js' para notificar al backend.
       await unirsePartidaPublica(idPartida);
       // Si la API no lanza error, navegamos al lobby.
       navigate(`/lobby/${idPartida}`);  // TODO: gestionar esta URL.

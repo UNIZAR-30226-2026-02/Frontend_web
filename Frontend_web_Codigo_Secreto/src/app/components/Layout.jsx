@@ -24,6 +24,7 @@ export function Layout() {
   const hideBullets = hideBulletsRoutes.some(r => location.pathname === r);
   const hideManual = hideManualRoutes.some(r => location.pathname === r);
 
+  /* DESCOMENTAR PARA CONEXIÓN CON BACKEND.
   const { user, isLoading } = useContext(UserContext);
 
   // PANTALLA DE CARGA (Mientras el backend valida la cookie)
@@ -39,7 +40,7 @@ export function Layout() {
 
   // LÓGICA PARA INICIALES Y BALAS (Con fallback por si user es null)
   //const initials = user?.alias ? user.alias.substring(0, 2).toUpperCase() : "??";
-  const balas = user?.balas ?? 0;
+  const balas = user?.balas ?? 0;*/
   
 
   return (
