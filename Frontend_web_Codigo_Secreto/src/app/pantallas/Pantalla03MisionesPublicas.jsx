@@ -4,9 +4,10 @@
 
 import { ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader, TapeStrip } from "../components/ScreenFrame";
 import { Search, Users, Clock, ArrowLeft, Filter, Loader2 } from "lucide-react"; 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { usePartidasPublicas } from "../hooks/hooksListaPartidasPublicas";
+import { obtenerTemasJugador, unirsePartidaPublica } from "../api/apiListaPartidasPublicas";
 
 // Datos de prueba sin conexión con backend.
 /*const data = [
@@ -21,11 +22,31 @@ export function Pantalla03MisionesPublicas() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTheme, setFilterTheme] = useState(null); 
 
+  // Estados para manejar los temas del jugador obtenidos vía API REST.
+  const [misTemas, setMisTemas] = useState([]); 
+  const [isLoadingTemas, setIsLoadingTemas] = useState(true);
+
   // Estados para manejar los datos del servidor.
   const [missions, setMissions] = useState([]); // Empieza vacío
   const [isLoading, setIsLoading] = useState(true); // Empieza cargando
   const [error, setError] = useState(null); // Por si falla la red
   
+  // Solicitar al backend los temas del jugador al inicializar la pantalla.
+  useEffect(() => {
+    const fetchTemas = async () => {
+      try {
+        // Se llama a la función de 'apiListaPartidasPublicas.js' para pedir los temas al backend.
+        const temas = await obtenerTemasJugador();
+        setMisTemas(temas);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoadingTemas(false);
+      }
+    };
+    fetchTemas();
+  }, []); // Se ejecuta solo una vez, al cargar la pantalla.
+
   // Se define qué hacer cuando llegan datos nuevos. Se usa useCallback para
   // evitar que se desconecte el WebSocket al actualizar el estado.
   const handleMisionesActualizadas = useCallback((data) => {
@@ -54,11 +75,29 @@ export function Pantalla03MisionesPublicas() {
   // con el backend a través de WebSockets.
   usePartidasPublicas(handleMisionesActualizadas, handleError);
   
+  // Función para manejar el evento de unirse a una partida
+  const handleUnirse = async (idPartida) => {
+    try {
+      // Se llama a la función de 'apiListaPartidasPublicas.js' para notificar al backend.
+      await unirsePartidaPublica(idPartida);
+      // Si la API no lanza error, navegamos al lobby.
+      navigate(`/lobby/${idPartida}`);  // TODO: gestionar esta URL.
+    } catch (err) {
+      console.error(err);
+      alert("No se ha podido acceder a la misión. Es posible que esté llena.");
+    }
+  };
+
   // Filtrado de misiones para la barra de búsqueda.
   const filtered = missions.filter(m => {
+    // Comprobar que el jugador tiene el tema de la misión (porque el backend ha enviado 
+    // todas las partidas sin filtrar).
+    const poseeTema = misTemas.some(t => t.nombre === m.theme);
+
     const matchSearch = m.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchTheme = !filterTheme || m.theme === filterTheme;
-    return matchSearch && matchTheme;
+    
+    return poseeTema && matchSearch && matchTheme;
   });
 
   return (
@@ -104,16 +143,26 @@ export function Pantalla03MisionesPublicas() {
                   style={{ fontSize: 12, transform: 'rotate(-2deg)', boxShadow: '5px 5px 10px rgba(0,0,0,0.3)' }}
                 >
                   <option value="">Todos los temas</option>
+                  
+                  {/* Datos de prueba de los temas.
                   <option value="Cyberpunk">Cyberpunk</option>
                   <option value="Naturaleza">Naturaleza</option>
                   <option value="Espacio">Espacio</option>
                   <option value="Fantasía">Fantasía</option>
+                  */}
+
+                  {/* Opciones del desplegable dinámicas basadas en los temas que posee el jugador */}
+                  {!isLoadingTemas && misTemas.map(tema => (
+                    <option key={tema.id_tema} value={tema.nombre}>
+                      {tema.nombre}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
             {/* Mission list */}
-            {isLoading ? (
+            {isLoading || isLoadingTemas ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 text-[#8a7a60] animate-spin mb-4" />
                 <p className="font-['Courier_Prime',monospace] text-[#8a7a60]" style={{ fontSize: 12 }}>
@@ -164,7 +213,7 @@ export function Pantalla03MisionesPublicas() {
                           </div>
                         ) : (
                           <div 
-                            onClick={() => navigate("/lobby")}  // TODO: poner endpoint real del backend.
+                            onClick={() => handleUnirse(m.id)}
                             className="flex bg-[#2a5a2a]/20 border border-[#4a8a4a]/30 rounded-sm px-2 py-2 cursor-pointer hover:bg-[#2a5a2a]/40 transition-colors"
                           >
                             <span className="font-['Courier_Prime',monospace] text-[#2a5a2a] hover:text-[#1a3a1a]" style={{ fontSize: 12 }}>UNIRSE</span>
