@@ -17,7 +17,7 @@ export async function obtenerTemasActivos() {
 
 // Obtener los temas propios del jugador logueado. -> GET /api/jugadores/temas
 export async function obtenerTemasJugador() {
-  const response = await fetch(`${API_BASE_URL}/jugadores/temas`, {
+  const response = await fetch(`${BASE_URL}/jugadores/temas`, {
     method: 'GET',
     credentials: 'include' // Necesario para enviar la cookie que contiene el JWT.
   });
@@ -52,7 +52,7 @@ export async function crearPartida(datos) {
 
 // Al pulsar el botón de UNIRSE, se envía esta información al backend.
 export async function unirsePartidaPublica(idPartida) {
-  const response = await fetch(`${API_BASE_URL}/api/partidas/${idPartida}/unirse/publica`, {
+  const response = await fetch(`${BASE_URL}/api/partidas/${idPartida}/unirse/publica`, {
     method: 'POST',
     credentials: 'include' // Necesario para enviar la cookie que contiene el JWT.
   });
@@ -64,6 +64,21 @@ export async function unirsePartidaPublica(idPartida) {
   // Si el backend devuelve algo (como el estado del lobby), podrías hacer return response.json()
   // Si devuelve un 200 OK vacío, con esto basta.
   return response.ok; 
+}
+
+// Añade esta función junto a las demás
+export async function unirsePartidaPrivada(codigo) {
+  const res = await fetch(`${BASE_URL}/partidas/join`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ codigo_partida: codigo })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Código de partida inválido');
+  }
+  return res.json(); // { id_partida, ... }
 }
 // -----------------------------------------------------
 
