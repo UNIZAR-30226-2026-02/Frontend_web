@@ -101,7 +101,7 @@ export function Pantalla07Lobby() {
   useEffect(() => {
     const fetchLobby = async () => {
       try {
-        const res = await fetch(`${API_BASE}/partidas/${idPartida}/lobby`, {
+        const res = await fetch(`${API_BASE}/partidas/${id_partida}/lobby`, {
           credentials: "include"
         });
         if (!res.ok) throw new Error("No se pudo cargar el lobby");
@@ -109,28 +109,28 @@ export function Pantalla07Lobby() {
         aplicarLobby(data);
 
         // Inicializar valores editables
-        setTemaSeleccionado(data.idTema);
-        setTiempoSeleccionado(String(data.tiempoEspera));
+        setTemaSeleccionado(data.id_tema);
+        setTiempoSeleccionado(String(data.tiempo_espera));
       } catch (err) {
         setError(err.message);
       } finally {
         setIsLoading(false);
       }
     };
-    if (idPartida) fetchLobby();
-  }, [idPartida, aplicarLobby]);
+    if (id_partida) fetchLobby();
+  }, [id_partida, aplicarLobby]);
 
   //2. Cargar temas del creador (para selector)
   useEffect(() => {
-    if (!soyCreador) return;
+    if (!soy_creador) return;
     obtenerTemasJugador()
       .then(setTemasDisponibles)
       .catch(console.error);
-  }, [soyCreador]);
+  }, [soy_creador]);
 
   //3. Conectar WebSocket del lobby 
   useEffect(() => {
-    if (!idPartida) return;
+    if (!id_partida) return;
 
     const token = sessionStorage.getItem("jwt_token");
     const client = new Client({
@@ -139,11 +139,11 @@ export function Pantalla07Lobby() {
       reconnectDelay: 3000,
       onConnect: () => {
         // Suscribirse a actualizaciones del lobby
-        client.subscribe(`/topic/partidas/${idPartida}/lobby`, (msg) => {
+        client.subscribe(`/topic/partidas/${id_partida}/lobby`, (msg) => {
           const data = JSON.parse(msg.body);
           aplicarLobby(data);
-          setTemaSeleccionado(data.idTema);
-          setTiempoSeleccionado(String(data.tiempoEspera));
+          setTemaSeleccionado(data.id_tema);
+          setTiempoSeleccionado(String(data.tiempo_espera));
         });
       },
       onStompError: (frame) => {
@@ -164,7 +164,7 @@ export function Pantalla07Lobby() {
       }
       client.deactivate();
     };
-  }, [idPartida, aplicarLobby]);
+  }, [id_partida, aplicarLobby]);
 
   // Acciones
 
@@ -172,28 +172,28 @@ export function Pantalla07Lobby() {
   const handleCambiarEquipo = (equipo) => {
     if (!stompRef.current?.connected) return;
     stompRef.current.publish({
-      destination: `/app/partida/${idPartida}/participantes/equipo`,
+      destination: `/app/partida/${id_partida}/participantes/equipo`,
       body: JSON.stringify({ equipo })
     });
     setMiEquipo(equipo);
   };
 
   // Cambiar tema (solo creador, solo privadas)
-  const handleCambiarTema = (idTema) => {
-    if (!stompRef.current?.connected || !soyCreador || partida?.esPublica) return;
-    setTemaSeleccionado(idTema);
+  const handleCambiarTema = (id_tema) => {
+    if (!stompRef.current?.connected || !soy_creador || partida?.es_publica) return;
+    setTemaSeleccionado(id_tema);
     stompRef.current.publish({
-      destination: `/app/partida/${idPartida}/tema`,
-      body: JSON.stringify({ id_tema: parseInt(idTema) })
+      destination: `/app/partida/${id_partida}/tema`,
+      body: JSON.stringify({ id_tema: parseInt(id_tema) })
     });
   };
 
   // Cambiar tiempo (solo creador, solo privadas)
   const handleCambiarTiempo = (tiempo) => {
-    if (!stompRef.current?.connected || !soyCreador || partida?.esPublica) return;
+    if (!stompRef.current?.connected || !soy_creador || partida?.es_publica) return;
     setTiempoSeleccionado(tiempo);
     stompRef.current.publish({
-      destination: `/app/partida/${idPartida}/tiempoTurno`,
+      destination: `/app/partida/${id_partida}/tiempoTurno`,
       body: JSON.stringify({ tiempoEspera: parseInt(tiempo) })
     });
   };
@@ -201,7 +201,7 @@ export function Pantalla07Lobby() {
   // Iniciar partida (RF-13: solo creador, con mínimo 2 por equipo)
   const handleIniciar = async () => {
     try {
-      await fetch(`${API_BASE}/partida/${idPartida}/iniciar`, {
+      await fetch(`${API_BASE}/partida/${id_partida}/iniciar`, {
         method: "PUT",
         credentials: "include"
       });
