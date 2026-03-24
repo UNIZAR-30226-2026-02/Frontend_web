@@ -39,7 +39,7 @@ export function Pantalla01Login() {
       const res = await loginConGoogle(idToken);
 
       // Evaluamos la respuesta según nuestro contrato de API.
-      if(res.esNuevo === true){
+      if(res.es_nuevo === true){
         // El usuario es nuevo y tiene que configurar su tag.
         console.log("Usuario no registrado. Redirigiendo a la creación de tag...");
         // Pasamos el ID de Google a la siguiente pantalla para que pueda usarlo al registrar el Tag.
