@@ -50,7 +50,7 @@ export function Pantalla12CrearPartida() {
       // Formamos el payload exactamente como lo pide la especificación del backend
       const payload = {
         es_publica: matchType === "public",
-        tag: user?.tag || "Desconocido", 
+        //tag: user?.tag || "Desconocido", 
         tiempo_espera: parseInt(timer, 10),
         id_tema: parseInt(theme, 10),
         max_jugadores: maxPlayers
@@ -61,7 +61,7 @@ export function Pantalla12CrearPartida() {
 
       // Si todo va bien, el backend nos devuelve datos (incluido el posible ID). 
       // TODO: revisar ruta, debería tener {id_partida}.
-      navigate("/lobby");
+      navigate("/lobby/" + respuesta.id_partida);
       
     } catch (error) {
       console.error("Fallo de conexión al crear la operación:", error);

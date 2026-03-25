@@ -55,7 +55,7 @@ function PlayerSlot({ player, teamColor }) {
 
 export function Pantalla07Lobby() {
   const navigate = useNavigate();
-  const { idPartida } = useParams();
+  const { id_partida } = useParams();
   const { user } = useContext(UserContext);
 
   // Estado del lobby
@@ -122,11 +122,11 @@ export function Pantalla07Lobby() {
 
   //2. Cargar temas del creador (para selector)
   useEffect(() => {
-    if (!soy_creador) return;
+    if (!soyCreador) return;
     obtenerTemasJugador()
       .then(setTemasDisponibles)
       .catch(console.error);
-  }, [soy_creador]);
+  }, [soyCreador]);
 
   //3. Conectar WebSocket del lobby 
   useEffect(() => {
@@ -158,7 +158,7 @@ export function Pantalla07Lobby() {
       // RF-12: notificar abandono del lobby
       if (client.connected) {
         client.publish({
-          destination: `/app/partida/${idPartida}/abandonarLobby`,
+          destination: `/app/partida/${id_partida}/abandonarLobby`,
           body: JSON.stringify({})
         });
       }
@@ -180,7 +180,7 @@ export function Pantalla07Lobby() {
 
   // Cambiar tema (solo creador, solo privadas)
   const handleCambiarTema = (id_tema) => {
-    if (!stompRef.current?.connected || !soy_creador || partida?.es_publica) return;
+    if (!stompRef.current?.connected || !soyCreador || partida?.es_publica) return;
     setTemaSeleccionado(id_tema);
     stompRef.current.publish({
       destination: `/app/partida/${id_partida}/tema`,
@@ -190,7 +190,7 @@ export function Pantalla07Lobby() {
 
   // Cambiar tiempo (solo creador, solo privadas)
   const handleCambiarTiempo = (tiempo) => {
-    if (!stompRef.current?.connected || !soy_creador || partida?.es_publica) return;
+    if (!stompRef.current?.connected || !soyCreador || partida?.es_publica) return;
     setTiempoSeleccionado(tiempo);
     stompRef.current.publish({
       destination: `/app/partida/${id_partida}/tiempoTurno`,
@@ -421,7 +421,7 @@ export function Pantalla07Lobby() {
             {/* Máximo jugadores */}
             <div className="bg-[#f5edd8] border border-[#a08050]/20 rounded-sm px-4 py-2 mb-4 flex items-center justify-between">
               <span className="font-['Courier_Prime',monospace] text-[#8a7a60]" style={{ fontSize: 9 }}>
-                PLAZAS: {(partida?.jugadores?.length || 0)}/{partida?.maxJugadores || "?"}
+                PLAZAS: {(partida?.jugadores?.length || 0)}/{partida?.max_jugadores || "?"}
               </span>
               {partida?.hayMinimo ? (
                 <span className="font-['Courier_Prime',monospace] text-[#50a050]" style={{ fontSize: 9 }}>

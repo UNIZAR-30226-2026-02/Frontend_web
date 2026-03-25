@@ -33,7 +33,7 @@ export async function obtenerTemasJugador() {
 
 // RF-12: Crear partida -> POST /api/partidas
 export async function crearPartida(datos) {
-  const res = await fetch(`${BASE_URL}/partidas`, {
+  const res = await fetch(`${BASE_URL}/partidas/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',

@@ -28,7 +28,7 @@ export const router = createBrowserRouter([
       { path: "misiones-publicas", Component: Pantalla03MisionesPublicas },
       { path: "partida-agente", Component: Pantalla04PartidaAgente },
       { path: "manual", Component: Pantalla06Manual },
-      { path: "lobby", Component: Pantalla07Lobby },
+      { path: "lobby/:id_partida", Component: Pantalla07Lobby },
       { path: "social", Component: Pantalla08Social },
       { path: "partida-jefe", Component: Pantalla09PartidaJefe },
       { path: "nombre-usuario-nuevo", Component: Pantalla05NombreUsuarioNuevo },
@@ -36,7 +36,7 @@ export const router = createBrowserRouter([
       { path: "perfil", Component: Pantalla11Perfil },
       { path: "crear-mision", Component: Pantalla12CrearPartida },
       { path: "tienda", Component: Pantalla13Tienda },
-      { path: "partida", Component: PantallaPartida },
+      { path: "partida/:id_partida", Component: PantallaPartida },
     ],
   },
 ]);
