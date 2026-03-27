@@ -18,12 +18,26 @@ export async function obtenerTemasActivos() {
 // Obtener los temas propios del jugador logueado. -> GET /api/jugadores/temas
 export async function obtenerTemasJugador() {
   const response = await fetch(`${BASE_URL}/jugadores/temas`, {
-    method: 'GET',
+    method: 'GET',  
     credentials: 'include' // Necesario para enviar la cookie que contiene el JWT.
   });
 
   if (!response.ok) {
     throw new Error("Error al obtener los temas del jugador");
+  }
+
+  return response.json();
+}
+
+// Obtener TODAS las partidas públicas en estado 'esperando'. -> GET /api/partidas/publicas
+export async function obtenerPartidasPublicas() {
+  const response = await fetch(`${BASE_URL}/partidas/publicas`, {
+    method: 'GET',  
+    credentials: 'include' // Necesario para enviar la cookie que contiene el JWT.
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al obtener las partidas públicas");
   }
 
   return response.json();

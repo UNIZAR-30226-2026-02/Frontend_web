@@ -7,7 +7,7 @@ import { Search, Users, Clock, ArrowLeft, Filter, Loader2 } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { usePartidasPublicas } from "../hooks/hooksPartidas";
-import { obtenerTemasJugador, unirsePartidaPublica } from "../api/apiPartidas";
+import { obtenerPartidasPublicas, obtenerTemasJugador, unirsePartidaPublica } from "../api/apiPartidas";
 
 // Datos de prueba sin conexión con backend.
 /*const data = [
@@ -47,6 +47,23 @@ export function Pantalla03MisionesPublicas() {
     fetchTemas();
   }, []); // Se ejecuta solo una vez, al cargar la pantalla.
 
+  // Solicitar al backend las partidas públicas para mostrarlas en el momento en el que se 
+  // inicializa la pantalla.
+  useEffect(() => {
+    const fetchPartidas = async () => {
+      try {
+        // Se llama a la función de 'apiPartidas.js' para pedir las partidas al backend.
+        const partidas = await obtenerPartidasPublicas();
+        handleMisionesActualizadas(partidas);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPartidas();
+  }, []); // Se ejecuta solo una vez, al cargar la pantalla.
+
   // Se define qué hacer cuando llegan datos nuevos. Se usa useCallback para
   // evitar que se desconecte el WebSocket al actualizar el estado.
   const handleMisionesActualizadas = useCallback((data) => {
@@ -54,10 +71,10 @@ export function Pantalla03MisionesPublicas() {
       id: partida.id_partida,
       name: `Partida de ${partida.tag}`,
       //host: partida.tag, 
-      players: `${partida.jugadoresActuales}/${partida.maxJugadores}`, 
+      players: `${partida.jugadores_actuales}/${partida.max_jugadores}`, 
       theme: partida.nombre, 
-      timer: `${partida.tiempoEspera}s`, 
-      status: partida.jugadoresActuales >= partida.maxJugadores ? "LLENA" : "ESPERANDO"
+      timer: `${partida.tiempo_espera}s`, 
+      status: partida.jugadores_actuales >= partida.max_jugadores ? "LLENA" : "ESPERANDO"
     }));
 
     setMissions(misionesFormateadas);

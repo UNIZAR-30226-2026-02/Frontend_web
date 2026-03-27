@@ -27,8 +27,7 @@ export function usePartidasPublicas(onMisionesRecibidas, onError) {
       onConnect: () => {
         console.log('Conectado a la central: Misiones Públicas');
         
-        // Nos suscribimos al canal (esto disparará el @SubscribeMapping en Spring Boot
-        // para recibir los datos del estado inicial).
+        // Nos suscribimos al canal para escuchar futuros cambios. 
         client.subscribe('/topic/partidas/publicas', (msg) => {
           try {
             const data = JSON.parse(msg.body);
