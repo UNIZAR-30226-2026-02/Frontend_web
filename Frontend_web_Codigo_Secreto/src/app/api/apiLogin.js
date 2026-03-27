@@ -22,6 +22,13 @@ export async function loginConGoogle(idToken) {
     body: JSON.stringify({ id_google: idToken }) 
   });
 
+  // TODO: comprobar qué status devuelve el backend si detecta un intento de doble sesión.
+  // El backend notifica de que ese usuario ya tiene una sesión iniciada en otro dispositivo.
+  if(res.status === 409){
+    throw new Error('Ya tiene una sesión abierta en otro dispositivo');
+  }
+
+  // Comprueba si hay algún otro error.
   if (!res.ok) {
     // Intentamos extraer el mensaje de error del backend, si no, uno genérico
     const err = await res.json().catch(() => ({}));

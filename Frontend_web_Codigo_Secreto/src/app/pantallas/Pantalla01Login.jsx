@@ -57,10 +57,10 @@ export function Pantalla01Login() {
         loginUsuario(res.jugador);
 
         // IMPORTANTE: para la reconexión.
-        if (res.jugador.partidaActivaId) {
+        if (res.jugador.partida_activa_id) {
           // El jugador tiene una partida en curso y se le redirige a ella directamente.
           console.log("Partida en curso detectada. Reconectando...");
-          navigate(`/partida/${res.jugador.partidaActivaId}`);
+          navigate(`/partida/${res.jugador.partida_activa_id}`);
 
         } else {
           // El jugador no tiene ninguna partida en curso. Redirección normal al Home.
@@ -70,13 +70,13 @@ export function Pantalla01Login() {
 
     } catch (error) {
       console.error("Infracción de seguridad o caída del servidor:", error);
-      alert("Error de comunicación con el servidor central.");
+      alert(error.message);
     }
   };
 
   const handleGoogleError = () => {
     console.error("Fallo al conectar con los satélites de Google.");
-    alert("Error de comunicación con Google.");
+    alert("Fallo al conectar con los satélites de Google.");
   };
 
   // ------ Interfaz gráfica ------

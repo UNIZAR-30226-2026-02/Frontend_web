@@ -96,6 +96,24 @@ export async function unirsePartidaPrivada(codigo) {
 }
 // -----------------------------------------------------
 
+// -------------- FIN DE PARTIDA --------------
+
+// Obtener los resultados finales de una partida -> GET /api/partida/{id_partida}/fin
+export async function obtenerResultadosPartida(idPartida) {
+  const response = await fetch(`${BASE_URL}/partida/${idPartida}/fin`, {
+    method: 'GET',
+    credentials: 'include' // Para que el backend pueda saber quién hace la petición.
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al obtener los resultados de la partida");
+  }
+
+  // Devuelve { aciertos_rojo, aciertos_azul, equipo_ganador }
+  return response.json();
+}
+// -----------------------------------------------------
+
 // TODO: revisar las funciones de aquí abajo
 
 // RF-21: Elegir equipo -> PUT /api/partidas/{id}/equipo

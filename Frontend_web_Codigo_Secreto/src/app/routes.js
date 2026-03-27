@@ -16,6 +16,7 @@ import { Pantalla11Perfil } from "./pantallas/Pantalla11Perfil";
 import { Pantalla12CrearPartida } from "./pantallas/Pantalla12CrearPartida";
 import { Pantalla13Tienda } from "./pantallas/Pantalla13Tienda";
 import { PantallaPartida } from "./pantallas/Pantalla14Partida";
+import { Pantalla15FinPartida } from "./pantallas/Pantalla15FinPartida";
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +38,7 @@ export const router = createBrowserRouter([
       { path: "crear-mision", Component: Pantalla12CrearPartida },
       { path: "tienda", Component: Pantalla13Tienda },
       { path: "partida/:id_partida", Component: PantallaPartida },
+      { path: "fin-partida", Component: Pantalla15FinPartida },
     ],
   },
 ]);
