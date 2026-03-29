@@ -1,3 +1,4 @@
+/* Pantalla de historial de partidas */
 import React from "react";
 import { useNavigate } from "react-router";
 import { ArrowLeft, Trophy, Skull, Clock, Users } from "lucide-react";
