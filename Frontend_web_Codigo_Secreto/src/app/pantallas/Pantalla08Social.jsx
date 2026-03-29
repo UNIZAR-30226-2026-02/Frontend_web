@@ -3,12 +3,11 @@
  */
 
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader } from "../components/ScreenFrame";
-import { Search, UserPlus, Trophy, TrendingUp, Flame, ArrowLeft } from "lucide-react";
+import { Search, UserPlus, Trophy, TrendingUp, Flame, ArrowLeft, X, Users } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
-// TODO: integrar con backend
-// De momento se usan datos de prueba.
+// Datos de prueba
 const friends = [
   { name: "LoboÁrtico", rank: "Capitán", online: true, wins: 34 },
   { name: "PhantomX", rank: "Teniente", online: true, wins: 28 },
@@ -17,6 +16,7 @@ const friends = [
   { name: "CodigoSecreto", rank: "General", online: true, wins: 87 },
   { name: "EspíaMaestro", rank: "Coronel", online: false, wins: 298 },
 ];
+
 const leaderboard = [
   { pos: 1, name: "ProAgente99", wins: 342, rate: "78%", streak: 12, badge: "🏆" },
   { pos: 2, name: "EspíaMaestro", wins: 298, rate: "72%", streak: 8, badge: "🥈" },
@@ -26,13 +26,33 @@ const leaderboard = [
   { pos: 6, name: "NightFox_99", wins: 52, rate: "58%", streak: 2, badge: "" },
   { pos: 7, name: "PhantomX", wins: 28, rate: "55%", streak: 1, badge: "" },
   { pos: 8, name: "SilentViper", wins: 19, rate: "52%", streak: 0, badge: "" },
-  { pos: 9, name: "CodigoSecreto", wins: 87, rate: "48%", streak: 0, badge: "" },
+  { pos: 9, name: "Agente_K", wins: 87, rate: "48%", streak: 0, badge: "" },
   { pos: 10, name: "Agente_Sombra", wins: 72, rate: "45%", streak: 0, badge: "" }
+];
+
+const friendsLeaderboard = [
+  { pos: 1, name: "CodigoSecreto", wins: 87, rate: "69%", streak: 6, badge: "🏆" },
+  { pos: 2, name: "NightFox_99", wins: 52, rate: "58%", streak: 2, badge: "🥈" },
+  { pos: 3, name: "LoboÁrtico", wins: 34, rate: "61%", streak: 3, badge: "🥉" },
+  { pos: 4, name: "PhantomX", wins: 28, rate: "55%", streak: 1, badge: "" },
+  { pos: 5, name: "SilentViper", wins: 19, rate: "50%", streak: 1, badge: "" },
 ];
 
 export function Pantalla08Social() {
   const [tab, setTab] = useState("friends");
   const navigate = useNavigate();
+
+  const [mostrarAgnadir, setMostrarAgnadir] = useState(false);
+  const [nombreAmigo, setNombreAmigo] = useState("");
+  const [mostrarRankingAmigos, setMostrarRankingAmigos] = useState(false);
+
+  const handleAgnadir = () => {
+    if (nombreAmigo.trim()) {
+      console.log("Añadiendo agente:", nombreAmigo);
+      setNombreAmigo("");
+      setMostrarAgnadir(false);
+    }
+  };
 
   return (
     <ScreenFrame title="RED DE CONTACTOS">
@@ -42,97 +62,160 @@ export function Pantalla08Social() {
           <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 11 }}>VOLVER AL ESCRITORIO</span>
         </button>
 
-      <ManilaFolder>
-        <div className="p-4 sm:p-6 lg:p-8">
-          {/* Folder tab */}
-          <div className="absolute -top-0 left-6 bg-[#b89055] px-4 py-1.5 rounded-b-sm border-x border-b border-[#a08040] shadow-sm z-10">
-            <span className="font-['Courier_Prime',monospace] text-[#2a1a08]" style={{ fontSize: 9 }}>COMUNICACIONES</span>
-          </div>
+        <ManilaFolder>
+          <div className="p-4 sm:p-6 lg:p-8">
+            <div className="absolute -top-0 left-6 bg-[#b89055] px-4 py-1.5 rounded-b-sm border-x border-b border-[#a08040] shadow-sm z-10">
+              <span className="font-['Courier_Prime',monospace] text-[#2a1a08]" style={{ fontSize: 9 }}>COMUNICACIONES</span>
+            </div>
 
-          <div className="flex items-start justify-between mb-5 flex-wrap gap-3 mt-2">
-            <SectionHeader title="RED DE CONTACTOS" />
-            <FBISeal size={50} />
-          </div>
+            <div className="flex items-start justify-between mb-5 flex-wrap gap-3 mt-2">
+              <SectionHeader title="RED DE CONTACTOS" />
+              <FBISeal size={50} />
+            </div>
 
-          {/* Tabs */}
-          <div className="flex gap-2 sm:gap-3 mb-5 flex-wrap">
-            {[
-              { key: "friends", label: "AGENTES ALIADOS" },
-              { key: "leaderboard", label: "CLASIFICACIÓN GLOBAL" },
-            ].map((t) => (
-              <button key={t.key} onClick={() => setTab(t.key)} className={`px-4 py-2 rounded-sm transition-all font-['Special_Elite',cursive] tracking-[0.1em] cursor-pointer ${tab === t.key ? "bg-[#f5edd8] text-[#5a4a30] border border-[#a08050]/30" : "bg-[#2a2a2a] text-[#e8dcc8] shadow-md"}`} style={{ fontSize: 12 }}>
-                {t.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Search */}
-          <div className="relative mb-5">
-            <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8a7a60]" />
-            <input type="text" placeholder="Buscar agente por nombre clave..." className="w-full bg-[#f5edd8] border-2 border-[#a08050]/40 rounded-sm pl-10 sm:pl-12 pr-12 py-2.5 font-['Courier_Prime',monospace] text-[#3a2a10] placeholder:text-[#a09070] outline-none" style={{ fontSize: 12 }} />
-            <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#2a2a2a] p-1.5 rounded-sm cursor-pointer">
-              <UserPlus className="w-4 h-4 text-[#d4b878]" />
-            </button>
-          </div>
-
-          {tab === "friends" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {friends.map((f) => (
-                <DarkCard key={f.name} className="p-3 sm:p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-3 h-3 rounded-full flex-shrink-0 ${f.online ? "bg-[#50a050] shadow-[0_0_6px_rgba(80,160,80,0.5)]" : "bg-[#8b2020]"}`} />
-                    <div className="min-w-0">
-                      <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 13 }}>{f.name}</p>
-                      <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 10 }}>{f.rank} — {f.wins} victorias</p>
-                    </div>
-                  </div>
-                  {f.online && (
-                    <button className="bg-[#2a3a5a] hover:bg-[#3a5a8a] text-[#80a0d0] px-3 py-1.5 rounded-sm transition-colors flex-shrink-0 ml-2 cursor-pointer">
-                      <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 10 }}>INVITAR</span>
-                    </button>
-                  )}
-                </DarkCard>
+            {/* Tabs Principales */}
+            <div className="flex gap-2 sm:gap-3 mb-5 flex-wrap">
+              {[
+                { key: "friends", label: "AGENTES ALIADOS" },
+                { key: "leaderboard", label: "CLASIFICACIÓN" },
+              ].map((t) => (
+                <button 
+                  key={t.key} 
+                  onClick={() => setTab(t.key)} 
+                  className={`px-4 py-2 rounded-sm transition-all font-['Special_Elite',cursive] tracking-[0.1em] cursor-pointer ${tab === t.key ? "bg-[#f5edd8] text-[#5a4a30] border border-[#a08050]/30 shadow-md" : "bg-[#2a2a2a] text-[#e8dcc8]"}`} 
+                  style={{ fontSize: 12 }}
+                >
+                  {t.label}
+                </button>
               ))}
             </div>
-          ) : (
-            <div>
-              {/* Top 3 */}
-              <div className="flex items-end justify-center gap-3 sm:gap-4 mb-5">
-                {[leaderboard[1], leaderboard[0], leaderboard[2]].map((p, i) => (
-                  <DarkCard key={p.name} className={`p-3 sm:p-4 text-center ${i === 1 ? "w-[140px] sm:w-[180px] -mb-2" : "w-[110px] sm:w-[150px]"}`}>
-                    <span className="text-2xl sm:text-3xl">{p.badge}</span>
-                    <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] mt-1 truncate" style={{ fontSize: 11 }}>{p.name}</p>
-                    <p className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 18 }}>{p.wins}</p>
-                    <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 9 }}>victorias</p>
-                  </DarkCard>
-                ))}
-              </div>
-              <div className="space-y-2">
-                {leaderboard.slice(3).map((p) => (
-                  <DarkCard key={p.name} className="px-4 sm:px-5 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                      <span className="font-['Courier_Prime',monospace] text-[#888] w-6 sm:w-8 flex-shrink-0" style={{ fontSize: 14 }}>#{p.pos}</span>
+
+            {/* Buscador */}
+            <div className="relative mb-5">
+              <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8a7a60]" />
+              <input type="text" placeholder="Buscar agente por nombre clave..." className="w-full bg-[#f5edd8] border-2 border-[#a08050]/40 rounded-sm pl-10 sm:pl-12 pr-12 py-2.5 font-['Courier_Prime',monospace] text-[#3a2a10] placeholder:text-[#a09070] outline-none" style={{ fontSize: 12 }} />
+              <button 
+                onClick={() => setMostrarAgnadir(true)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#2a2a2a] p-1.5 rounded-sm cursor-pointer hover:bg-[#3a3a3a] transition-colors"
+              >
+                <UserPlus className="w-4 h-4 text-[#d4b878]" />
+              </button>
+            </div>
+
+            {tab === "friends" ? (
+              /* VISTA DE AMIGOS */
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {friends.map((f) => (
+                  <DarkCard key={f.name} className="p-3 sm:p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${f.online ? "bg-[#50a050] shadow-[0_0_6px_rgba(80,160,80,0.5)]" : "bg-[#8b2020]"}`} />
                       <div className="min-w-0">
-                        <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 12 }}>{p.name}</p>
-                        <p className="font-['Courier_Prime',monospace] text-[#888] hidden sm:block" style={{ fontSize: 9 }}>
-                          <Trophy className="w-3 h-3 inline" /> {p.wins} —
-                          <TrendingUp className="w-3 h-3 inline ml-1" /> {p.rate} —
-                          <Flame className="w-3 h-3 inline ml-1" /> {p.streak} racha
-                        </p>
+                        <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 13 }}>{f.name}</p>
+                        <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 10 }}>{f.rank} — {f.wins} victorias</p>
                       </div>
                     </div>
+                    {f.online && (
+                      <button className="bg-[#2a3a5a] hover:bg-[#3a5a8a] text-[#80a0d0] px-3 py-1.5 rounded-sm transition-colors flex-shrink-0 ml-2 cursor-pointer">
+                        <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 10 }}>INVITAR</span>
+                      </button>
+                    )}
                   </DarkCard>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              /* VISTA DE CLASIFICACIÓN */
+              <div>
+                <div className="flex justify-center mb-5">
+                  <div className="inline-flex bg-[#2a2218] border border-[#5a4a30]/50 rounded-sm p-1 gap-1">
+                    <button
+                      onClick={() => setMostrarRankingAmigos(false)}
+                      className={`px-4 py-2 rounded-sm transition-all font-['Courier_Prime',monospace] cursor-pointer ${!mostrarRankingAmigos ? "bg-[#f5edd8] text-[#5a4a30] shadow-sm" : "text-[#8a7a60] hover:text-[#d4b878]"}`}
+                      style={{ fontSize: 11 }}
+                    >
+                      <Trophy className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" /> GLOBAL
+                    </button>
+                    <button
+                      onClick={() => setMostrarRankingAmigos(true)}
+                      className={`px-4 py-2 rounded-sm transition-all font-['Courier_Prime',monospace] cursor-pointer ${mostrarRankingAmigos ? "bg-[#f5edd8] text-[#5a4a30] shadow-sm" : "text-[#8a7a60] hover:text-[#d4b878]"}`}
+                      style={{ fontSize: 11 }}
+                    >
+                      <Users className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" /> AMIGOS
+                    </button>
+                  </div>
+                </div>
 
-          <div className="mt-6 flex justify-end">
-            <RedStamp text="CONFIDENTIAL" className="rotate-[-3deg]" />
+                {/* Podium Top 3 */}
+                <div className="flex items-end justify-center gap-3 sm:gap-4 mb-5">
+                  {(mostrarRankingAmigos ? [friendsLeaderboard[1], friendsLeaderboard[0], friendsLeaderboard[2]] : [leaderboard[1], leaderboard[0], leaderboard[2]])
+                    .map((p, i) => (
+                      <DarkCard key={p.name} className={`p-3 sm:p-4 text-center ${i === 1 ? "w-[140px] sm:w-[180px] -mb-2 border-[#d4b878]/30" : "w-[110px] sm:w-[150px]"}`}>
+                        <span className="text-2xl sm:text-3xl">{p.badge}</span>
+                        <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] mt-1 truncate" style={{ fontSize: 11 }}>{p.name}</p>
+                        <p className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 18 }}>{p.wins}</p>
+                        <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 9 }}>victorias</p>
+                      </DarkCard>
+                  ))}
+                </div>
+
+                {/* Resto de la lista */}
+                <div className="space-y-2">
+                  {(mostrarRankingAmigos ? friendsLeaderboard.slice(3) : leaderboard.slice(3)).map((p) => (
+                    <DarkCard key={p.name} className="px-4 sm:px-5 py-3 flex items-center justify-between">
+                      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                        <span className="font-['Courier_Prime',monospace] text-[#888] w-6 sm:w-8 flex-shrink-0" style={{ fontSize: 14 }}>#{p.pos}</span>
+                        <div className="min-w-0">
+                          <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 12 }}>{p.name}</p>
+                          <p className="font-['Courier_Prime',monospace] text-[#888] hidden sm:block" style={{ fontSize: 9 }}>
+                            <Trophy className="w-3 h-3 inline" /> {p.wins} — <TrendingUp className="w-3 h-3 inline ml-1" /> {p.rate} — <Flame className="w-3 h-3 inline ml-1" /> {p.streak} racha
+                          </p>
+                        </div>
+                      </div>
+                    </DarkCard>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6 flex justify-end">
+              <RedStamp text="CONFIDENTIAL" className="rotate-[-3deg]" />
+            </div>
           </div>
-        </div>
-      </ManilaFolder>
+        </ManilaFolder>
       </div>
+
+      {/* Modal Añadir Amigo (Fuera del ManilaFolder para evitar problemas de overflow) */}
+      {mostrarAgnadir && (
+        <>
+          <div className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" onClick={() => setMostrarAgnadir(false)} />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-md">
+            <div className="bg-[#2a2218] border-2 border-[#5a4a30] rounded-sm shadow-[6px_8px_24px_rgba(0,0,0,0.7)] p-5 sm:p-6">
+              <button onClick={() => setMostrarAgnadir(false)} className="absolute top-3 right-3 text-[#8a7a60] hover:text-[#d4b878] cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+              <h3 className="font-['Special_Elite',cursive] text-[#e8dcc8] tracking-[0.1em] mb-1" style={{ fontSize: 16 }}>AÑADIR AGENTE</h3>
+              <p className="font-['Courier_Prime',monospace] text-[#8a7a60] mb-4" style={{ fontSize: 10 }}>Introduce el nombre clave</p>
+              <input
+                type="text"
+                value={nombreAmigo}
+                onChange={(e) => setNombreAmigo(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAgnadir()}
+                placeholder="Nombre_Agente_007"
+                className="w-full bg-[#f5edd8] border-2 border-[#a08050]/50 rounded-sm px-4 py-2.5 font-['Courier_Prime',monospace] text-[#3a2a10] outline-none mb-4"
+                style={{ fontSize: 13 }}
+                autoFocus
+              />
+              <div className="flex gap-3">
+                <button onClick={() => setMostrarAgnadir(false)} className="flex-1 bg-[#3a2a2a] text-[#a09070] py-2.5 rounded-sm cursor-pointer">CANCELAR</button>
+                <button 
+                  onClick={handleAgnadir} 
+                  disabled={!nombreAmigo.trim()}
+                  className="flex-1 bg-[#2a5a2a] disabled:bg-[#2a2a2a] text-white py-2.5 rounded-sm cursor-pointer"
+                >AÑADIR</button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </ScreenFrame>
   );
 }

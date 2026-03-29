@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import { 
   Trophy, Target, Flame, Eye, Crown, Edit3, 
-  Check, LogOut, ArrowLeft, X, Camera, AlertTriangle
+  Check, LogOut, ArrowLeft, X, Camera, AlertTriangle, Palette
 } from "lucide-react";
 import { useNavigate } from "react-router";
 
@@ -13,7 +13,7 @@ import {
   ScreenFrame, ManilaFolder, DarkCard, RedStamp, 
   FBISeal, SectionHeader, SubsectionLabel 
 } from "../components/ScreenFrame";
-import { IconoBala } from "../components/iconoBala";
+import { IconoBala } from "../components/IconoBala";
 
 // Estilos
 import "../components/Perfil.css";
@@ -26,6 +26,14 @@ const OPCIONES_AVATAR = [
   { id: 4, iniciales: "VX", bg: "from-[#2a4a2a] to-[#1a3a1a]" },
   { id: 5, iniciales: "NK", bg: "from-[#4a4a20] to-[#2a2a10]" },
   { id: 6, iniciales: "RX", bg: "from-[#4a2a4a] to-[#2a1a2a]" },
+];
+
+const TEMAS_VISUALES = [
+  { id: "gold", name: "Oro envejecido", color: "#d4af37", borderColor: "#b8941f", bgColor: "#2a2518" },
+  { id: "sage", name: "Verde salvia", color: "#8a9a5b", borderColor: "#6d7a45", bgColor: "#1a2218" },
+  { id: "terracotta", name: "Terracota cálida", color: "#c65d3b", borderColor: "#a04a2a", bgColor: "#2a1c18" },
+  { id: "purple", name: "Púrpura real", color: "#8b5a8b", borderColor: "#6d456d", bgColor: "#221822" },
+  { id: "rose", name: "Cuarzo rosa", color: "#c67b8a", borderColor: "#a05060", bgColor: "#2a1820" },
 ];
 
 /**
@@ -54,6 +62,10 @@ export function Pantalla11Perfil() {
 
   // Estado para controlar la visibilidad del popup de desactivación.
   const [mostrarPopupDesactivar, setMostrarPopupDesactivar] = useState(false);
+
+  // Estados de Personalización
+  const [temaMarco, setTemaMarco] = useState("gold");
+  const [temaTablero, setTemaTablero] = useState("sage");
 
   const avatarActual = OPCIONES_AVATAR.find(a => a.id === avatarSeleccionado);
 
@@ -251,6 +263,55 @@ export function Pantalla11Perfil() {
                 </DarkCard>
               ))}
             </div>
+
+            {/* SECCIÓN DE PERSONALIZACIÓN */}
+            <SubsectionLabel label="CONFIGURACIÓN ESTÉTICA" borderColor="#4a3a20" />
+            <DarkCard className="p-5 mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <Palette className="w-5 h-5 text-[#d4b878]" />
+                <p className="fuente-elite text-[#e8dcc8] tracking-widest text-sm">PERSONALIZAR INTERFAZ</p>
+              </div>
+
+              {/* Selector de Marco */}
+              <div className="mb-6">
+                <p className="fuente-courier text-[#a09070] text-xs mb-3 ">ESTILO DE MARCO DE CARTAS:</p>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  {TEMAS_VISUALES.map((tema) => (
+                    <button
+                      key={tema.id}
+                      onClick={() => setTemaMarco(tema.id)}
+                      className={`relative p-2 rounded-sm border-2 transition-all ${
+                        temaMarco === tema.id ? "border-[#d4b878] bg-[#3a3228]" : "border-[#444] bg-[#1a1a1a]"
+                      }`}
+                    >
+                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: tema.bgColor, border: `2px solid ${tema.borderColor}` }} />
+                      <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{tema.name}</p>
+                      {temaMarco === tema.id && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Selector de Tablero */}
+              <div>
+                <p className="fuente-courier text-[#a09070] text-xs mb-3 ">COLOR DE FONDO DEL TABLERO:</p>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  {TEMAS_VISUALES.map((tema) => (
+                    <button
+                      key={tema.id}
+                      onClick={() => setTemaTablero(tema.id)}
+                      className={`relative p-2 rounded-sm border-2 transition-all ${
+                        temaTablero === tema.id ? "border-[#d4b878] bg-[#3a3228]" : "border-[#444] bg-[#1a1a1a]"
+                      }`}
+                    >
+                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: tema.bgColor }} />
+                      <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{tema.name}</p>
+                      {temaTablero === tema.id && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </DarkCard>
 
             {/* Enlace a Logros */}
             <DarkCard 
