@@ -60,10 +60,10 @@ function GameCard({ carta, isSelected, isRevealed, canSelect, onSelect, isJefe }
         ) : null}
 
         {/* Overlay revelado */}
-        {isRevealed && carta.tipo === "A" && <Skull className="rev-icon-skull" />}
-        {isRevealed && carta.tipo === "R" && <div className="rev-token token-red" />}
-        {isRevealed && carta.tipo === "B" && <div className="rev-token token-blue" />}
-        {isRevealed && carta.tipo === "C" && <div className="rev-token token-neutral" />}
+        {isRevealed && carta.tipo === "asesino" && <Skull className="rev-icon-skull" />}
+        {isRevealed && carta.tipo === "rojo" && <div className="rev-token token-red" />}
+        {isRevealed && carta.tipo === "azul" && <div className="rev-token token-blue" />}
+        {isRevealed && carta.tipo === "civil" && <div className="rev-token token-neutral" />}
 
         {/* Seleccionada: fingerprint */}
         {isSelected && !isRevealed && (
@@ -81,9 +81,9 @@ function GameCard({ carta, isSelected, isRevealed, canSelect, onSelect, isJefe }
           <div style={{
             position: "absolute", bottom: 0, left: 0, right: 0,
             height: "4px",
-            background: carta.tipo === "R" ? "#cc3333"
-              : carta.tipo === "B" ? "#3366cc"
-              : carta.tipo === "A" ? "#000"
+            background: carta.tipo === "rojo" ? "#cc3333"
+              : carta.tipo === "azul" ? "#3366cc"
+              : carta.tipo === "asesino" ? "#000"
               : "#666"
           }} />
         )}
@@ -137,13 +137,13 @@ function ChatPanel({ mensajes, onEnviar, esJefe, chatInputRef }) {
 
       <div className="chat-messages-scroll-area" ref={scrollRef}>
         {mensajes.map((m, i) => (
-          <div key={i} className={`message-row ${m.esPropio ? "message-own" : ""}`}>
-            <div className={`message-bubble ${m.esPropio ? "bubble-own" : m.esSystem ? "bubble-system" : "bubble-default"}`}>
+          <div key={i} className={`message-row ${m.es_propio ? "message-own" : ""}`}>
+            <div className={`message-bubble ${m.es_propio ? "bubble-own" : m.es_system ? "bubble-system" : "bubble-default"}`}>
               <div className="message-meta-info">
                 <span className="message-username">{m.tag || "Agente"}</span>
                 <span className="message-timestamp">{m.hora}</span>
               </div>
-              {!m.esValido && !m.esSystem ? (
+              {!m.es_valido && !m.es_system ? (
                 <p className="message-content-text" style={{ color: "#666", fontStyle: "italic" }}>
                   [Mensaje bloqueado por lenguaje inapropiado]
                 </p>
@@ -206,12 +206,12 @@ function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista }) {
         <div className="clue-display-box">
           <div>
             <span className="clue-label">PISTA:</span>
-            <p className="clue-word-value highlight">{pista.palabraPista}</p>
+            <p className="clue-word-value highlight">{pista.palabra_pista}</p>
           </div>
           <div className="clue-divider" />
           <div>
             <span className="clue-label">CANTIDAD:</span>
-            <p className="clue-number-value">{pista.pistaNumero}</p>
+            <p className="clue-number-value">{pista.pista_numero}</p>
           </div>
         </div>
         <p style={{ fontFamily: "var(--font-courier)", color: "#888", fontSize: "10px", marginTop: "0.5rem" }}>
@@ -235,7 +235,6 @@ function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista }) {
             type="text"
             value={palabra}
             onChange={(e) => {
-              // RF-15: Solo una palabra (sin espacios)
               const val = e.target.value.replace(/\s/g, "");
               setPalabra(val.toUpperCase());
             }}
@@ -304,16 +303,16 @@ function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, vo
       <div className="clue-display-box" style={{ marginBottom: "0.75rem" }}>
         <div>
           <span className="clue-label">PISTA:</span>
-          <p className="clue-word-value highlight">{pista.palabraPista}</p>
+          <p className="clue-word-value highlight">{pista.palabra_pista}</p>
         </div>
         <div className="clue-divider" />
         <div>
           <span className="clue-label">CARTAS:</span>
-          <p className="clue-number-value">{pista.pistaNumero}</p>
+          <p className="clue-number-value">{pista.pista_numero}</p>
         </div>
       </div>
 
-      {/* Votos en tiempo real (RF-17) */}
+      {/* Votos en tiempo real */}
       <div style={{ marginBottom: "0.75rem" }}>
         <span className="voting-label-xs">
           VOTOS ACTUALES: {votosActuales?.length || 0}/{totalJugadores || "?"}
@@ -361,54 +360,40 @@ export function PantallaPartida() {
   const { idPartida } = useParams();
   const { user } = useContext(UserContext);
 
-  // Estado del jugador en esta partida
-  const [rol, setRol] = useState(null);         // "jefe" | "agente"
-  const [equipo, setEquipo] = useState(null);   // "rojo" | "azul"
-  const [equipoInicial, setEquipoInicial] = useState(null);
-
-  // Estado del tablero (RF-14)
+  const [rol, setRol] = useState(null);
+  const [equipo, setEquipo] = useState(null);
   const [cartas, setCartas] = useState([]);
-  const [estadoPartida, setEstadoPartida] = useState(null);
   const [turnoActual, setTurnoActual] = useState(null);
   const [rojoGana, setRojoGana] = useState(null);
 
-  // Pista actual (RF-15)
   const [pistaActual, setPistaActual] = useState(null);
   const [pistaEnviada, setPistaEnviada] = useState(false);
 
-  // Votación (RF-16/17)
   const [cartaSeleccionada, setCartaSeleccionada] = useState(null);
   const [votosActuales, setVotosActuales] = useState([]);
   const [miVotoEnviado, setMiVotoEnviado] = useState(false);
 
-  // Chat (RF-23)
   const [mensajes, setMensajes] = useState([]);
-
-  // Temporizador (RF-26)
   const [tiempoRestante, setTiempoRestante] = useState(null);
+  const [finPartida, setFinPartida] = useState(null);
 
-  // Fin de partida
-  const [finPartida, setFinPartida] = useState(null); // { ganador, motivo }
-
-  // Carga
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
 
   const stompRef = useRef(null);
   const chatInputRef = useRef(null);
 
-  // 1. Obtener rol inicial del jugador (REST)
+  // 1. Obtener rol inicial
   useEffect(() => {
     const fetchRol = async () => {
       try {
-        const res = await fetch(`${API_BASE}/partida/${idPartida}/participantes/rol`, {
+        const res = await fetch(`${API_BASE}/partidas/${idPartida}/participantes/rol`, {
           credentials: "include"
         });
         if (!res.ok) throw new Error("No se ha podido obtener el rol");
         const data = await res.json();
         setRol(data.rol);
         setEquipo(data.equipo);
-        setEquipoInicial(data.equipoInicial);
       } catch (err) {
         setError(err.message);
       }
@@ -416,33 +401,34 @@ export function PantallaPartida() {
     if (idPartida) fetchRol();
   }, [idPartida]);
 
-  // 2. Obtener estado inicial del tablero (RNF-1 reconexión)
+  const aplicarEstadoTablero = useCallback((data) => {
+    if (data.tablero?.cartas) setCartas(data.tablero.cartas);
+    if (data.turno_actual) setTurnoActual(data.turno_actual);
+    if (data.rojo_gana !== undefined) setRojoGana(data.rojo_gana);
+    if (data.pista_actual) setPistaActual(data.pista_actual);
+    if (data.votos_actuales) setVotosActuales(data.votos_actuales);
+  }, []);
+
+  // 2. Obtener estado inicial
   useEffect(() => {
     const fetchEstado = async () => {
       try {
         const res = await fetch(`${API_BASE}/partidas/${idPartida}/estado`, {
           credentials: "include"
         });
-        if (!res.ok) return; // Si no existe, el WS lo cubrirá
+        if (!res.ok) return;
         const data = await res.json();
         aplicarEstadoTablero(data);
       } catch (err) {
-        console.warn("Estado inicial no disponible, esperando WS", err);
+        console.warn("Error cargando estado inicial", err);
       } finally {
         setCargando(false);
       }
     };
     if (idPartida && rol) fetchEstado();
-  }, [idPartida, rol]);
+  }, [idPartida, rol, aplicarEstadoTablero]);
 
-  const aplicarEstadoTablero = useCallback((data) => {
-    if (data.tablero) setCartas(data.tablero);
-    if (data.estado) setEstadoPartida(data.estado);
-    if (data.turno_actual !== undefined) setTurnoActual(data.turno_actual);
-    if (data.rojoGana !== undefined) setRojoGana(data.rojoGana);
-  }, []);
-
-  // 3. Conectar WebSockets
+  // 3. WebSockets
   useEffect(() => {
     if (!idPartida || !rol || !equipo) return;
 
@@ -450,25 +436,20 @@ export function PantallaPartida() {
     const client = new Client({
       webSocketFactory: () => new SockJS(WS_URL),
       connectHeaders: { Authorization: `Bearer ${token}` },
-      reconnectDelay: 3000, // RNF-1: reconexión automática
+      reconnectDelay: 3000,
       onConnect: () => {
-        console.log("Conectado a la partida", idPartida);
-
-        // Estado del tablero
         client.subscribe(`/topic/partidas/${idPartida}/estado`, (msg) => {
           const data = JSON.parse(msg.body);
           aplicarEstadoTablero(data);
-          setMiVotoEnviado(false); // Reset al cambiar estado
+          setMiVotoEnviado(false);
           setCartaSeleccionada(null);
         });
 
-        // Temporizador (RF-26)
         client.subscribe(`/topic/partidas/${idPartida}/temporizador`, (msg) => {
           const data = JSON.parse(msg.body);
-          setTiempoRestante(data.segundos_restantes ?? data);
+          setTiempoRestante(data.segundos_restantes);
         });
 
-        // Pista (RF-15) — agentes reciben la pista
         client.subscribe(`/topic/partidas/${idPartida}/pista`, (msg) => {
           const data = JSON.parse(msg.body);
           setPistaActual(data);
@@ -478,77 +459,60 @@ export function PantallaPartida() {
           setVotosActuales([]);
         });
 
-        // Votos en tiempo real (RF-17)
         client.subscribe(`/topic/partidas/${idPartida}/votos`, (msg) => {
           const data = JSON.parse(msg.body);
           setVotosActuales(data.votos_actuales || []);
         });
 
-        // Chat del equipo (RF-23)
-        client.subscribe(
-          `/topic/partidas/${idPartida}/chat/${equipo.toLowerCase()}`,
-          (msg) => {
-            const data = JSON.parse(msg.body);
-            const hora = new Date().toLocaleTimeString("es", {
-              hour: "2-digit", minute: "2-digit"
-            });
-            setMensajes((prev) => [...prev, {
-              tag: data.tag || "Agente",
-              mensaje: data.mensaje,
-              hora,
-              esValido: data.esValido !== false,
-              esPropio: data.id_google === user?.id_google,
-              esSystem: false
-            }]);
-          }
-        );
+        client.subscribe(`/topic/partidas/${idPartida}/chat/${equipo.toLowerCase()}`, (msg) => {
+          const data = JSON.parse(msg.body);
+          const hora = new Date().toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" });
+          setMensajes((prev) => [...prev, {
+            tag: data.tag || "Agente",
+            mensaje: data.mensaje,
+            hora,
+            es_valido: data.es_valido !== false,
+            es_propio: data.id_google === user?.id_google,
+            es_system: false
+          }]);
+        });
 
-        // Fin de partida
         client.subscribe(`/topic/partidas/${idPartida}/fin`, (msg) => {
           const data = JSON.parse(msg.body);
           setFinPartida(data);
         });
-      },
-      onStompError: (frame) => {
-        console.error("STOMP error:", frame);
-        setError("Conexión perdida con el servidor. Reconectando...");
-      },
-      onWebSocketClose: () => {
-        // RNF-1: intentará reconectar automáticamente por reconnectDelay
-        console.warn("WS desconectado, reconectando...");
       }
     });
 
     client.activate();
     stompRef.current = client;
-
     return () => client.deactivate();
   }, [idPartida, rol, equipo, aplicarEstadoTablero, user?.id_google]);
 
-  // Acciones
+  // Acciones (CamelCase -> SnakeCase conversion automática por @JsonProperty o Naming Strategy)
 
-  // RF-15: Jefe envía pista
   const handleEnviarPista = useCallback((palabra, numero) => {
     if (!stompRef.current?.connected) return;
     stompRef.current.publish({
       destination: `/app/partidas/${idPartida}/pista`,
-      body: JSON.stringify({ palabraPista: palabra, pistaNumero: numero })
+      body: JSON.stringify({ palabra_pista: palabra, pista_numero: numero })
     });
-    setPistaActual({ palabraPista: palabra, pistaNumero: numero });
+    setPistaActual({ palabra_pista: palabra, pista_numero: numero });
     setPistaEnviada(true);
   }, [idPartida]);
 
-  // RF-16: Agente vota carta
-  const handleVotar = useCallback((idCarta) => {
-    if (!stompRef.current?.connected || !idCarta || miVotoEnviado) return;
+  const handleVotar = useCallback((id_carta) => {
+    if (!stompRef.current?.connected || !id_carta || miVotoEnviado) return;
     stompRef.current.publish({
       destination: `/app/partidas/${idPartida}/votar`,
-      body: JSON.stringify({ id_carta_tablero: idCarta })
+      body: JSON.stringify({ 
+        id_carta_tablero: id_carta,
+        id_turno: pistaActual?.id_turno 
+      })
     });
     setMiVotoEnviado(true);
-  }, [idPartida, miVotoEnviado]);
+  }, [idPartida, miVotoEnviado, pistaActual]);
 
-  // RF-23: Agente envía mensaje
   const handleEnviarMensaje = useCallback((texto) => {
     if (!stompRef.current?.connected) return;
     stompRef.current.publish({
@@ -557,44 +521,29 @@ export function PantallaPartida() {
     });
   }, [idPartida]);
 
-  // RF-11: Abandonar partida
   const handleAbandonar = async () => {
-    const confirmado = window.confirm(
-      "¿Está seguro de que quiere abandonar la partida? Se aplicará una penalización de balas."
-    );
-    if (!confirmado) return;
-
+    if (!window.confirm("¿Está seguro de que quiere abandonar la partida?")) return;
     try {
       await fetch(`${API_BASE}/partidas/${idPartida}/participantes`, {
         method: "DELETE",
         credentials: "include"
       });
-    } catch (err) {
-      console.error("Error al abandonar:", err);
-    }
-    navigate("/home");
+      navigate("/home");
+    } catch (err) { console.error(err); }
   };
 
-  //Cálculos derivados
   const esJefe = rol === "jefe";
   const esMiTurno = turnoActual === equipo;
   const puedoVotar = !esJefe && esMiTurno && !miVotoEnviado && pistaActual;
 
-  const cartaSeleccionadaObj = cartas.find(
-    (c) => c.id_carta_tablero === cartaSeleccionada
-  );
+  const cartaSeleccionadaObj = cartas.find(c => c.id_carta_tablero === cartaSeleccionada);
   const palabraSeleccionada = cartaSeleccionadaObj?.palabra;
 
-  const rojoDescubiertos = cartas.filter(
-    (c) => c.tipo === "R" && c.estado === "revelada"
-  ).length;
-  const azulDescubiertos = cartas.filter(
-    (c) => c.tipo === "B" && c.estado === "revelada"
-  ).length;
-  const totalRojo = cartas.filter((c) => c.tipo === "R").length;
-  const totalAzul = cartas.filter((c) => c.tipo === "B").length;
+  const rojoDescubiertos = cartas.filter(c => c.tipo === "rojo" && c.estado === "revelada").length;
+  const azulDescubiertos = cartas.filter(c => c.tipo === "azul" && c.estado === "revelada").length;
+  const totalRojo = cartas.filter(c => c.tipo === "rojo").length;
+  const totalAzul = cartas.filter(c => c.tipo === "azul").length;
 
-  // Render
   if (cargando && !cartas.length) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-transparent">
@@ -607,193 +556,73 @@ export function PantallaPartida() {
 
   return (
     <ScreenFrame title={esJefe ? "VISTA DEL JEFE DE ESPIONAJE" : "VISTA DEL AGENTE"}>
-
-      {/*Overlay Fin de Partida*/}
       {finPartida && (
         <div className="game-over-overlay">
           <div className="game-over-content">
             <div className={`end-game-stamp ${finPartida.ganador === equipo ? "win-stamp" : "lose-stamp"}`}>
-              {finPartida.ganador === equipo ? (
-                <Check className="end-game-icon" />
-              ) : (
-                <Skull className="end-game-icon" />
-              )}
-              <p className="end-game-title">
-                {finPartida.ganador === equipo ? "MISIÓN COMPLETADA" : "MISIÓN FALLIDA"}
-              </p>
-              <p className="end-game-subtitle">
-                {finPartida.motivo === "asesino_revelado"
-                  ? "El Asesino ha sido revelado"
-                  : `Equipo ${finPartida.ganador === "rojo" ? "Rojo" : "Azul"} descubrió todos sus agentes`}
-              </p>
+              {finPartida.ganador === equipo ? <Check className="end-game-icon" /> : <Skull className="end-game-icon" />}
+              <p className="end-game-title">{finPartida.ganador === equipo ? "MISIÓN COMPLETADA" : "MISIÓN FALLIDA"}</p>
             </div>
-            <button onClick={() => navigate("/home")} className="view-report-btn">
-              <span>VOLVER AL HOME</span>
-            </button>
+            <button onClick={() => navigate("/home")} className="view-report-btn">VOLVER AL HOME</button>
           </div>
         </div>
       )}
 
-      {/* Error de conexión */}
-      {error && (
-        <div style={{
-          position: "fixed", top: "4rem", left: "50%", transform: "translateX(-50%)",
-          backgroundColor: "rgba(139,32,32,0.9)", border: "1px solid #8b2020",
-          borderRadius: "2px", padding: "0.5rem 1rem", zIndex: 60
-        }}>
-          <p style={{ fontFamily: "var(--font-courier)", color: "#e08080", fontSize: "11px" }}>
-            {error}
-          </p>
-        </div>
-      )}
-
-      {/* Top bar */}
       <div className="agent-top-bar">
         <div className="top-bar-stats-group">
-          {/* Botón Abortar (RF-11) */}
-          <button onClick={handleAbandonar} className="abort-mission-btn">
-            <span>ABORTAR MISIÓN</span>
-          </button>
-
-          {/* Marcador */}
+          <button onClick={handleAbandonar} className="abort-mission-btn">ABORTAR MISIÓN</button>
           <DarkCard className="score-counter-card">
-            <div className="score-team red-team">
-              <div className="team-dot" />
-              <span className="score-text">{rojoDescubiertos}/{totalRojo}</span>
-            </div>
+            <div className="score-team red-team"><div className="team-dot" /><span className="score-text">{rojoDescubiertos}/{totalRojo}</span></div>
             <span className="score-separator">vs</span>
-            <div className="score-team blue-team">
-              <div className="team-dot" />
-              <span className="score-text">{azulDescubiertos}/{totalAzul}</span>
-            </div>
+            <div className="score-team blue-team"><div className="team-dot" /><span className="score-text">{azulDescubiertos}/{totalAzul}</span></div>
           </DarkCard>
-
-          {/* Turno actual */}
-          <div className="current-turn-badge">
-            <span>TURNO EQUIPO {turnoActual?.toUpperCase() || "..."}</span>
-          </div>
+          <div className="current-turn-badge"><span>TURNO EQUIPO {turnoActual?.toUpperCase() || "..."}</span></div>
         </div>
-
-        {/* Role badge */}
-        <div className="role-badge-row">
-          <div className="agent-role-badge">
-            <span>
-              {esJefe ? "JEFE DE ESPIONAJE" : "AGENTE DE CAMPO"} —
-              EQUIPO {equipo?.toUpperCase() || "..."}
-              {esJefe && " — VISTA CLASIFICADA"}
-            </span>
-          </div>
-        </div>
-
-        {/* Temporizador (RF-26) */}
+        <div className="role-badge-row"><div className="agent-role-badge"><span>{esJefe ? "JEFE" : "AGENTE"} — {equipo?.toUpperCase()}</span></div></div>
         {tiempoRestante !== null && (
-          <DarkCard className="game-timer-card" style={{
-            ...(tiempoRestante <= 10 ? {
-              borderColor: "#cc3333",
-              background: "rgba(139,32,32,0.3)"
-            } : {})
-          }}>
-            <Clock className="timer-icon" />
-            <span className="timer-clock-text" style={{
-              color: tiempoRestante <= 10 ? "#e08080" : "#d4b878"
-            }}>
-              {formatearTiempo(tiempoRestante)}
-            </span>
+          <DarkCard className="game-timer-card">
+            <Clock className="timer-icon" /><span className="timer-clock-text">{formatearTiempo(tiempoRestante)}</span>
           </DarkCard>
         )}
       </div>
 
-      {/* Layout principal*/}
       <div className="agent-main-layout">
-
-        {/* Tablero (RF-14) */}
         <div className="board-and-voting-area">
           <ManilaFolder>
-            <div className="board-container">
-              <div className="board-grid-5cols">
-                {cartas.map((carta) => {
-                  const isRevealed = carta.estado === "revelada";
-                  const canSelect = !esJefe && esMiTurno && !isRevealed && !!pistaActual && !miVotoEnviado;
-
-                  return (
-                    <GameCard
-                      key={carta.id_carta_tablero}
-                      carta={carta}
-                      isSelected={cartaSeleccionada === carta.id_carta_tablero}
-                      isRevealed={isRevealed}
-                      canSelect={canSelect}
-                      onSelect={setCartaSeleccionada}
-                      isJefe={esJefe}
-                    />
-                  );
-                })}
-              </div>
-
-              {/* Leyenda del jefe */}
-              {esJefe && (
-                <div style={{
-                  display: "flex", justifyContent: "center", gap: "1rem",
-                  marginTop: "0.75rem", paddingTop: "0.5rem",
-                  borderTop: "1px solid rgba(138,122,96,0.2)", flexWrap: "wrap"
-                }}>
-                  {[
-                    { label: "AGENTE ROJO", color: "#cc3333", bg: "rgba(204,51,51,0.2)" },
-                    { label: "AGENTE AZUL", color: "#3366cc", bg: "rgba(51,102,204,0.2)" },
-                    { label: "CIVIL", color: "#777", bg: "rgba(119,119,119,0.2)" },
-                    { label: "ASESINO", color: "#000", bg: "rgba(10,10,10,0.8)" },
-                  ].map((s) => (
-                    <div key={s.label} style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                      <div style={{
-                        width: "0.75rem", height: "0.75rem", borderRadius: "0.125rem",
-                        border: `2px solid ${s.color}`, backgroundColor: s.bg
-                      }} />
-                      <span style={{ fontFamily: "var(--font-courier)", color: "#6a5a40", fontSize: "9px" }}>
-                        {s.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
+            <div className="board-grid-5cols">
+              {cartas.map((carta) => (
+                <GameCard
+                  key={carta.id_carta_tablero}
+                  carta={carta}
+                  isSelected={cartaSeleccionada === carta.id_carta_tablero}
+                  isRevealed={carta.estado === "revelada"}
+                  canSelect={puedoVotar && carta.estado !== "revelada"}
+                  onSelect={setCartaSeleccionada}
+                  isJefe={esJefe}
+                />
+              ))}
             </div>
           </ManilaFolder>
         </div>
 
-        {/* Panel lateral */}
         <div className="side-panels-column">
-
-          {/* Chat */}
-          <ChatPanel
-            mensajes={mensajes}
-            onEnviar={handleEnviarMensaje}
-            esJefe={esJefe}
-            chatInputRef={chatInputRef}
-          />
-
-          {/* Panel según rol */}
+          <ChatPanel mensajes={mensajes} onEnviar={handleEnviarMensaje} esJefe={esJefe} chatInputRef={chatInputRef} />
           {esJefe ? (
-            <PanelPistaJefe
-              onEnviarPista={handleEnviarPista}
-              pistaEnviada={pistaEnviada}
-              pista={pistaActual}
-            />
+            <PanelPistaJefe onEnviarPista={handleEnviarPista} pistaEnviada={pistaEnviada} pista={pistaActual} />
           ) : (
             <PanelVotacionAgente
               pista={pistaActual}
               cartaSeleccionada={cartaSeleccionada}
               palabraSeleccionada={palabraSeleccionada}
               votosActuales={votosActuales}
-              totalJugadores={3} // TODO: obtener del estado del backend
+              totalJugadores={3}
               onVotar={handleVotar}
               puedoVotar={puedoVotar}
             />
           )}
-
         </div>
       </div>
-
-      <div className="agent-footer-row">
-        <RedStamp text={esJefe ? "TOP SECRET" : "CLASSIFIED"} className="classified-stamp-effect" />
-      </div>
+      <div className="agent-footer-row"><RedStamp text="CLASSIFIED" /></div>
     </ScreenFrame>
   );
 }
