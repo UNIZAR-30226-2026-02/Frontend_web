@@ -3,7 +3,6 @@
  */
 
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader } from "../components/ScreenFrame";
-// Importamos los iconos necesarios para las solicitudes
 import { Search, UserPlus, Trophy, TrendingUp, Flame, ArrowLeft, X, Users, UserCheck, UserX, Clock } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
@@ -133,11 +132,6 @@ export function Pantalla08Social() {
                         <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 10 }}>{f.rank} — {f.wins} victorias</p>
                       </div>
                     </div>
-                    {f.online && (
-                      <button className="bg-[#2a3a5a] hover:bg-[#3a5a8a] text-[#80a0d0] px-3 py-1.5 rounded-sm transition-colors flex-shrink-0 ml-2 cursor-pointer">
-                        <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 10 }}>INVITAR</span>
-                      </button>
-                    )}
                   </DarkCard>
                 ))}
               </div>
