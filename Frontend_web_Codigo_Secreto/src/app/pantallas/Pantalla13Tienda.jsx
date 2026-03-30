@@ -14,10 +14,11 @@ const PALETAS_TIENDA = [
   { id: "rose", name: "Cuarzo rosa", color: "#c67b8a", price: "750", unlocked: false },
 ];
 const packs = [
-  { name: "Animales Exóticos", count: "50 imágenes", price: "300", emoji: "🦁" },
-  { name: "Ciudades del Mundo", count: "50 imágenes", price: "300", emoji: "🏙️" },
-  { name: "Comida Gourmet", count: "50 imágenes", price: "300", emoji: "🍣" },
-  { name: "Deportes Extremos", count: "50 imágenes", price: "400", emoji: "🏄" },
+  { id: 1, name: "Magia", icon: "🪄", price: "350", count: "50", unlocked: false },
+  { id: 2, name: "Histórico", icon: "📜", price: "400", count: "50", unlocked: false },
+  { id: 3, name: "Vida submarina", icon: "🐙", price: "300", count: "50", unlocked: false },
+  { id: 4, name: "Cyberpunk", icon: "🌆", price: "450", count: "50", unlocked: false },
+  { id: 5, name: "Naturaleza", icon: "🌿", price: "300", count: "50", unlocked: false },
 ];
 
 export function Pantalla13Tienda() {
@@ -94,20 +95,34 @@ export function Pantalla13Tienda() {
             </div>
 
             {/* Card Packs */}
-            <SubsectionLabel icon={<Package className="w-4 h-4 text-[#5a4a30]" />} label="PAQUETES DE CARTAS" borderColor="#8b2020" />
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-              {packs.map((p) => (
-                <DarkCard key={p.name} className="p-4 text-center">
-                  <div className="text-3xl sm:text-4xl mb-2">{p.emoji}</div>
-                  <p className="font-['Special_Elite',cursive] text-[#e8dcc8]" style={{ fontSize: 12 }}>{p.name}</p>
-                  <p className="font-['Courier_Prime',monospace] text-[#888] mt-1" style={{ fontSize: 9 }}>{p.count}</p>
-                  <div className="flex items-center justify-center gap-1 mt-2">
-                    <IconoBala size={13} />
-                    <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 13 }}>{p.price}</span>
-                  </div>
-                  <button className="mt-2 w-full bg-[#5a4a20]/80 hover:bg-[#5a4a20] text-[#e8dcc8] py-1.5 rounded-sm transition-colors cursor-pointer">
-                    <span className="font-['Special_Elite',cursive] tracking-[0.1em]" style={{ fontSize: 10 }}>ADQUIRIR</span>
-                  </button>
+            <SubsectionLabel 
+              icon={<Package className="w-4 h-4 text-[#5a4a30]" />} 
+              label="PAQUETES DE CARTAS" 
+              borderColor="#8b2020" 
+            />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+              {packs.map((pack) => (
+                <DarkCard key={pack.id} className="p-4 text-center">
+                  <div className="text-3xl mb-2">{pack.icon}</div>
+                  <p className="fuente-elite text-[#e8dcc8]" style={{ fontSize: 11 }}>{pack.name.toUpperCase()}</p>
+                  <p className="fuente-courier text-[#888] mt-1" style={{ fontSize: 9 }}>{pack.count} CARTAS</p>
+                  
+                  {pack.unlocked ? (
+                    <div className="mt-2 flex items-center justify-center gap-1 text-[#50a060]">
+                      <Check className="w-3 h-3" />
+                      <span className="fuente-courier" style={{ fontSize: 9 }}>DISPONIBLE</span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-center gap-1 mt-2">
+                        <IconoBala size={12} />
+                        <span className="fuente-courier text-[#d4b878]" style={{ fontSize: 12 }}>{pack.price}</span>
+                      </div>
+                      <button className="mt-2 w-full bg-[#5a4a20]/80 hover:bg-[#5a4a20] text-[#e8dcc8] py-1.5 rounded-sm transition-colors cursor-pointer">
+                        <span className="fuente-elite tracking-tighter" style={{ fontSize: 10 }}>ADQUIRIR</span>
+                      </button>
+                    </>
+                  )}
                 </DarkCard>
               ))}
             </div>
