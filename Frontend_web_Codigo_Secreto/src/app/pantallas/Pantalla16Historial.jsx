@@ -1,4 +1,4 @@
-/* Pantalla de historial de partidas */
+/* Pantalla de historial de partidas: Muestra las últimas 30 partidas */
 import React from "react";
 import { useNavigate } from "react-router";
 import { ArrowLeft, Trophy, Skull, Clock, Users } from "lucide-react";
