@@ -5,6 +5,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import "../components/Escritorio.css"; 
+import { unirsePartidaPrivada } from "../api/apiPartidas";
 
 import { ManilaFolder, RedStamp, FBISeal } from "../components/ScreenFrame";
 import { Crosshair, ShoppingBag, MessageSquare, Trophy, Archive, ArrowRight, LogIn, Lock, Globe, Search} from "lucide-react";
@@ -14,10 +15,13 @@ export function Pantalla02Home() {
   const [joinOpen, setJoinOpen] = useState(false);
   const [privateCode, setPrivateCode] = useState("");
 
-  const handleJoinMission = () => {
-    if (privateCode.trim().length > 0) {
-      console.log("Validando código:", privateCode);
-      navigate("/lobby");
+  const handleJoinMission = async () => {
+    if (!privateCode.trim()) return;
+    try {
+      const data = await unirsePartidaPrivada(privateCode.trim());
+      navigate(`/lobby/${data.id_partida}`);
+    } catch (err) {
+      alert(err.message);
     }
   };
 
@@ -96,7 +100,7 @@ export function Pantalla02Home() {
                             value={privateCode}
                             onChange={(e) => setPrivateCode(e.target.value.toUpperCase())}
                             maxLength={8}
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={(e) => { e.stopPropagation(); handleJoinMission(); }}
                           />
                           <button className="btn-validate" onClick={(e) => { e.stopPropagation(); navigate("/lobby"); }}>
                             <ArrowRight size={16} />
