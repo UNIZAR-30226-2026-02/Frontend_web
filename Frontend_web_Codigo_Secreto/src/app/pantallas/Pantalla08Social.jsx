@@ -3,7 +3,8 @@
  */
 
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader } from "../components/ScreenFrame";
-import { Search, UserPlus, Trophy, TrendingUp, Flame, ArrowLeft, X, Users } from "lucide-react";
+// Importamos los iconos necesarios para las solicitudes
+import { Search, UserPlus, Trophy, TrendingUp, Flame, ArrowLeft, X, Users, UserCheck, UserX, Clock } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -38,6 +39,14 @@ const friendsLeaderboard = [
   { pos: 5, name: "SilentViper", wins: 19, rate: "50%", streak: 1, badge: "" },
 ];
 
+// Datos iniciales de solicitudes
+const initialFriendRequests = [
+  { name: "RedWolf_87", rank: "Teniente", wins: 42, timeAgo: "Hace 2 horas" },
+  { name: "GhostRider", rank: "Capitán", wins: 67, timeAgo: "Hace 5 horas" },
+  { name: "IronEagle_01", rank: "Sargento", wins: 23, timeAgo: "Hace 1 día" },
+  { name: "StealthOps", rank: "Comandante", wins: 91, timeAgo: "Hace 2 días" },
+];
+
 export function Pantalla08Social() {
   const [tab, setTab] = useState("friends");
   const navigate = useNavigate();
@@ -45,6 +54,9 @@ export function Pantalla08Social() {
   const [mostrarAgnadir, setMostrarAgnadir] = useState(false);
   const [nombreAmigo, setNombreAmigo] = useState("");
   const [mostrarRankingAmigos, setMostrarRankingAmigos] = useState(false);
+  
+  // ESTADO DE SOLICITUDES
+  const [requests, setRequests] = useState(initialFriendRequests);
 
   const handleAgnadir = () => {
     if (nombreAmigo.trim()) {
@@ -52,6 +64,12 @@ export function Pantalla08Social() {
       setNombreAmigo("");
       setMostrarAgnadir(false);
     }
+  };
+
+  // FUNCIÓN PARA GESTIONAR ACCIONES DE SOLICITUD
+  const handleActionRequest = (name, action) => {
+    console.log(`${action === 'accept' ? 'Aceptando' : 'Rechazando'} a:`, name);
+    setRequests(prev => prev.filter(r => r.name !== name));
   };
 
   return (
@@ -73,11 +91,12 @@ export function Pantalla08Social() {
               <FBISeal size={50} />
             </div>
 
-            {/* Tabs Principales */}
+            {/* Tabs Principales actualizados con contador */}
             <div className="flex gap-2 sm:gap-3 mb-5 flex-wrap">
               {[
                 { key: "friends", label: "AGENTES ALIADOS" },
                 { key: "leaderboard", label: "CLASIFICACIÓN" },
+                { key: "requests", label: `SOLICITUDES (${requests.length})` },
               ].map((t) => (
                 <button 
                   key={t.key} 
@@ -102,8 +121,8 @@ export function Pantalla08Social() {
               </button>
             </div>
 
-            {tab === "friends" ? (
-              /* VISTA DE AMIGOS */
+            {/* CONTENIDO DE TABS */}
+            {tab === "friends" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {friends.map((f) => (
                   <DarkCard key={f.name} className="p-3 sm:p-4 flex items-center justify-between">
@@ -122,8 +141,9 @@ export function Pantalla08Social() {
                   </DarkCard>
                 ))}
               </div>
-            ) : (
-              /* VISTA DE CLASIFICACIÓN */
+            )}
+
+            {tab === "leaderboard" && (
               <div>
                 <div className="flex justify-center mb-5">
                   <div className="inline-flex bg-[#2a2218] border border-[#5a4a30]/50 rounded-sm p-1 gap-1">
@@ -144,7 +164,6 @@ export function Pantalla08Social() {
                   </div>
                 </div>
 
-                {/* Podium Top 3 */}
                 <div className="flex items-end justify-center gap-3 sm:gap-4 mb-5">
                   {(mostrarRankingAmigos ? [friendsLeaderboard[1], friendsLeaderboard[0], friendsLeaderboard[2]] : [leaderboard[1], leaderboard[0], leaderboard[2]])
                     .map((p, i) => (
@@ -154,10 +173,9 @@ export function Pantalla08Social() {
                         <p className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 18 }}>{p.wins}</p>
                         <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 9 }}>victorias</p>
                       </DarkCard>
-                  ))}
+                    ))}
                 </div>
 
-                {/* Resto de la lista */}
                 <div className="space-y-2">
                   {(mostrarRankingAmigos ? friendsLeaderboard.slice(3) : leaderboard.slice(3)).map((p) => (
                     <DarkCard key={p.name} className="px-4 sm:px-5 py-3 flex items-center justify-between">
@@ -176,6 +194,49 @@ export function Pantalla08Social() {
               </div>
             )}
 
+            {/* VISTA DE SOLICITUDES */}
+            {tab === "requests" && (
+              <div className="space-y-3">
+                {requests.length > 0 ? (
+                  requests.map((r) => (
+                    <DarkCard key={r.name} className="p-4 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-1">
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className="bg-[#3a2a10] p-2 rounded-sm">
+                          <Clock className="w-5 h-5 text-[#d4b878]" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 14 }}>{r.name}</p>
+                          <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 10 }}>
+                            {r.rank} • {r.wins} victorias • <span className="italic text-[#b89055]">{r.timeAgo}</span>
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => handleActionRequest(r.name, 'accept')}
+                          className="bg-[#2a5a2a] hover:bg-[#3a6a3a] text-white p-2 rounded-sm cursor-pointer transition-colors"
+                          title="Aceptar"
+                        >
+                          <UserCheck className="w-5 h-5" />
+                        </button>
+                        <button 
+                          onClick={() => handleActionRequest(r.name, 'reject')}
+                          className="bg-[#8b2020] hover:bg-[#a03030] text-white p-2 rounded-sm cursor-pointer transition-colors"
+                          title="Rechazar"
+                        >
+                          <UserX className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </DarkCard>
+                  ))
+                ) : (
+                  <div className="text-center py-10">
+                    <p className="font-['Courier_Prime',monospace] text-[#8a7a60]">No hay solicitudes pendientes en el archivo.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="mt-6 flex justify-end">
               <RedStamp text="CONFIDENTIAL" className="rotate-[-3deg]" />
             </div>
@@ -183,7 +244,7 @@ export function Pantalla08Social() {
         </ManilaFolder>
       </div>
 
-      {/* Modal Añadir Amigo (Fuera del ManilaFolder para evitar problemas de overflow) */}
+      {/* Modal Añadir Amigo */}
       {mostrarAgnadir && (
         <>
           <div className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" onClick={() => setMostrarAgnadir(false)} />
