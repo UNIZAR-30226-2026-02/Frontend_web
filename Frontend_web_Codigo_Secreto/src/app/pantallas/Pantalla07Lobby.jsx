@@ -154,6 +154,8 @@ export function Pantalla07Lobby() {
     client.activate();
     stompRef.current = client;
 
+    // Esto es lo que se ejecuta cuando se cierra la pantalla actual (se vuelve al home o se accede
+    // al perfil).
     return () => {
       // RF-12: notificar abandono del lobby
       if (client.connected) {
@@ -173,6 +175,8 @@ export function Pantalla07Lobby() {
     if (!stompRef.current?.connected) return;
     stompRef.current.publish({
       destination: `/app/partida/${id_partida}/participantes/equipo`,
+      // No hace falta poner 'equipo: equipo' porque el nombre de la variable es
+      // el mismo que el del dato que espera el backend.
       body: JSON.stringify({ equipo })
     });
     setMiEquipo(equipo);
@@ -194,7 +198,7 @@ export function Pantalla07Lobby() {
     setTiempoSeleccionado(tiempo);
     stompRef.current.publish({
       destination: `/app/partida/${id_partida}/tiempoTurno`,
-      body: JSON.stringify({ tiempoEspera: parseInt(tiempo) })
+      body: JSON.stringify({ tiempo_espera: parseInt(tiempo) })
     });
   };
 
@@ -272,8 +276,8 @@ export function Pantalla07Lobby() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5 mt-2">
               <SectionHeader title="ASIGNACIÓN DE EQUIPOS" />
               <div className="flex items-center gap-3">
-                {/* Código de partida */}
-                {partida?.codigo_partida && (
+                {/* Código de partida. Solo lo muestra si es privada. */}
+                {partida?.codigo_partida && !partida?.es_publica && (
                   <button
                     onClick={handleCopiarCodigo}
                     className="bg-[#f5edd8] border-2 border-[#a08050]/40 rounded-sm px-3 py-1.5 flex items-center gap-2 cursor-pointer hover:bg-[#ede0c0] transition-colors"
@@ -370,14 +374,14 @@ export function Pantalla07Lobby() {
               <div className="bg-[#f5edd8] border border-[#a08050]/30 rounded-sm px-3 sm:px-4 py-2 flex flex-col justify-center">
                 <span className="font-['Courier_Prime',monospace] text-[#8a7a60]" style={{ fontSize: 9 }}>TIPO</span>
                 <p className="font-['Courier_Prime',monospace] text-[#3a2a10]" style={{ fontSize: 12 }}>
-                  {partida?.esPublica ? "Pública" : "Privada"}
+                  {partida?.es_publica ? "Pública" : "Privada"}
                 </p>
               </div>
 
               {/* Tiempo (editable si soy creador y es privada) */}
               <div className="bg-[#f5edd8] border border-[#a08050]/30 rounded-sm px-3 sm:px-4 py-2 flex flex-col justify-center">
                 <label className="font-['Courier_Prime',monospace] text-[#8a7a60]" style={{ fontSize: 9 }}>TURNO</label>
-                {soyCreador && !partida?.esPublica ? (
+                {soyCreador && !partida?.es_publica ? (
                   <select
                     value={tiempoSeleccionado || "60"}
                     onChange={(e) => handleCambiarTiempo(e.target.value)}
@@ -391,7 +395,7 @@ export function Pantalla07Lobby() {
                   </select>
                 ) : (
                   <p className="font-['Courier_Prime',monospace] text-[#3a2a10]" style={{ fontSize: 12 }}>
-                    {partida?.tiempoEspera}s
+                    {partida?.tiempo_espera}s
                   </p>
                 )}
               </div>
@@ -399,7 +403,7 @@ export function Pantalla07Lobby() {
               {/* Tema (editable si soy creador y es privada) */}
               <div className="bg-[#f5edd8] border border-[#a08050]/30 rounded-sm px-3 sm:px-4 py-2 flex flex-col justify-center">
                 <label className="font-['Courier_Prime',monospace] text-[#8a7a60]" style={{ fontSize: 9 }}>TEMA</label>
-                {soyCreador && !partida?.esPublica ? (
+                {soyCreador && !partida?.es_publica ? (
                   <select
                     value={temaSeleccionado || ""}
                     onChange={(e) => handleCambiarTema(e.target.value)}
@@ -412,7 +416,7 @@ export function Pantalla07Lobby() {
                   </select>
                 ) : (
                   <p className="font-['Courier_Prime',monospace] text-[#3a2a10]" style={{ fontSize: 12 }}>
-                    {partida?.nombreTema || "—"}
+                    {partida?.nombre_tema || "—"}
                   </p>
                 )}
               </div>
@@ -423,7 +427,7 @@ export function Pantalla07Lobby() {
               <span className="font-['Courier_Prime',monospace] text-[#8a7a60]" style={{ fontSize: 9 }}>
                 PLAZAS: {(partida?.jugadores?.length || 0)}/{partida?.max_jugadores || "?"}
               </span>
-              {partida?.hayMinimo ? (
+              {partida?.hay_minimo ? (
                 <span className="font-['Courier_Prime',monospace] text-[#50a050]" style={{ fontSize: 9 }}>
                   ✓ MÍNIMO ALCANZADO
                 </span>
@@ -434,27 +438,27 @@ export function Pantalla07Lobby() {
               )}
             </div>
 
-            {/* Botón iniciar (RF-13: solo creador, hayMinimo) */}
+            {/* Botón iniciar (RF-13: solo creador, hay_minimo) */}
             {soyCreador && (
               <button
                 onClick={handleIniciar}
-                disabled={!partida?.hayMinimo}
+                disabled={!partida?.hay_minimo}
                 className={`w-full text-white py-4 rounded-sm shadow-[0_4px_16px_rgba(0,0,0,0.4)] transition-colors flex items-center justify-center gap-3 ${
-                  partida?.hayMinimo
+                  partida?.hay_minimo
                     ? "bg-[#2a5a2a] hover:bg-[#3a6a3a] cursor-pointer"
                     : "bg-[#2a2a2a] cursor-not-allowed opacity-50"
                 }`}
               >
                 <Fingerprint className="w-5 h-5 text-[#80c090]" />
                 <div className="flex items-center gap-2">
-                  {partida?.hayMinimo && (
+                  {partida?.hay_minimo && (
                     <div className="w-3 h-3 bg-[#50ff50] rounded-full animate-pulse shadow-[0_0_8px_rgba(80,255,80,0.5)]" />
                   )}
                   <span
                     className="font-['Special_Elite',cursive] tracking-[0.15em] sm:tracking-[0.2em]"
                     style={{ fontSize: "clamp(12px, 2vw, 16px)" }}
                   >
-                    {partida?.hayMinimo ? "INICIAR PARTIDA" : "ESPERANDO JUGADORES..."}
+                    {partida?.hay_minimo ? "INICIAR PARTIDA" : "ESPERANDO JUGADORES..."}
                   </span>
                 </div>
               </button>

@@ -66,7 +66,7 @@ export async function crearPartida(datos) {
 
 // Al pulsar el botón de UNIRSE, se envía esta información al backend.
 export async function unirsePartidaPublica(idPartida) {
-  const response = await fetch(`${BASE_URL}/api/partidas/${idPartida}/unirse/publica`, {
+  const response = await fetch(`${BASE_URL}/partidas/${idPartida}/unirse/publica`, {
     method: 'POST',
     credentials: 'include' // Necesario para enviar la cookie que contiene el JWT.
   });
@@ -80,19 +80,19 @@ export async function unirsePartidaPublica(idPartida) {
   return response.ok; 
 }
 
-// Añade esta función junto a las demás
+// POST /api/partidas/{codigo}/unirse/privada
+// Función para unirse a una partida privada a partir de su código único.
 export async function unirsePartidaPrivada(codigo) {
-  const res = await fetch(`${BASE_URL}/partidas/join`, {
+  const res = await fetch(`${BASE_URL}/partidas/${codigo}/unirse/privada`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ codigo_partida: codigo })
+    credentials: 'include'
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || 'Código de partida inválido');
   }
-  return res.json(); // { id_partida, ... }
+  return res.json(); // {id_partida} para redirigir al lobby.
 }
 // -----------------------------------------------------
 
