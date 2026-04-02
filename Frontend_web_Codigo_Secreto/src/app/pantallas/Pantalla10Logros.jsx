@@ -1,71 +1,248 @@
 /*
- * Pantalla de logros y medallas del agente: Aquí se muestran los reconocimientos obtenidos por el jugador.
- Se divide en dos secciones principales: Logros Operativos (hitos) y Medallas de Servicio 
- (num partidas ganadas). 
+ * Pantalla de logros y medallas del agente.
+ * RF-7: Los usuarios registrados pueden consultar su colección de logros y medallas desbloqueadas.
+ * 
+ * Los logros y medallas se definen según el diccionario de datos del proyecto:
+ * 
+ * LOGROS (cada uno otorga 50 balas al desbloquearse):
+ * - Agente principiante: primera partida completada.
+ * - Agente de entrenamiento: 20 partidas jugadas.
+ * - Agente oficial: 50 partidas jugadas.
+ * - Agente inspector: 100 partidas jugadas.
+ * - Sociable: 5 amigos añadidos.
+ * - Puntería extrema: acabar una partida sin fallos.
+ * - Fiebre de balas: adquirir todos los paquetes de cartas y temas visuales de la tienda.
+ * 
+ * MEDALLAS (insignias por partidas ganadas):
+ * - Agente de bronce: 50 partidas ganadas. Insignia color bronce.
+ * - Agente de plata: 100 partidas ganadas. Insignia color plateado.
+ * - Agente de oro: 200 partidas ganadas. Insignia color dorado.
+ * 
+ * La pantalla obtiene los datos del perfil del usuario (progreso de partidas, amigos, etc.)
+ * y calcula el estado de cada logro/medalla. Se muestra el porcentaje de progreso global,
+ * la colección desbloqueada y un resumen estadístico.
  */
 import React from "react";
-import { 
-  Trophy, Medal, Star, Shield, Crosshair, Eye, 
-  Flame, Target, Users, Lock, Crown, ArrowLeft 
+import {
+  Trophy, Medal, Star, Shield, Crosshair, Eye,
+  Flame, Target, Users, Lock, Crown, ArrowLeft, Gamepad2, ShoppingBag
 } from "lucide-react";
 import { useNavigate } from "react-router";
-import { 
-  ScreenFrame, ManilaFolder, DarkCard, RedStamp, 
-  FBISeal, SectionHeader, SubsectionLabel 
+import {
+  ScreenFrame, ManilaFolder, DarkCard, RedStamp,
+  FBISeal, SectionHeader, SubsectionLabel
 } from "../components/ScreenFrame";
 import "../components/Logros.css";
 
-// Configuración de medallas: asocia cada nivel con una clase CSS y un emoji (si queda muy cutre lo cambiamos)
+// Configuración de rareza para estilos visuales
 const configuracionRareza = {
-  bronce: { clase: "medalla-bronce", insignia: "🥉" },
-  plata: { clase: "medalla-plata", insignia: "🥈" },
-  oro: { clase: "medalla-oro", insignia: "🏅" },
-  platino: { clase: "medalla-platino", insignia: "💎" },
+  bronce: { clase: "medalla-bronce", insignia: "🥉", color: "#cd7f32" },
+  plata: { clase: "medalla-plata", insignia: "🥈", color: "#c0c0c0" },
+  oro: { clase: "medalla-oro", insignia: "🏅", color: "#ffd700" },
+  platino: { clase: "medalla-platino", insignia: "💎", color: "#b0c4de" },
 };
 
-// Listado de logros operativos: harcodeada basta por ahora
+// DEFINICIÓN DE LOGROS SEGÚN DICCIONARIO
+// Cada logro tiene:
+// - id: identificador único
+// - nombre: nombre visible
+// - descripcion: texto explicativo
+// - condicion: { actual, max } para calcular progreso (actual se obtiene del perfil)
+// - rareza: asignada según dificultad (usamos la configuración de rareza)
+// - recompensa: 50 balas
+// - icono: componente Lucide (representativo)
+// - desbloqueado: booleano calculado
+
 const listaLogros = [
-  { icono: Crosshair, nombre: "Primera Misión", desc: "Completa tu primera partida", progreso: 1, max: 1, desbloqueado: true, rareza: "bronce" },
-  { icono: Trophy, nombre: "Victoria Inaugural", desc: "Gana tu primera partida", progreso: 1, max: 1, desbloqueado: true, rareza: "bronce" },
-  { icono: Flame, nombre: "En Racha", desc: "Gana 5 partidas consecutivas", progreso: 5, max: 5, desbloqueado: true, rareza: "plata" },
-  { icono: Eye, nombre: "Jefe Experto", desc: "Gana 10 partidas como Jefe de Espionaje", progreso: 10, max: 10, desbloqueado: true, rareza: "plata" },
-  { icono: Target, nombre: "Puntería Perfecta", desc: "Adivina 5 cartas en un solo turno", progreso: 5, max: 5, desbloqueado: true, rareza: "oro" },
-  { icono: Shield, nombre: "Defensa Sólida", desc: "Gana sin revelar civiles", progreso: 3, max: 3, desbloqueado: true, rareza: "oro" },
-  { icono: Users, nombre: "Líder de Escuadrón", desc: "Juega 50 partidas con amigos", progreso: 47, max: 50, desbloqueado: false, rareza: "plata" },
-  { icono: Star, nombre: "Centurión", desc: "Gana 100 partidas", progreso: 79, max: 100, desbloqueado: false, rareza: "oro" },
-  { icono: Crown, nombre: "Leyenda Viviente", desc: "Alcanza el rango de General", progreso: 0, max: 1, desbloqueado: false, rareza: "platino" },
-  { icono: Crosshair, nombre: "Asesino Esquivado", desc: "Sobrevive al asesino 20 veces", progreso: 14, max: 20, desbloqueado: false, rareza: "plata" },
-  { icono: Flame, nombre: "Inferno", desc: "Racha de 13 victorias seguidas", progreso: 5, max: 13, desbloqueado: false, rareza: "platino" },
+  {
+    id: "principiante",
+    nombre: "Agente principiante",
+    descripcion: "Completa tu primera partida",
+    condicion: { max: 1 },
+    rareza: "bronce",
+    recompensa: 50,
+    icono: Gamepad2,
+  },
+  {
+    id: "entrenamiento",
+    nombre: "Agente de entrenamiento",
+    descripcion: "Juega 20 partidas",
+    condicion: { max: 20 },
+    rareza: "bronce",
+    recompensa: 50,
+    icono: Star,
+  },
+  {
+    id: "oficial",
+    nombre: "Agente oficial",
+    descripcion: "Juega 50 partidas",
+    condicion: { max: 50 },
+    rareza: "plata",
+    recompensa: 50,
+    icono: Trophy,
+  },
+  {
+    id: "inspector",
+    nombre: "Agente inspector",
+    descripcion: "Juega 100 partidas",
+    condicion: { max: 100 },
+    rareza: "oro",
+    recompensa: 50,
+    icono: Crown,
+  },
+  {
+    id: "sociable",
+    nombre: "Sociable",
+    descripcion: "Añade 5 amigos",
+    condicion: { max: 5 },
+    rareza: "plata",
+    recompensa: 50,
+    icono: Users,
+  },
+  {
+    id: "punteria",
+    nombre: "Puntería extrema",
+    descripcion: "Acaba una partida sin fallos",
+    condicion: { max: 1 }, // booleano
+    rareza: "oro",
+    recompensa: 50,
+    icono: Target,
+  },
+  {
+    id: "fiebre",
+    nombre: "Fiebre de balas",
+    descripcion: "Adquiere todos los paquetes de cartas y temas visuales",
+    condicion: { max: 1 },
+    rareza: "platino",
+    recompensa: 50,
+    icono: ShoppingBag,
+  },
 ];
 
-// Listado de medallas de honor: Adecuar a las que se convengan
+// DEFINICIÓN DE MEDALLAS SEGÚN DICCIONARIO-
 const listaMedallas = [
-  { nombre: "Servicio Distinguido", emoji: "🎖️", desc: "100+ horas de juego", obtenida: true },
-  { nombre: "Agente del Mes", emoji: "⭐", desc: "Mejor rendimiento mensual", obtenida: true },
-  { nombre: "Maestro Espía", emoji: "🕵️", desc: "Ratio 70%+ como Jefe", obtenida: false },
-  { nombre: "Héroe de Guerra", emoji: "🏆", desc: "Gana un torneo oficial", obtenida: false },
-  { nombre: "Ojo de Halcón", emoji: "🦅", desc: "Precisión 90%+ en 10 partidas", obtenida: true },
-  { nombre: "Superviviente", emoji: "💀", desc: "Sobrevive 50 partidas sin asesino", obtenida: false },
+  {
+    id: "bronce",
+    nombre: "Agente de bronce",
+    descripcion: "50 partidas ganadas",
+    partidasRequeridas: 50,
+    emoji: "🥉",
+    rareza: "bronce",
+  },
+  {
+    id: "plata",
+    nombre: "Agente de plata",
+    descripcion: "100 partidas ganadas",
+    partidasRequeridas: 100,
+    emoji: "🥈",
+    rareza: "plata",
+  },
+  {
+    id: "oro",
+    nombre: "Agente de oro",
+    descripcion: "200 partidas ganadas",
+    partidasRequeridas: 200,
+    emoji: "🏅",
+    rareza: "oro",
+  },
 ];
 
-export function Pantalla10Logros() {
-  const navegar = useNavigate();
 
-  // Cálculos de estadísticas para la cabecera
-  const totalDesbloqueados = listaLogros.filter(l => l.desbloqueado).length;
-  const totalMedallasObtenidas = listaMedallas.filter(m => m.obtenida).length;
-  const totalElementos = listaLogros.length + listaMedallas.length;
-  
-  // Porcentaje total de completado
-  const progresoGlobal = Math.round(((totalDesbloqueados + totalMedallasObtenidas) / totalElementos) * 100);
+// DATOS DE EJEMPLO DEL PERFIL DEL USUARIO (en producción vendrán del backend)
+const perfilEjemplo = {
+  partidasJugadas: 100,      // partidas totales jugadas
+  partidasGanadas: 45,       // partidas ganadas
+  amigos: 3,                 // amigos añadidos
+  partidaSinFallos: false,   // si alguna vez acabó sin fallos (logro puntería)
+  todosPaquetes: false,      // si tiene todos los paquetes y temas (fiebre de balas)
+};
+
+// FUNCIONES DE CÁLCULO DE PROGRESO (simulan lógica de backend)
+
+/**
+ * Calcula el estado de cada logro a partir del perfil del usuario.
+ * Devuelve una copia de listaLogros con los campos calculados:
+ * - progreso: valor actual (0..max)
+ * - desbloqueado: boolean
+ * - max: número máximo para completar
+ */
+const calcularLogros = (perfil) => {
+  return listaLogros.map(logro => {
+    let progreso = 0;
+    let max = logro.condicion.max;
+    let desbloqueado = false;
+
+    switch (logro.id) {
+      case "principiante":
+      case "entrenamiento":
+      case "oficial":
+      case "inspector":
+        progreso = Math.min(perfil.partidasJugadas, max);
+        desbloqueado = perfil.partidasJugadas >= max;
+        break;
+      case "sociable":
+        progreso = Math.min(perfil.amigos, max);
+        desbloqueado = perfil.amigos >= max;
+        break;
+      case "punteria":
+        progreso = perfil.partidaSinFallos ? 1 : 0;
+        desbloqueado = perfil.partidaSinFallos;
+        break;
+      case "fiebre":
+        progreso = perfil.todosPaquetes ? 1 : 0;
+        desbloqueado = perfil.todosPaquetes;
+        break;
+      default:
+        progreso = 0;
+    }
+    return {
+      ...logro,
+      progreso,
+      max,
+      desbloqueado,
+    };
+  });
+};
+
+/**
+ * Calcula las medallas obtenidas según las partidas ganadas.
+ */
+const calcularMedallas = (partidasGanadas) => {
+  return listaMedallas.map(medalla => ({
+    ...medalla,
+    obtenida: partidasGanadas >= medalla.partidasRequeridas,
+  }));
+};
+
+// COMPONENTE PRINCIPAL
+export function Pantalla10Logros() {
+  const navigate = useNavigate();
+
+  // Obtener datos calculados del perfil
+  const logros = calcularLogros(perfilEjemplo);
+  const medallas = calcularMedallas(perfilEjemplo.partidasGanadas);
+
+  // Estadísticas
+  const totalLogros = logros.length;
+  const logrosDesbloqueados = logros.filter(l => l.desbloqueado).length;
+  const totalMedallas = medallas.length;
+  const medallasObtenidas = medallas.filter(m => m.obtenida).length;
+
+  // Balas ganadas por logros desbloqueados
+  const balasGanadas = logrosDesbloqueados * 50;
+
+  // Progreso global (logros + medallas)
+  const totalElementos = totalLogros + totalMedallas;
+  const totalDesbloqueados = logrosDesbloqueados + medallasObtenidas;
+  const progresoGlobal = Math.round((totalDesbloqueados / totalElementos) * 100);
 
   return (
     <ScreenFrame title="LOGROS Y MEDALLAS">
       <div className="max-w-5xl mx-auto pt-8 sm:pt-4">
         
-        {/* Botón para retroceder al Dashboard : ESTO A LO MEJOR HABRÍA UE HACER UNA CLASE GENÉRICA PORQUE SE REPITE*/}
-        <button 
-          onClick={() => navegar("/home")} 
+        {/* Botón volver al dashboard (RF-2, navegación) */}
+        <button
+          onClick={() => navigate("/home")}
           className="flex items-center gap-2 text-[#8a7a60] hover:text-[#d4b878] transition-colors cursor-pointer mb-4 group font-courier"
           style={{ fontSize: 11 }}
         >
@@ -94,36 +271,68 @@ export function Pantalla10Logros() {
 
             {/* Fichas de resumen estadístico */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-              <TarjetaResumen icono={Trophy} valor={`${totalDesbloqueados}/${listaLogros.length}`} etiqueta="LOGROS" color="#d4b878" />
-              <TarjetaResumen icono={Medal} valor={`${totalMedallasObtenidas}/${listaMedallas.length}`} etiqueta="MEDALLAS" color="#c4a060" />
-              <TarjetaResumen icono={Star} valor="2" etiqueta="ORO" color="#f0c840" />
-              <TarjetaResumen icono={Crown} valor="0" etiqueta="PLATINO" color="#c090e0" />
+              <TarjetaResumen
+                icono={Trophy}
+                valor={`${logrosDesbloqueados}/${totalLogros}`}
+                etiqueta="LOGROS"
+                color="#d4b878"
+              />
+              <TarjetaResumen
+                icono={Medal}
+                valor={`${medallasObtenidas}/${totalMedallas}`}
+                etiqueta="MEDALLAS"
+                color="#c4a060"
+              />
+              <TarjetaResumen
+                icono={Star}
+                valor={balasGanadas}
+                etiqueta="BALAS GANADAS"
+                color="#f0c840"
+              />
+              <TarjetaResumen
+                icono={Crown}
+                valor={perfilEjemplo.partidasGanadas}
+                etiqueta="PARTIDAS GANADAS"
+                color="#c090e0"
+              />
             </div>
 
-            {/* Sección de Logros Operativos */}
-            <SubsectionLabel icono={<Trophy className="w-4 h-4 text-[#5a4a30]" />} label="LOGROS OPERATIVOS" borderColor="#8b2020" />
+            {/* Sección de Logros Operativos (RF-7) */}
+            <SubsectionLabel
+              icono={<Trophy className="w-4 h-4 text-[#5a4a30]" />}
+              label="LOGROS OPERATIVOS"
+              borderColor="#8b2020"
+            />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-              {listaLogros.map((logro) => (
-                <ElementoLogro key={logro.nombre} logro={logro} />
+              {logros.map((logro) => (
+                <ElementoLogro key={logro.id} logro={logro} />
               ))}
             </div>
 
             {/* Sección de Medallas de Servicio */}
-            <SubsectionLabel icono={<Medal className="w-4 h-4 text-[#5a4a30]" />} label="MEDALLAS DE SERVICIO" borderColor="#5a4a20" />
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-              {listaMedallas.map((medalla) => (
-                <ElementoMedalla key={medalla.nombre} medalla={medalla} />
+            <SubsectionLabel
+              icono={<Medal className="w-4 h-4 text-[#5a4a30]" />}
+              label="MEDALLAS DE SERVICIO"
+              borderColor="#5a4a20"
+            />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 mb-6">
+              {medallas.map((medalla) => (
+                <ElementoMedalla key={medalla.id} medalla={medalla} />
               ))}
             </div>
 
-            {/* Barra de Progreso General del Agente: NOS GUSTA EL MOMENTO ARCOÍRIS? NO SÉ SI PEGA CON LA ESTÉTICA */}
+            {/* Barra de Progreso General del Agente */}
             <div className="bg-[#f5edd8]/40 border border-[#a08050]/20 rounded-sm p-4 mb-5">
               <div className="flex items-center justify-between mb-2">
-                <span className="font-elite text-[#4a3a20] tracking-[0.1em]" style={{ fontSize: 13 }}>PROGRESO TOTAL DEL AGENTE</span>
-                <span className="font-courier text-[#5a4a30]" style={{ fontSize: 13 }}>{progresoGlobal}%</span>
+                <span className="font-elite text-[#4a3a20] tracking-[0.1em]" style={{ fontSize: 13 }}>
+                  PROGRESO TOTAL DEL AGENTE
+                </span>
+                <span className="font-courier text-[#5a4a30]" style={{ fontSize: 13 }}>
+                  {progresoGlobal}%
+                </span>
               </div>
               <div className="h-3 bg-[#3a3020]/20 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full rounded-full bg-gradient-to-r from-[#8b2020] via-[#d4a020] to-[#50a050] transition-all duration-1000"
                   style={{ width: `${progresoGlobal}%` }}
                 />
@@ -132,7 +341,9 @@ export function Pantalla10Logros() {
 
             {/* Pie de página con sellos */}
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <span className="font-courier text-[#8a7a60]/50" style={{ fontSize: 9 }}>COD_DOC: FBI-RECOMPENSAS-1976</span>
+              <span className="font-courier text-[#8a7a60]/50" style={{ fontSize: 9 }}>
+                COD_DOC: FBI-RECOMPENSAS-1976
+              </span>
               <RedStamp text="CLASIFICADO" className="rotate-[-3deg]" />
             </div>
           </div>
@@ -142,38 +353,48 @@ export function Pantalla10Logros() {
   );
 }
 
-// SUBCOMPONENTES AUXILIARES 
+// -----------------------------------------------------------------------------
+// SUBCOMPONENTES AUXILIARES
+// -----------------------------------------------------------------------------
 
 /**
- * Tarjeta pequeña para el resumen superior
+ * Tarjeta pequeña para el resumen superior.
+ * Muestra icono, valor numérico y etiqueta.
  */
 function TarjetaResumen({ icono: Icono, valor, etiqueta, color }) {
   return (
     <DarkCard className="p-4 text-center">
       <Icono className="w-6 h-6 mx-auto mb-2" style={{ color }} />
-      <p className="font-courier" style={{ fontSize: 22, color }}>{valor}</p>
-      <p className="font-courier text-[#888]" style={{ fontSize: 9 }}>{etiqueta}</p>
+      <p className="font-courier" style={{ fontSize: 22, color }}>
+        {valor}
+      </p>
+      <p className="font-courier text-[#888]" style={{ fontSize: 9 }}>
+        {etiqueta}
+      </p>
     </DarkCard>
   );
 }
 
 /**
- * Representación individual de un logro con su barra de progreso
+ * Representación individual de un logro con barra de progreso.
+ * Recibe un objeto 'logro' que ya contiene 'progreso', 'max' y 'desbloqueado'.
  */
-function ElementoLogro({ logro: l }) {
-  const config = configuracionRareza[l.rareza];
-  const porcentaje = Math.round((l.progreso / l.max) * 100);
-  const Icono = l.icono;
+function ElementoLogro({ logro }) {
+  const config = configuracionRareza[logro.rareza];
+  const porcentaje = Math.round((logro.progreso / logro.max) * 100);
+  const Icono = logro.icono;
 
   return (
-    <DarkCard className={`achievement-card ${config.clase} ${!l.desbloqueado ? "opacity-70" : ""}`}>
-      {/* Franja superior de medalla */}
+    <DarkCard
+      className={`achievement-card ${config.clase} ${!logro.desbloqueado ? "opacity-70" : ""}`}
+    >
+      {/* Franja superior decorativa */}
       <div className="medalla-stripe" />
-      
+
       <div className="flex items-start gap-3 mt-1">
-        {/* Contenedor del Icono o Candado */}
+        {/* Icono o candado según desbloqueo */}
         <div className="icon-container">
-          {l.desbloqueado ? (
+          {logro.desbloqueado ? (
             <Icono className="w-5 h-5 text-[var(--rarity-text)]" />
           ) : (
             <Lock className="w-4 h-4 text-[#666]" />
@@ -182,26 +403,37 @@ function ElementoLogro({ logro: l }) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className={`font-elite ${l.desbloqueado ? "text-[#e8dcc8]" : "text-[#888]"} truncate`} style={{ fontSize: 13 }}>
-              {l.nombre}
+            <p
+              className={`font-elite ${logro.desbloqueado ? "text-[#e8dcc8]" : "text-[#888]"} truncate`}
+              style={{ fontSize: 13 }}
+            >
+              {logro.nombre}
             </p>
             <span style={{ fontSize: 14 }}>{config.insignia}</span>
           </div>
-          <p className="font-courier text-[#888] mt-0.5" style={{ fontSize: 10 }}>{l.desc}</p>
-          
-          {/* Visualización del progreso */}
+          <p className="font-courier text-[#888] mt-0.5" style={{ fontSize: 10 }}>
+            {logro.descripcion}
+          </p>
+
+          {/* Barra de progreso y contador */}
           <div className="mt-2">
             <div className="flex items-center justify-between mb-1 font-courier" style={{ fontSize: 9 }}>
-              <span className="text-[#666]">{l.progreso}/{l.max}</span>
-              {l.desbloqueado && <span className="text-[#50a050]">✓ COMPLETADO</span>}
+              <span className="text-[#666]">
+                {logro.progreso}/{logro.max}
+              </span>
+              {logro.desbloqueado ? (
+                <span className="text-[#50a050]">✓ COMPLETADO</span>
+              ) : (
+                <span className="text-[#a0a060]">+{logro.recompensa} balas</span>
+              )}
             </div>
             <div className="progress-bar-container">
-              <div 
-                className="progress-fill" 
-                style={{ 
-                  width: `${porcentaje}%`, 
-                  backgroundColor: l.desbloqueado ? "#50a050" : "var(--rarity-color)" 
-                }} 
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${porcentaje}%`,
+                  backgroundColor: logro.desbloqueado ? "#50a050" : config.color,
+                }}
               />
             </div>
           </div>
@@ -212,23 +444,32 @@ function ElementoLogro({ logro: l }) {
 }
 
 /**
- * Representación individual de una medalla
+ * Representación individual de una medalla.
+ * Muestra emoji, nombre, descripción y estado obtenida/no obtenida.
  */
-function ElementoMedalla({ medalla: m }) {
+function ElementoMedalla({ medalla }) {
+  const obtenida = medalla.obtenida;
+
   return (
-    <DarkCard className={`p-4 text-center ${!m.obtenida ? "opacity-50" : ""}`}>
-      {/* Icono de la medalla con efecto gris si no se tiene */}
-      <div className={`text-4xl mb-2 ${!m.obtenida ? "grayscale" : ""}`}>{m.emoji}</div>
-      
-      <p className={`font-elite ${m.obtenida ? "text-[#e8dcc8]" : "text-[#666]"} truncate`} style={{ fontSize: 11 }}>
-        {m.nombre}
+    <DarkCard className={`p-4 text-center ${!obtenida ? "opacity-50" : ""}`}>
+      <div className={`text-4xl mb-2 ${!obtenida ? "grayscale" : ""}`}>
+        {medalla.emoji}
+      </div>
+      <p
+        className={`font-elite ${obtenida ? "text-[#e8dcc8]" : "text-[#666]"} truncate`}
+        style={{ fontSize: 11 }}
+      >
+        {medalla.nombre}
       </p>
-      <p className="font-courier text-[#888] mt-1" style={{ fontSize: 8 }}>{m.desc}</p>
-      
-      {/* Estado de la medalla */}
-      {m.obtenida ? (
+      <p className="font-courier text-[#888] mt-1" style={{ fontSize: 8 }}>
+        {medalla.descripcion}
+      </p>
+
+      {obtenida ? (
         <div className="mt-2 inline-block bg-[#2a5a2a]/40 border border-[#50a050]/30 rounded-sm px-2 py-0.5">
-          <span className="font-courier text-[#50a050]" style={{ fontSize: 8 }}>OBTENIDA</span>
+          <span className="font-courier text-[#50a050]" style={{ fontSize: 8 }}>
+            OBTENIDA
+          </span>
         </div>
       ) : (
         <div className="mt-2">
