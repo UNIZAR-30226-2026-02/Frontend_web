@@ -2,37 +2,94 @@
  * Pantalla de fin de partida.
  */
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router';
+import React, { useState, useEffect } from 'react'; // AÑADIDO: useEffect
+import { useNavigate, useParams } from 'react-router'; // AÑADIDO: useParams
 // Asumimos que estos componentes visuales existen en tu proyecto
 // basándonos en la estética de pantallas anteriores de "Manila Folder"
 import { ManilaFolder, SectionHeader, RedStamp, TapeStrip, FBISeal } from "../components/ScreenFrame"; 
 import { Home, BarChart3, Users, Award, ArrowLeft } from "lucide-react";
 
+// AÑADIDO: Base URL para la API
+const API_BASE = "http://localhost:8080/api";
+
 export function Pantalla15FinPartida() {
   const navigate = useNavigate();
+  const { id_partida } = useParams(); // AÑADIDO: Capturamos el id de la URL
 
-  // TODO: integrar con backend.
-  // Estado ganador de prueba.
-  const [ganadorSimulado, setGanadorSimulado] = useState('Rojo'); 
+  // --- AÑADIDO: Estados de integración con el backend ---
+  const [datosFinales, setDatosFinales] = useState(null);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Datos de prueba.
-  const mockData = {
-    equipo_ganador: ganadorSimulado, // 'Rojo' o 'Azul'
-    aciertos_rojo: 8,
-    aciertos_azul: 6,
-    total_cartas: 25,
-    duracion_turnos: 12,
-    codigos_operativos: "F4V3M6"
-  };
+  // --- AÑADIDO: Llamada GET a la API ---
+  useEffect(() => {
+    const fetchResultados = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/partida/${id_partida}/fin`, {
+          credentials: "include"
+        });
+        if (!res.ok) {
+          throw new Error("No se ha podido recuperar el informe de la misión.");
+        }
+        const data = await res.json();
+        setDatosFinales(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setCargando(false);
+      }
+    };
 
-  const { equipo_ganador, aciertos_rojo, aciertos_azul, codigos_operativos } = mockData;
+    if (id_partida) fetchResultados();
+  }, [id_partida]);
+
+  // // TODO: integrar con backend.
+  // // Estado ganador de prueba.
+  // const [ganadorSimulado, setGanadorSimulado] = useState('Rojo'); 
+
+  // // Datos de prueba.
+  // const mockData = {
+  //   equipo_ganador: ganadorSimulado, // 'Rojo' o 'Azul'
+  //   aciertos_rojo: 8,
+  //   aciertos_azul: 6,
+  //   total_cartas: 25,
+  //   duracion_turnos: 12,
+  //   codigos_operativos: "F4V3M6"
+  // };
+
+  // const { equipo_ganador, aciertos_rojo, aciertos_azul, codigos_operativos } = mockData;
+
+  // --- AÑADIDO: Extracción de variables recibidas desde el endpoint ---
+  const equipo_ganador = datosFinales?.equipo_ganador || 'Rojo'; 
+  const aciertos_rojo = datosFinales?.aciertos_rojo || 0;
+  const aciertos_azul = datosFinales?.aciertos_azul || 0;
+  
+  // Dependiendo de cómo lo envíe tu backend (ej. "rojo" vs "Rojo"), quizá 
+  // debas usar: equipo_ganador?.toLowerCase() === 'rojo'
   const esRojoGanador = equipo_ganador === 'Rojo';
 
   // Configuración visual condicional según el ganador
   const colorPrimarioGanador = esRojoGanador ? "text-[#8B2020]" : "text-[#80a0d0]";
   const bgBanderaGanador = esRojoGanador ? "bg-[#8b2020]/80" : "bg-[#80a0d0]";
   const bordeGanador = esRojoGanador ? "border-[#8B2020]" : "border-[#80a0d0]";
+
+  // --- AÑADIDO: Vistas de Carga y Error ---
+  if (cargando) {
+    return (
+      <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center font-['Courier_Prime',monospace]">
+        <p className="text-[#c4a060] tracking-widest uppercase">RECUPERANDO INFORME CLASIFICADO...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#1a1a1a] flex flex-col items-center justify-center font-['Courier_Prime',monospace] p-4 text-center">
+        <p className="text-[#cc3333] mb-4">ERROR AL DESENCRIPTAR INFORME: {error}</p>
+        <button onClick={() => navigate("/home")} className="text-[#c4a060] border border-[#c4a060] px-4 py-2 hover:bg-[#c4a060]/10">VOLVER AL ESCRITORIO</button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#1a1a1a] p-4 sm:p-8 lg:p-12 pt-16 sm:pt-12 font-['Courier_Prime',monospace]">
@@ -64,11 +121,13 @@ export function Pantalla15FinPartida() {
                 </p>
               </div>
               {/* Botón visual para cambiar ganador en el MOCK. TODO: eliminar */}
+              {/* COMENTADO: Ya no se necesita el mock de estado.
               <button 
                 onClick={() => setGanadorSimulado(prev => prev === 'Rojo' ? 'Azul' : 'Rojo')}
                 className="text-[9px] bg-black/5 px-2 py-1 rounded text-[#5a4a30] hover:bg-black/10"
               >
               </button>
+              */}
             </div>
 
             {/* ─── SECCIÓN CENTRAL: ANUNCIO DE VICTORIA ─── */}

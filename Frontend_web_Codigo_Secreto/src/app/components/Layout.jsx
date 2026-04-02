@@ -13,17 +13,17 @@ import avatar from '../../assets/1_magia.jpeg';
 
 // Pantallas en las que NO se van a mostrar los iconos persistentes de las esquinas 
 // (foto de agente ni contador de balas).
-  const hideProfileRoutes = ["/","/login", "/partida-agente","/manual", "/nombre-usuario-nuevo"];
-  const hideBulletsRoutes = ["/","/login", "/partida-agente","/manual", "/nombre-usuario-nuevo", "/tienda"];
+  const hideProfileRoutes = ["/","/login", "/partida","/manual", "/nombre-usuario-nuevo"];
+  const hideBulletsRoutes = ["/","/login", "/partida","/manual", "/nombre-usuario-nuevo", "/tienda"];
   // Pantallas en las que NO se quiere mostrar el icono del manual.
   const hideManualRoutes = ["/","/login","/manual", "/nombre-usuario-nuevo"];
 
 export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const hideProfile = hideProfileRoutes.some(r => location.pathname === r);
-  const hideBullets = hideBulletsRoutes.some(r => location.pathname === r);
-  const hideManual = hideManualRoutes.some(r => location.pathname === r);
+  const hideProfile = hideProfileRoutes.some(r => location.pathname === r || location.pathname.startsWith(`${r}/`));
+  const hideBullets = hideBulletsRoutes.some(r => location.pathname === r || location.pathname.startsWith(`${r}/`));
+  const hideManual = hideManualRoutes.some(r => location.pathname === r || location.pathname.startsWith(`${r}/`));
 
   /* DESCOMENTAR PARA CONEXIÓN CON BACKEND.
   const { user, isLoading } = useContext(UserContext);

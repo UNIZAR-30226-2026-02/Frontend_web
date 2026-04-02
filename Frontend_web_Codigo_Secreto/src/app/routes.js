@@ -39,7 +39,7 @@ export const router = createBrowserRouter([
       { path: "crear-mision", Component: Pantalla12CrearPartida },
       { path: "tienda", Component: Pantalla13Tienda },
       { path: "partida/:id_partida", Component: PantallaPartida },
-      { path: "fin-partida", Component: Pantalla15FinPartida },
+      { path: "fin-partida/:id_partida", Component: Pantalla15FinPartida },
       { path: "historial", Component: Pantalla16Historial },
     ],
   },

@@ -329,7 +329,8 @@ function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista }) {
 
 /**
  * Panel de votación para los agentes.
- * Muestra la pista activa, los votos actuales, la carta seleccionada y permite votar.
+ * Muestra la pista activa, los votos actuales, la carta seleccionada y permite votar (en función
+ * de si es su turno o no).
  */
 function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, votosActuales, totalJugadores, onVotar, puedoVotar }) {
   if (!pista) {
@@ -360,6 +361,8 @@ function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, vo
       {/* Votos en tiempo real */}
       <div style={{ marginBottom: "0.75rem" }}>
         <span className="voting-label-xs">
+          {/* TODO: buscar del backend el número de jugadores en ese equipo, porque no tiene
+          por qué coincidir con la mitad. */}
           VOTOS ACTUALES: {votosActuales?.length || 0}/{Math.ceil((totalJugadores - 1) / 2) || "?"} 
         </span>
         <div className="vote-dots-container">
@@ -418,11 +421,12 @@ export function PantallaPartida() {
   const [cartaSeleccionada, setCartaSeleccionada] = useState(null);
   const [votosActuales, setVotosActuales] = useState([]);
   const [miVotoEnviado, setMiVotoEnviado] = useState(false);
+  const [totalRojo, setTotalRojo] = useState(0);
+  const [totalAzul, setTotalAzul] = useState(0);
 
   // Chat y tiempo
   const [mensajes, setMensajes] = useState([]);
   const [tiempoRestante, setTiempoRestante] = useState(null);
-  const [finPartida, setFinPartida] = useState(null);
 
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -459,6 +463,13 @@ export function PantallaPartida() {
   //    Maneja la lógica de turnos y pistas según el flujo corregido.
   // ------------------------------------------------------------
   const aplicarEstadoTablero = useCallback((data) => {
+
+    // Comprobación de finalización de partida
+    if (data.estado === 'finalizada') {
+      navigate(`/fin-partida/${idPartida}`);
+      return; // Detenemos la ejecución, ya no importa el resto del tablero
+    }
+
     // Actualizar cartas
     if (data.tablero?.cartas) setCartas(data.tablero.cartas);
     // Actualizar turno actual
@@ -479,7 +490,7 @@ export function PantallaPartida() {
 
     // Actualizar votos si vienen
     if (data.votos_turno_actual) setVotosActuales(data.votos_turno_actual);
-  }, []);
+  }, [navigate, idPartida]); // Dependencias necesarias para la redirección a fin de partida.
 
   // ------------------------------------------------------------
   // 3. OBTENER ESTADO INICIAL DE LA PARTIDA (REST)
@@ -493,6 +504,14 @@ export function PantallaPartida() {
         if (!res.ok) return;
         const data = await res.json();
         aplicarEstadoTablero(data);
+        // Importante. Para mostrar el marcador en la partida, hay que saber qué equipo empieza
+        // y asignarle 8 o 9 cartas. Se obtiene el equipo del primer turno, que empieza y tiene
+        // una carta más que desvelar que el otro equipo. No sirve con mirar el tipo de las cartas
+        // para ver cuántas hay rojas o azules, ya que los agentes reciben el tipo como null.
+        if (data.equipo_turno_actual !== undefined){
+          setTotalRojo(data.equipo_turno_actual === "rojo" ? 9 : 8);
+          setTotalAzul(data.equipo_turno_actual === "rojo" ? 8 : 9);
+        }
       } catch (err) {
         console.warn("Error cargando estado inicial", err);
       } finally {
@@ -526,10 +545,19 @@ export function PantallaPartida() {
       reconnectDelay: 3000,
       onConnect: () => {
         // Estado general del tablero (cartas reveladas, turno, pista, votos)
-        client.subscribe(`/topic/partidas/${idPartida}/estado`, (msg) => {
+        // IMPORTANTE: cada usuario se suscribe a su propio canal para que el backend
+        // le envía el estado del tablero personalizado (mostrando la identidad de las 
+        // cartas o no en función de si es jefe o agente).
+        /*client.subscribe(`/topic/partidas/${idPartida}/estado`, (msg) => {
           const data = JSON.parse(msg.body);
           aplicarEstadoTablero(data);
           // Resetear estado local de voto y selección después de cada actualización
+          setMiVotoEnviado(false);
+          setCartaSeleccionada(null);
+        });*/
+        client.subscribe(`/user/queue/partidas/${idPartida}/estado`, (msg) => {
+          const data = JSON.parse(msg.body);
+          aplicarEstadoTablero(data);
           setMiVotoEnviado(false);
           setCartaSeleccionada(null);
         });
@@ -542,6 +570,7 @@ export function PantallaPartida() {
 
         // Nueva pista (solo cuando el jefe la envía)
         // En la suscripción a la pista (asegurar que se resetea el estado)
+        // TODO: revisar este endpoint.
         client.subscribe(`/topic/partidas/${idPartida}/pista`, (msg) => {
           const data = JSON.parse(msg.body);
           setPistaActual(data);
@@ -552,10 +581,12 @@ export function PantallaPartida() {
         });
 
         // Actualización de votos en tiempo real
-        client.subscribe(`/topic/partidas/${idPartida}/votos`, (msg) => {
+        // TODO: borrar esta suscripción. No hace falta porque la actualización de los
+        // votos se recibe en el estado general de la partida.
+        /*client.subscribe(`/topic/partidas/${idPartida}/votos`, (msg) => {
           const data = JSON.parse(msg.body);
           setVotosActuales(data.votos_actuales || []);
-        });
+        });*/
 
         // Mensajes de chat del equipo
         client.subscribe(`/topic/partidas/${idPartida}/chat/${equipo.toLowerCase()}`, (msg) => {
@@ -572,10 +603,12 @@ export function PantallaPartida() {
         });
 
         // Fin de la partida
-        client.subscribe(`/topic/partidas/${idPartida}/fin`, (msg) => {
+        // TODO: no hace falta esto porque el final de la partida se notifica con el estado
+        // 'finalizada'.
+        /*client.subscribe(`/topic/partidas/${idPartida}/fin`, (msg) => {
           const data = JSON.parse(msg.body);
           setFinPartida(data);
-        });
+        });*/
       }
     });
 
@@ -668,8 +701,6 @@ export function PantallaPartida() {
   // Conteo de cartas descubiertas para la puntuación
   const rojoDescubiertos = cartas.filter(c => c.tipo === "rojo" && c.estado === "revelada").length;
   const azulDescubiertos = cartas.filter(c => c.tipo === "azul" && c.estado === "revelada").length;
-  const totalRojo = cartas.filter(c => c.tipo === "rojo").length;
-  const totalAzul = cartas.filter(c => c.tipo === "azul").length;
 
   // Estados de carga y error
   if (cargando && rol === null) {
@@ -697,21 +728,9 @@ export function PantallaPartida() {
   // ------------------------------------------------------------
   return (
     <ScreenFrame title={esJefe ? "VISTA DEL JEFE DE ESPIONAJE" : "VISTA DEL AGENTE"}>
-      {/* Overlay de fin de partida */}
-      {finPartida && (
-        <div className="game-over-overlay">
-          <div className="game-over-content">
-            <div className={`end-game-stamp ${finPartida.ganador === equipo ? "win-stamp" : "lose-stamp"}`}>
-              {finPartida.ganador === equipo ? <Check className="end-game-icon" /> : <Skull className="end-game-icon" />}
-              <p className="end-game-title">{finPartida.ganador === equipo ? "MISIÓN COMPLETADA" : "MISIÓN FALLIDA"}</p>
-            </div>
-            <button onClick={() => navigate("/home")} className="view-report-btn">VOLVER AL HOME</button>
-          </div>
-        </div>
-      )}
 
-      {/* Barra superior con estadísticas y controles */}
-      <div className="agent-top-bar">
+      {/* Barra superior con estadísticas y controles
+      {/*<div className="agent-top-bar">
         <div className="top-bar-stats-group">
           <button onClick={handleAbandonar} className="abort-mission-btn">ABORTAR MISIÓN</button>
           <DarkCard className="score-counter-card">
@@ -727,6 +746,60 @@ export function PantallaPartida() {
           </DarkCard>
         )}
         <div className="role-badge-row"><div className="agent-role-badge"><span>{esJefe ? "JEFE" : "AGENTE"} — {equipo?.toUpperCase()}</span></div></div>
+      </div> */}
+
+      {/* Barra superior con estadísticas y controles */}
+      <div className="relative flex justify-between items-center w-full mb-6 min-h-[4rem]">
+        
+        {/* 1. IZQUIERDA: Botón Abortar y Marcador */}
+        <div className="flex items-center gap-4 z-10">
+          
+          {/* Botón Abortar (Color más apagado, sin resplandor, estilo más rústico) */}
+          <button 
+            onClick={handleAbandonar} 
+            className="px-4 py-2 bg-[#8b2020] hover:bg-[#6b1818] text-[#e8dcc8] rounded-xl border border-[#5a1515] cursor-pointer font-['Courier_Prime',monospace] font-bold tracking-widest text-sm md:text-base uppercase transition-colors"
+          >
+            ABORTAR MISIÓN
+          </button>
+
+          {/* Marcador Original */}
+          <DarkCard className="score-counter-card">
+            <div className="score-team red-team"><div className="team-dot" /><span className="score-text">{rojoDescubiertos}/{totalRojo}</span></div>
+            <span className="score-separator">vs</span>
+            <div className="score-team blue-team"><div className="team-dot" /><span className="score-text">{azulDescubiertos}/{totalAzul}</span></div>
+          </DarkCard>
+        </div>
+
+        {/* 2. CENTRO: Rol del Jugador */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none z-0">
+          <span className="font-['Courier_Prime',monospace] text-sm text-[#e8dcc8] tracking-widest font-bold uppercase leading-tight">
+            Eres
+          </span>
+          <span className="font-['Courier_Prime',monospace] text-xl text-[#e8dcc8] tracking-widest font-bold uppercase leading-tight">
+            {esJefe ? "Jefe de Espías" : "Agente de Campo"}
+          </span>
+          <span className={`font-['Courier_Prime',monospace] text-xl tracking-widest font-bold uppercase leading-tight ${equipo === "rojo" ? "text-[#cc3333]" : "text-[#3366cc]"}`}>
+            {equipo === "rojo" ? "Rojo" : equipo === "azul" ? "Azul" : ""}
+          </span>
+        </div>
+
+        {/* 3. DERECHA: Turno y Temporizador (Alineados horizontalmente) */}
+        <div className="flex items-center gap-4 z-10 mr-16">
+          
+          {/* Turno */}
+          <div className="current-turn-badge">
+            <span>TURNO {turnoActual?.toUpperCase() || "..."}</span>
+          </div>
+
+          {/* Temporizador */}
+          {tiempoRestante !== null && (
+            <DarkCard className="game-timer-card !m-0">
+              <Clock className="timer-icon" />
+              <span className="timer-clock-text">{formatearTiempo(tiempoRestante)}</span>
+            </DarkCard>
+          )}
+        </div>
+        
       </div>
 
       {/* Layout principal: tablero + paneles laterales */}

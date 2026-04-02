@@ -98,7 +98,7 @@ export function Pantalla03MisionesPublicas() {
       // Se llama a la función de 'apiPartidas.js' para notificar al backend.
       await unirsePartidaPublica(idPartida);
       // Si la API no lanza error, navegamos al lobby.
-      navigate(`/lobby/${idPartida}`);  // TODO: gestionar esta URL.
+      navigate(`/lobby/${idPartida}`);
     } catch (err) {
       console.error(err);
       alert("No se ha podido acceder a la misión. Es posible que esté llena.");

@@ -163,7 +163,7 @@ export function Pantalla07Lobby() {
     // Solo avisar al backend si la partida NO ha arrancado
       if (!partidaIniciadaRef.current && stompRef.current?.connected) {
           stompRef.current.publish({
-              destination: `/app/partida/${idPartida}/abandonarLobby`,
+              destination: `/app/partida/${id_partida}/abandonarLobby`,
               body: JSON.stringify({})
           });
       }
