@@ -9,6 +9,7 @@ import { IconoBala } from "../components/iconoBala";
 import { UserContext } from "./UserContext";
 import { useContext } from "react";
 
+import avatar from '../../assets/1_magia.jpeg';
 
 // Pantallas en las que NO se van a mostrar los iconos persistentes de las esquinas 
 // (foto de agente ni contador de balas).
@@ -71,11 +72,7 @@ export function Layout() {
             <div className="relative">
               {/* Polaroid frame */}
               <div className="bg-[#f0e8d4] p-[3px] pb-[10px] shadow-[2px_3px_10px_rgba(0,0,0,0.6)] rotate-[-4deg] group-hover:rotate-[-1deg] transition-transform">
-                <div className="w-9 h-9 sm:w-11 sm:h-11 bg-[#3a2a18] overflow-hidden">
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#4a3a28] to-[#2a1c10]">
-                    <span className="font-['Special_Elite',cursive] text-[#c4a060]" style={{ fontSize: 10 }}>AG</span>
-                  </div>
-                </div>
+                  <img src={avatar} alt="Avatar" className="w-8 h-8 sm:w-12 sm:h-12 object-cover"  />
               </div>
               {/* Red dot */}
               <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#cc3333] rounded-full border border-[#8b2020] shadow-[0_0_6px_rgba(200,50,50,0.5)]" />

@@ -18,14 +18,21 @@ import { IconoBala } from "../components/IconoBala";
 // Estilos
 import "../components/Perfil.css";
 
-/* MEJOR FOTOS ESTO PLACEHOLDER PARA AVATAR */
+import Magia from '../../assets/1_magia.jpeg';
+import Hist from '../../assets/2_historico.jpeg';
+import Subm from "../../assets/3_vidasubmarina.jpeg";
+import Cyber from "../../assets/4_cyberpunk.jpeg"
+import Natur from "../../assets/5_naturaleza.jpeg"
+
+
+/* OPCIONES DE AVATAR: IMÁGENES DESDE LA CARPETA ASSETS                       */
+
 const OPCIONES_AVATAR = [
-  { id: 1, iniciales: "AG", bg: "from-[#4a3a28] to-[#2a1c10]" },
-  { id: 2, iniciales: "SP", bg: "from-[#2a3a5a] to-[#1a2a40]" },
-  { id: 3, iniciales: "MK", bg: "from-[#5a2a2a] to-[#3a1a1a]" },
-  { id: 4, iniciales: "VX", bg: "from-[#2a4a2a] to-[#1a3a1a]" },
-  { id: 5, iniciales: "NK", bg: "from-[#4a4a20] to-[#2a2a10]" },
-  { id: 6, iniciales: "RX", bg: "from-[#4a2a4a] to-[#2a1a2a]" },
+  { id: 1, src: Magia, alt: "Agente 1" },
+  { id: 2, src: Hist, alt: "Agente 2" },
+  { id: 3, src: Subm, alt: "Agente 3" },
+  { id: 4, src: Cyber, alt: "Agente 4" },
+  { id: 5, src: Natur, alt: "Agente 5" },
 ];
 
 const TEMAS_VISUALES = [
@@ -36,20 +43,6 @@ const TEMAS_VISUALES = [
   { id: "rose", name: "Cuarzo rosa", color: "#c67b8a", borderColor: "#a05060", bgColor: "#2a1820" },
 ];
 
-/**
- * Gradiente de avatar : SE QUITARÁ PORQUE SERÁ FOTO MAYBE
- */
-function obtenerGradienteAvatar(id) {
-  const av = OPCIONES_AVATAR.find(a => a.id === id);
-  if (!av) return 'linear-gradient(135deg, #4a3a28, #2a1c10)';
-  
-  const colores = av.bg
-    .replace(/from-\[/g, '')
-    .replace(/\] to-\[/g, ', ')
-    .replace(/\]/g, '');
-  
-  return `linear-gradient(135deg, ${colores})`;
-}
 
 export function Pantalla11Perfil() {
   const navegar = useNavigate();
@@ -118,13 +111,13 @@ export function Pantalla11Perfil() {
                   title="Cambiar fotografía"
                 >
                   <div className="polaroid-container">
-                    <div
-                      className="polaroid-foto"
-                      style={{ backgroundImage: obtenerGradienteAvatar(avatarSeleccionado) }}
-                    >
-                      <span className="fuente-elite text-[#c4a060]" style={{ fontSize: 28 }}>
-                          {avatarActual.iniciales}
-                      </span>
+                    <div className="polaroid-foto bg-[#1a1208] flex items-center justify-center overflow-hidden">
+                      {/* Imagen de perfil real */}
+                      <img
+                        src={avatarActual.src}
+                        alt={avatarActual.alt}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <p className="fuente-courier text-[#5a4a30] text-center mt-1.5" style={{ fontSize: 8 }}>
                       {nombreAgente.toUpperCase()}
@@ -167,8 +160,12 @@ export function Pantalla11Perfil() {
                             className={`cursor-pointer transition-all ${avatarSeleccionado === av.id ? "ring-2 ring-[#d4b878] scale-105" : "opacity-60 hover:opacity-100 hover:scale-105"}`}
                           >
                             <div className="bg-[#f0e8d4] p-1 pb-2.5 shadow-[1px_1px_5px_rgba(0,0,0,0.3)]">
-                              <div className={`w-full aspect-square bg-gradient-to-br ${av.bg} flex items-center justify-center`}>
-                                <span className="fuente-elite text-[#c4a060]" style={{ fontSize: 16 }}>{av.iniciales}</span>
+                              <div className="w-full aspect-square bg-[#2a2418] flex items-center justify-center overflow-hidden">
+                                <img
+                                  src={av.src}
+                                  alt={av.alt}
+                                  className="w-full h-full object-cover"
+                                />
                               </div>
                             </div>
                             {avatarSeleccionado === av.id && <Check className="w-3 h-3 text-[#50a050] mx-auto mt-0.5" />}
