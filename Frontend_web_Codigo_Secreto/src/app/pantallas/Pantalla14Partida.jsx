@@ -357,7 +357,7 @@ function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, vo
 // PANTALLA PRINCIPAL
 export function PantallaPartida() {
   const navigate = useNavigate();
-  const { idPartida } = useParams();
+  const { id_partida:idPartida } = useParams();
   const { user } = useContext(UserContext);
 
   const [rol, setRol] = useState(null);
@@ -383,31 +383,41 @@ export function PantallaPartida() {
   const stompRef = useRef(null);
   const chatInputRef = useRef(null);
 
+  console.log("PantallaPartida render, idPartida =", idPartida);
   // 1. Obtener rol inicial
   useEffect(() => {
     const fetchRol = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/partidas/${idPartida}/participantes/rol`, {
-          credentials: "include"
-        });
-        if (!res.ok) throw new Error("No se ha podido obtener el rol");
-        const data = await res.json();
-        setRol(data.rol);
-        setEquipo(data.equipo);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
+  try {
+    console.log("Fetching rol para partida:", idPartida);
+    const res = await fetch(`${API_BASE}/partidas/${idPartida}/participantes/rol`, {
+      credentials: "include"
+    });
+    console.log("Respuesta rol status:", res.status);
+    if (!res.ok) {
+      const errBody = await res.text();
+      console.error("Error body:", errBody);
+      throw new Error("No se ha podido obtener el rol");
+    }
+    const data = await res.json();
+    console.log("Rol recibido:", data);
+    setRol(data.rol);
+    setEquipo(data.equipo);
+  } catch (err) {
+    console.error("Error fetchRol:", err);
+    setError(err.message);
+    setCargando(false);
+  }
+};
     if (idPartida) fetchRol();
   }, [idPartida]);
 
   const aplicarEstadoTablero = useCallback((data) => {
     if (data.tablero?.cartas) setCartas(data.tablero.cartas);
-    if (data.turno_actual) setTurnoActual(data.turno_actual);
+    if (data.equipo_turno_actual) setTurnoActual(data.equipo_turno_actual); 
     if (data.rojo_gana !== undefined) setRojoGana(data.rojo_gana);
     if (data.pista_actual) setPistaActual(data.pista_actual);
-    if (data.votos_actuales) setVotosActuales(data.votos_actuales);
-  }, []);
+    if (data.votos_turno_actual) setVotosActuales(data.votos_turno_actual); 
+}, []);
 
   // 2. Obtener estado inicial
   useEffect(() => {
@@ -532,7 +542,7 @@ export function PantallaPartida() {
     } catch (err) { console.error(err); }
   };
 
-  const esJefe = rol === "jefe";
+  const esJefe = rol === "lider";
   const esMiTurno = turnoActual === equipo;
   const puedoVotar = !esJefe && esMiTurno && !miVotoEnviado && pistaActual;
 
@@ -544,15 +554,25 @@ export function PantallaPartida() {
   const totalRojo = cartas.filter(c => c.tipo === "rojo").length;
   const totalAzul = cartas.filter(c => c.tipo === "azul").length;
 
-  if (cargando && !cartas.length) {
+  if (cargando && rol === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-transparent">
-        <p style={{ fontFamily: "var(--font-courier)", color: "#c4a060", fontSize: "14px" }}>
-          ESTABLECIENDO CONEXIÓN SEGURA...
-        </p>
-      </div>
+        <div className="min-h-screen flex items-center justify-center">
+            <p style={{ fontFamily: "var(--font-courier)", color: "#c4a060" }}>
+                ESTABLECIENDO CONEXIÓN SEGURA...
+            </p>
+        </div>
     );
-  }
+}
+
+if (error) {
+    return (
+        <div className="min-h-screen flex items-center justify-center">
+            <p style={{ fontFamily: "var(--font-courier)", color: "#cc3333" }}>
+                ERROR: {error}
+            </p>
+        </div>
+    );
+}
 
   return (
     <ScreenFrame title={esJefe ? "VISTA DEL JEFE DE ESPIONAJE" : "VISTA DEL AGENTE"}>

@@ -58,6 +58,8 @@ export function Pantalla07Lobby() {
   const { id_partida } = useParams();
   const { user } = useContext(UserContext);
 
+  const partidaIniciadaRef = useRef(false);
+
   // Estado del lobby
   const [lobbyData, setLobbyData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -88,6 +90,7 @@ export function Pantalla07Lobby() {
 
     // Si la partida ha pasado a en_curso, redirigir a la pantalla de juego
     if (data.estado === "en_curso") {
+      partidaIniciadaRef.current = true;
       navigate(`/partida/${data.id_partida}`);
     }
 
@@ -157,12 +160,12 @@ export function Pantalla07Lobby() {
     // Esto es lo que se ejecuta cuando se cierra la pantalla actual (se vuelve al home o se accede
     // al perfil).
     return () => {
-      // RF-12: notificar abandono del lobby
-      if (client.connected) {
-        client.publish({
-          destination: `/app/partida/${id_partida}/abandonarLobby`,
-          body: JSON.stringify({})
-        });
+    // Solo avisar al backend si la partida NO ha arrancado
+      if (!partidaIniciadaRef.current && stompRef.current?.connected) {
+          stompRef.current.publish({
+              destination: `/app/partida/${idPartida}/abandonarLobby`,
+              body: JSON.stringify({})
+          });
       }
       client.deactivate();
     };

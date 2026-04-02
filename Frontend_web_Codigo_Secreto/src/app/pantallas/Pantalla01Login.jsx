@@ -50,8 +50,8 @@ export function Pantalla01Login() {
         // El usuario ya existe.
         console.log("Acceso concedido. Redirigiendo al Home...");
         // Guardar el JWT en sessionStorage, para los WebSockets.
-        if (res.jwt) {
-          sessionStorage.setItem('jwt_token', res.jwt);
+        if (res.token) {
+          sessionStorage.setItem('jwt_token', res.token);
         }       
         // Se guardan los datos del jugador logueado en el UserContext.
         loginUsuario(res.jugador);

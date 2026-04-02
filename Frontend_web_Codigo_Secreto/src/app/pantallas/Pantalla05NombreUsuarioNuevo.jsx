@@ -51,8 +51,9 @@ export function Pantalla05NombreUsuarioNuevo() {
       // Caso de éxito: El usuario se ha guardado en BD y nos devuelven el JWT
   
       // Guardar el JWT en sessionStorage, para los WebSockets. 
-      if (res.jwt) {
-        sessionStorage.setItem('jwt_token', res.jwt);
+      if (res.token) {
+        sessionStorage.setItem('jwt_token', res.token
+        );
       }       
       // Se guardan los datos del jugador logueado en el UserContext.
       loginUsuario(res.jugador);
