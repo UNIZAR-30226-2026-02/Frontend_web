@@ -1,17 +1,35 @@
 /*
  * Pantalla para el manual.
+ * MODIFICADO: Los sliders de música y efectos ahora controlan el volumen real del sistema de sonido global.
  */
 
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader, SubsectionLabel } from "../components/ScreenFrame";
 import { Volume2, Music, Info, BookOpen, ArrowLeft } from "lucide-react";
-import { useState } from "react";
+// NUEVO: Importamos el hook useSound para acceder al contexto de sonido
+import { useSound } from "../hooks/useSound";
 import { useNavigate } from "react-router";
 import '../components/Manual.css'; 
 
 export function Pantalla06Manual() {
-  const [musicVol, setMusicVol] = useState(70);
-  const [sfxVol, setSfxVol] = useState(85);
   const navigate = useNavigate();
+
+  // Obtenemos del contexto los valores de volumen (0..1) y las funciones para actualizarlos
+  const { musicVolume, sfxVolume, setMusicVolume, setSfxVolume } = useSound();
+
+  // Convertimos los valores internos (0..1) a porcentaje (0..100) para mostrarlos en la UI
+  const musicPercent = Math.round(musicVolume * 100);
+  const sfxPercent = Math.round(sfxVolume * 100);
+
+  // Handles que convierten el porcentaje del slider (0..100) a fracción (0..1) y actualizan el contexto
+  const handleMusicChange = (e) => {
+    const percent = Number(e.target.value);
+    setMusicVolume(percent / 100);
+  };
+
+  const handleSfxChange = (e) => {
+    const percent = Number(e.target.value);
+    setSfxVolume(percent / 100);
+  };
 
   return (
     <ScreenFrame title="MANUAL OPERATIVO">
@@ -99,33 +117,50 @@ export function Pantalla06Manual() {
                   <SubsectionLabel icon={<Volume2 className="w-4 h-4 text-[#5a4a30]" />} label="AUDIO" borderColor="#5a4a20" />
                   <DarkCard className="audio-card">
                     
-                    {/* Slider Música */}
+                    {/* Slider Música - AHORA CONTROL EL VOLUMEN REAL */}
                     <div className="slider-group">
                       <div className="slider-header">
                         <div className="slider-label-group">
                           <Music className="w-4 h-4 text-[#888]" />
                           <span className="slider-label">Música de Fondo</span>
                         </div>
-                        <span className="slider-value">{musicVol}%</span>
+                        {/* Mostramos el porcentaje actual */}
+                        <span className="slider-value">{musicPercent}%</span>
                       </div>
                       <div className="slider-track">
-                        <div className="slider-fill music-fill" style={{ width: `${musicVol}%` }} />
-                        <input type="range" min="0" max="100" value={musicVol} onChange={(e) => setMusicVol(Number(e.target.value))} className="slider-input" />
+                        {/* Barra de progreso visual */}
+                        <div className="slider-fill music-fill" style={{ width: `${musicPercent}%` }} />
+                        {/* Input range controla el volumen real */}
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="100" 
+                          value={musicPercent} 
+                          onChange={handleMusicChange} 
+                          className="slider-input" 
+                        />
                       </div>
                     </div>
 
-                    {/* Slider SFX */}
+                    {/* Slider SFX - AHORA CONTROL EL VOLUMEN REAL */}
                     <div className="slider-group">
                       <div className="slider-header">
                         <div className="slider-label-group">
                           <Volume2 className="w-4 h-4 text-[#888]" />
                           <span className="slider-label">Efectos de Sonido</span>
                         </div>
-                        <span className="slider-value">{sfxVol}%</span>
+                        <span className="slider-value">{sfxPercent}%</span>
                       </div>
                       <div className="slider-track">
-                        <div className="slider-fill sfx-fill" style={{ width: `${sfxVol}%` }} />
-                        <input type="range" min="0" max="100" value={sfxVol} onChange={(e) => setSfxVol(Number(e.target.value))} className="slider-input" />
+                        <div className="slider-fill sfx-fill" style={{ width: `${sfxPercent}%` }} />
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="100" 
+                          value={sfxPercent} 
+                          onChange={handleSfxChange} 
+                          className="slider-input" 
+                        />
                       </div>
                     </div>
 
