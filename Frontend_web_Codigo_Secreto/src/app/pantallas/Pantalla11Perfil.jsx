@@ -1,10 +1,11 @@
 /*
  * Pantalla de perfil del agente: Aquí se muestra la información personal del jugador y se permite su edición.
+ * Ajustada a los nuevos requisitos, muestra solo las estadísticas que se pueden obtener con los datos del endpoint
  */
 import React, { useState } from "react";
 import { 
   Trophy, Target, Flame, Eye, Crown, Edit3, 
-  Check, LogOut, ArrowLeft, X, Camera, AlertTriangle, Palette
+  Check, LogOut, ArrowLeft, X, Camera, AlertTriangle, Palette, TrendingUp,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 
@@ -43,6 +44,21 @@ const TEMAS_VISUALES = [
   { id: "rose", name: "Cuarzo rosa", color: "#c67b8a", borderColor: "#a05060", bgColor: "#2a1820" },
 ];
 
+// DATOS ESTADÍSTICOS (vendrán del backend)
+  const datosAgente = {
+    balas: 500,
+    partidas_jugadas: 137,
+    victorias: 79,
+    numAciertos: 789,
+    numFallos: 342
+  };
+
+  // Cálculos derivados
+  const totalIntentos = datosAgente.numAciertos + datosAgente.numFallos;
+  const tasaExito = totalIntentos > 0 ? ((datosAgente.numAciertos / totalIntentos) * 100).toFixed(1) : 0;
+  const porcentajeVictorias = datosAgente.partidas_jugadas > 0 
+    ? ((datosAgente.victorias / datosAgente.partidas_jugadas) * 100).toFixed(0) 
+    : 0;
 
 export function Pantalla11Perfil() {
   const navegar = useNavigate();
@@ -220,45 +236,38 @@ export function Pantalla11Perfil() {
             </div>
 
             {/* Estadísticas de Servicio */}
-            <SubsectionLabel label="ESTADÍSTICAS DE SERVICIO" borderColor="#4a3a20" />
+            <SubsectionLabel label="RESUMEN OPERATIVO" borderColor="#4a3a20" />
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
               <TarjetaEstadistica 
-                icono={Eye} titulo="MISIONES TOTALES" valor="137" 
-                subtexto="79 victorias" colorBarra="#5090c0" porcentaje="58%" iconoColor="#80a0d0" 
+                icono={Eye} titulo="MISIONES" valor={datosAgente.partidas_jugadas} 
+                subtexto={`${datosAgente.victorias} victorias`} colorBarra="#5090c0" porcentaje={`${porcentajeVictorias}%`} iconoColor="#80a0d0" 
               />
               <TarjetaEstadistica 
-                icono={Target} titulo="TASA DE ÉXITO" valor="65.5%" 
-                subtexto="Efectividad operativa" colorBarra="#50a060" porcentaje="65%" iconoColor="#80c090" 
+                icono={Target} titulo="TASA DE ÉXITO" valor={`${tasaExito}%`} 
+                subtexto="Precisión de inteligencia" colorBarra="#50a060" porcentaje={`${tasaExito}%`} iconoColor="#80c090" 
               />
-              
-              <DarkCard className="p-4 sm:p-5">
-                <div className="flex items-center justify-between mb-2">
-                  <Flame className="w-5 h-5 text-[#d0a060]" />
-                  <span className="fuente-courier text-[#d4b878]" style={{ fontSize: 24 }}>5</span>
-                </div>
-                <p className="fuente-elite text-[#e8dcc8] tracking-[0.1em]" style={{ fontSize: 13 }}>RACHA ACTUAL</p>
-                <p className="fuente-courier text-[#888] mt-1" style={{ fontSize: 10 }}>Mejor: 13</p>
-                <div className="mt-2 flex gap-1">
-                  {[1,2,3,4,5].map(i => <div key={i} className="h-1 flex-1 bg-[#d4b878] rounded-full" />)}
-                  {[6,7,8].map(i => <div key={i} className="h-1 flex-1 bg-[#444] rounded-full" />)}
-                </div>
+              <DarkCard className="p-4 sm:p-5 flex flex-col justify-center">
+                 <div className="flex items-center gap-3 mb-2">
+                    <TrendingUp className="w-5 h-5 text-[#d0a060]" />
+                    <p className="fuente-elite text-[#e8dcc8] tracking-widest text-xs">RENDIMIENTO</p>
+                 </div>
+                 <p className="fuente-courier text-[#888]" style={{ fontSize: 10 }}>Ratio Victoria/Derrota</p>
+                 <p className="fuente-courier text-[#d4b878] text-xl mt-1">
+                    {datosAgente.victorias} / {datosAgente.partidas_jugadas - datosAgente.victorias}
+                 </p>
               </DarkCard>
             </div>
 
             {/* Desglose Detallado */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-              {[
-                { etiqueta: "Pistas dadas", valor: "342", color: "#8b2020" },
-                { etiqueta: "Aciertos totales", valor: "789", color: "#2a5a3a" },
-                { etiqueta: "Como Jefe", valor: "45", color: "#2a3a5a" },
-                { etiqueta: "Como Agente", valor: "82", color: "#5a4a20" },
-              ].map((item) => (
-                <DarkCard key={item.etiqueta} className="p-3 sm:p-4">
-                  <div className="h-1 rounded-full mb-2" style={{ backgroundColor: item.color }} />
-                  <p className="fuente-courier text-[#d4b878]" style={{ fontSize: 20 }}>{item.valor}</p>
-                  <p className="fuente-courier text-[#888] mt-1" style={{ fontSize: 10 }}>{item.etiqueta}</p>
-                </DarkCard>
-              ))}
+            <div className="grid grid-cols-2 gap-3 mb-8">
+              <DarkCard className="p-4 border-l-4 border-emerald-700">
+                <p className="fuente-courier text-[#d4b878] text-2xl">{datosAgente.numAciertos}</p>
+                <p className="fuente-courier text-[#888] text-[10px] uppercase">Aciertos Confirmados</p>
+              </DarkCard>
+              <DarkCard className="p-4 border-l-4 border-red-900">
+                <p className="fuente-courier text-[#d4b878] text-2xl">{datosAgente.numFallos}</p>
+                <p className="fuente-courier text-[#888] text-[10px] uppercase">Fallos en Misión</p>
+              </DarkCard>
             </div>
 
             {/* SECCIÓN DE PERSONALIZACIÓN */}
