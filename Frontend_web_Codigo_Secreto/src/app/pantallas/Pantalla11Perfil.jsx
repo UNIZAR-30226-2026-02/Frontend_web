@@ -228,45 +228,31 @@ export function Pantalla11Perfil() {
                 
                 <div className="flex items-center gap-3 mt-3 flex-wrap">
                   <div className="border-2 border-[#4a3a20] rounded-sm px-3 py-1">
-                    <span className="fuente-elite text-[#4a3a20] tracking-[0.1em]" style={{ fontSize: 11 }}>NIVEL DE ACCESO: ALTO</span>
+                    <span className="fuente-elite text-[#4a3a20] tracking-[0.1em]" style={{ fontSize: 11 }}>AGENTE DE ORO</span>
                   </div>
                   <RedStamp text="TOP SECRET" className="rotate-[-6deg]" />
                 </div>
               </div>
             </div>
 
-            {/* Estadísticas de Servicio */}
+            {/* Estadísticas de Servicio: Solo Partidas y Votos en un Grid simétrico */}
             <SubsectionLabel label="RESUMEN OPERATIVO" borderColor="#4a3a20" />
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-              <TarjetaEstadistica 
-                icono={Eye} titulo="MISIONES" valor={datosAgente.partidas_jugadas} 
-                subtexto={`${datosAgente.victorias} victorias`} colorBarra="#5090c0" porcentaje={`${porcentajeVictorias}%`} iconoColor="#80a0d0" 
-              />
-              <TarjetaEstadistica 
-                icono={Target} titulo="TASA DE ÉXITO" valor={`${tasaExito}%`} 
-                subtexto="Precisión de inteligencia" colorBarra="#50a060" porcentaje={`${tasaExito}%`} iconoColor="#80c090" 
-              />
-              <DarkCard className="p-4 sm:p-5 flex flex-col justify-center">
-                 <div className="flex items-center gap-3 mb-2">
-                    <TrendingUp className="w-5 h-5 text-[#d0a060]" />
-                    <p className="fuente-elite text-[#e8dcc8] tracking-widest text-xs">RENDIMIENTO</p>
-                 </div>
-                 <p className="fuente-courier text-[#888]" style={{ fontSize: 10 }}>Ratio Victoria/Derrota</p>
-                 <p className="fuente-courier text-[#d4b878] text-xl mt-1">
-                    {datosAgente.victorias} / {datosAgente.partidas_jugadas - datosAgente.victorias}
-                 </p>
-              </DarkCard>
-            </div>
-
-            {/* Desglose Detallado */}
             <div className="grid grid-cols-2 gap-3 mb-8">
               <DarkCard className="p-4 border-l-4 border-emerald-700">
-                <p className="fuente-courier text-[#d4b878] text-2xl">{datosAgente.numAciertos}</p>
-                <p className="fuente-courier text-[#888] text-[10px] uppercase">Aciertos Confirmados</p>
+                <p className="fuente-courier text-[#d4b878] text-2xl sm:text-3xl">{datosAgente.victorias}</p>
+                <p className="fuente-courier text-[#888] text-[10px] uppercase">Partidas Ganadas</p>
               </DarkCard>
               <DarkCard className="p-4 border-l-4 border-red-900">
-                <p className="fuente-courier text-[#d4b878] text-2xl">{datosAgente.numFallos}</p>
-                <p className="fuente-courier text-[#888] text-[10px] uppercase">Fallos en Misión</p>
+                <p className="fuente-courier text-[#d4b878] text-2xl sm:text-3xl">{datosAgente.partidas_jugadas - datosAgente.victorias}</p>
+                <p className="fuente-courier text-[#888] text-[10px] uppercase">Partidas Perdidas</p>
+              </DarkCard>
+              <DarkCard className="p-4 border-l-4 border-emerald-700">
+                <p className="fuente-courier text-[#d4b878] text-2xl sm:text-3xl">{datosAgente.numAciertos}</p>
+                <p className="fuente-courier text-[#888] text-[10px] uppercase">Votos Acertados</p>
+              </DarkCard>
+              <DarkCard className="p-4 border-l-4 border-red-900">
+                <p className="fuente-courier text-[#d4b878] text-2xl sm:text-3xl">{datosAgente.numFallos}</p>
+                <p className="fuente-courier text-[#888] text-[10px] uppercase">Votos Fallados</p>
               </DarkCard>
             </div>
 

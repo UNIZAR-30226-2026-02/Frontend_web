@@ -505,6 +505,7 @@ export function PantallaPartida() {
     } 
     // Actualizar turno actual
     if (data.equipo_turno_actual !== undefined) setTurnoActual(data.equipo_turno_actual);
+    console.log("Turno actual:", data.equipo_turno_actual);
     if (data.rojo_gana !== undefined) setRojoGana(data.rojo_gana);  
 
     // Mirar 'fase_turno' para ver si se está esperando la pista o votando.
@@ -821,8 +822,8 @@ export function PantallaPartida() {
         {/* DERECHA: Turno y Temporizador (Alineados horizontalmente) */}
         <div className="flex items-center gap-4 z-10 mr-16">
           
-          {/* Turno */}
-          <div className="current-turn-badge">
+          {/* Turno. Se pone de color azul o rojo en función del equipo que tenga el turno actual.*/}
+          <div className={`current-turn-badge ${turnoActual?.toLowerCase() || ""}`}>
             <span>TURNO {turnoActual?.toUpperCase() || "..."}</span>
           </div>
 
