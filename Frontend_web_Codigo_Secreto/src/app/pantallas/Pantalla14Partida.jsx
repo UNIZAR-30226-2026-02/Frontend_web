@@ -17,7 +17,7 @@ import SockJS from "sockjs-client";
 
 import {
   Clock, Send as SendIcon, Check, Vote, Skull,
-  AlertTriangle, EyeOff, ArrowLeft
+  AlertTriangle, EyeOff, ArrowLeft, Loader2
 } from "lucide-react";
 
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp } from "../components/ScreenFrame";
@@ -348,12 +348,16 @@ function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista, esMiTurno }) {
  * de si es su turno o no).
  */
 function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, votosActuales, totalJugadores, onVotar, puedoVotar }) {
+  // Corrección 3: spinner mientras el Jefe analiza el tablero (sin pista activa)
   if (!pista) {
     return (
       <DarkCard className="voting-action-panel">
-        <p style={{ fontFamily: "var(--font-courier)", color: "#888", fontSize: "11px", textAlign: "center" }}>
-          Esperando pista del Jefe de Espionaje...
-        </p>
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="animate-spin text-[#c4a060]" />
+          <p style={{ fontFamily: "var(--font-courier)", color: "#888", fontSize: "11px", textAlign: "center" }}>
+            El Jefe de Espionaje está analizando el tablero...
+          </p>
+        </div>
       </DarkCard>
     );
   }
@@ -517,14 +521,18 @@ export function PantallaPartida() {
 
     // Manejo de pista actual:
     // - Si el backend envía una pista, significa que estamos en medio de una votación.
-    // - Si no hay pista (null), el turno actual puede continuar (si se acertó una carta y quedan más) 
+    // - Si no hay pista (null), el turno actual puede continuar (si se acertó una carta y quedan más)
     //   o ha cambiado de equipo. En cualquier caso, se permite al jefe dar una nueva pista.
     if (data.pista_actual) {
       setPistaActual(data.pista_actual);
       setPistaEnviada(true);      // El jefe ya envió esta pista
     } else {
+      // Corrección 1 (Bug 2): limpiar estado local del agente cuando no hay pista activa.
+      // Esto cubre el cambio de equipo y el inicio de turno (fase esperando_pista).
       setPistaActual(null);
-      setPistaEnviada(false);     // El jefe puede dar una nueva pista
+      setPistaEnviada(false);       // El jefe puede dar una nueva pista
+      setMiVotoEnviado(false);      // Permitir votar en la siguiente ronda
+      setCartaSeleccionada(null);   // Limpiar selección anterior del tablero
     }
 
     // Actualizar votos si vienen
@@ -553,15 +561,16 @@ export function PantallaPartida() {
   }, [idPartida, rol, aplicarEstadoTablero]);
 
   // ------------------------------------------------------------
-  // 4. LIMPIAR SELECCIÓN Y VOTO LOCAL CUANDO CAMBIA EL TURNO
-  //    Evita que un agente vote fuera de su turno.
+  // 4. LIMPIAR SELECCIÓN Y VOTO LOCAL CUANDO CAMBIA EL TURNO O LA FASE
+  //    Corrección 2 (Bug 1): también resetea cuando faseTurno pasa a "esperando_pista",
+  //    lo que cubre el cambio de equipo y el inicio de cada turno.
   // ------------------------------------------------------------
   useEffect(() => {
-    if (turnoActual !== equipo) {
+    if (turnoActual !== equipo || faseTurno === "esperando_pista") {
       setCartaSeleccionada(null);
       setMiVotoEnviado(false);
     }
-  }, [turnoActual, equipo]);
+  }, [turnoActual, equipo, faseTurno]);
 
   // ------------------------------------------------------------
   // 5. WEBSOCKETS: SUSCRIPCIÓN A EVENTOS EN TIEMPO REAL
@@ -589,8 +598,17 @@ export function PantallaPartida() {
         client.subscribe(`/user/queue/partidas/${idPartida}/estado`, (msg) => {
           const data = JSON.parse(msg.body);
           aplicarEstadoTablero(data);
-          setMiVotoEnviado(false);
-          setCartaSeleccionada(null);
+          // Corrección 5 (Bug 5): reset condicional.
+          // Si hay votos registrados es una actualización parcial (otros agentes votando):
+          //   → NO resetear, el agente que ya votó no debe poder volver a votar.
+          // Si no hay votos es una nueva ronda dentro del mismo turno (backend limpió votos):
+          //   → SÍ resetear para permitir votar la siguiente carta.
+          // Cambio de equipo/fase: gestionado por el useEffect de faseTurno/equipo.
+          const hayVotos = (data.votos_turno_actual?.length || 0) > 0;
+          if (!hayVotos) {
+            setMiVotoEnviado(false);
+            setCartaSeleccionada(null);
+          }
         });
 
         // Temporizador del turno
