@@ -58,7 +58,7 @@ export function Pantalla15FinPartida() {
   // Vistas de Carga y Error
   if (cargando) {
     return (
-      <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center font-['Courier_Prime',monospace]">
+      <div className="min-h-screen bg-transparent flex items-center justify-center font-['Courier_Prime',monospace]">
         <p className="text-[#c4a060] tracking-widest uppercase">RECUPERANDO INFORME CLASIFICADO...</p>
       </div>
     );
@@ -66,7 +66,7 @@ export function Pantalla15FinPartida() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#1a1a1a] flex flex-col items-center justify-center font-['Courier_Prime',monospace] p-4 text-center">
+      <div className="min-h-screen bg-transparent flex flex-col items-center justify-center font-['Courier_Prime',monospace] p-4 text-center">
         <p className="text-[#cc3333] mb-4">ERROR AL DESENCRIPTAR INFORME: {error}</p>
         <button onClick={() => navigate("/home")} className="text-[#c4a060] border border-[#c4a060] px-4 py-2 hover:bg-[#c4a060]/10">VOLVER AL ESCRITORIO</button>
       </div>
@@ -74,7 +74,7 @@ export function Pantalla15FinPartida() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a] p-4 sm:p-8 lg:p-12 pt-16 sm:pt-12 font-['Courier_Prime',monospace]">
+    <div className="min-h-screen bg-transparent p-4 sm:p-8 lg:p-12 pt-16 sm:pt-12 font-['Courier_Prime',monospace]">
       <div className="max-w-4xl mx-auto relative">
 
         <button
