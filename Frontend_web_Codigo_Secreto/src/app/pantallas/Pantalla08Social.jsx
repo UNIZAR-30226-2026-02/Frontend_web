@@ -93,7 +93,7 @@ export function Pantalla08Social() {
             {/* Tabs Principales actualizados con contador */}
             <div className="flex gap-2 sm:gap-3 mb-5 flex-wrap">
               {[
-                { key: "friends", label: "AGENTES ALIADOS" },
+                { key: "friends", label: "AMIGOS" },
                 { key: "leaderboard", label: "CLASIFICACIÓN" },
                 { key: "requests", label: `SOLICITUDES (${requests.length})` },
               ].map((t) => (
@@ -122,16 +122,18 @@ export function Pantalla08Social() {
 
             {/* CONTENIDO DE TABS */}
             {tab === "friends" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 {friends.map((f) => (
-                  <DarkCard key={f.name} className="p-3 sm:p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${f.online ? "bg-[#50a050] shadow-[0_0_6px_rgba(80,160,80,0.5)]" : "bg-[#8b2020]"}`} />
-                      <div className="min-w-0">
-                        <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 13 }}>{f.name}</p>
-                        <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 10 }}>{f.rank} — {f.wins} victorias</p>
-                      </div>
-                    </div>
+                  <DarkCard key={f.name} className="p-3 sm:p-4 flex items-center justify-between gap-3">
+                    {/* Nombre alineado a la izquierda (ocupa el espacio disponible y se trunca si es muy largo) */}
+                    <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 14 }}>
+                      {f.name}
+                    </p>
+                    
+                    {/* Victorias alineadas a la derecha (flex-shrink-0 evita que se encoja el texto) */}
+                    <p className="font-['Courier_Prime',monospace] text-[#888] flex-shrink-0" style={{ fontSize: 11 }}>
+                      {f.wins} victorias
+                    </p>
                   </DarkCard>
                 ))}
               </div>
@@ -139,7 +141,7 @@ export function Pantalla08Social() {
 
             {tab === "leaderboard" && (
               <div>
-                <div className="flex justify-center mb-5">
+                <div className="flex justify-center mb-10">
                   <div className="inline-flex bg-[#2a2218] border border-[#5a4a30]/50 rounded-sm p-1 gap-1">
                     <button
                       onClick={() => setMostrarRankingAmigos(false)}
@@ -158,10 +160,14 @@ export function Pantalla08Social() {
                   </div>
                 </div>
 
-                <div className="flex items-end justify-center gap-3 sm:gap-4 mb-5">
+                {/* Contenedor del podio con mt-6 para dejar espacio al 1º puesto */}
+                <div className="flex items-end justify-center gap-3 sm:gap-4 mb-5 mt-12">
                   {(mostrarRankingAmigos ? [friendsLeaderboard[1], friendsLeaderboard[0], friendsLeaderboard[2]] : [leaderboard[1], leaderboard[0], leaderboard[2]])
                     .map((p, i) => (
-                      <DarkCard key={p.name} className={`p-3 sm:p-4 text-center ${i === 1 ? "w-[140px] sm:w-[180px] -mb-2 border-[#d4b878]/30" : "w-[110px] sm:w-[150px]"}`}>
+                      <DarkCard 
+                        key={p.name} 
+                        className={`p-3 sm:p-4 text-center transition-transform ${i === 1 ? "w-[140px] sm:w-[180px] -translate-y-6 border-[#d4b878]/30 shadow-[0_8px_20px_rgba(212,184,120,0.15)] z-10" : "w-[110px] sm:w-[150px]"}`}
+                      >
                         <span className="text-2xl sm:text-3xl">{p.badge}</span>
                         <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] mt-1 truncate" style={{ fontSize: 11 }}>{p.name}</p>
                         <p className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 18 }}>{p.wins}</p>
@@ -201,7 +207,7 @@ export function Pantalla08Social() {
                         <div className="min-w-0">
                           <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 14 }}>{r.name}</p>
                           <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 10 }}>
-                            {r.rank} • {r.wins} victorias • <span className="italic text-[#b89055]">{r.timeAgo}</span>
+                            {r.wins} victorias • <span className="italic text-[#b89055]">{r.timeAgo}</span>
                           </p>
                         </div>
                       </div>

@@ -259,6 +259,21 @@
     padding-top: 0.375rem;
     padding-bottom: 0.375rem;
 }
+
+/* Estilo para el turno del equipo Rojo */
+.current-turn-badge.rojo {
+  background-color: var(--theme-red);
+  border: 1px solid var(--theme-red-border);
+  color: #ffffff; 
+}
+
+/* Estilo para el turno del equipo Azul */
+.current-turn-badge.azul {
+  background-color: var(--theme-blue);
+  border: 1px solid var(--color-blue-500);
+  color: #ffffff; 
+}
+
 .current-turn-badge span {
     font-family: var(--font-special-elite);
     color: #e08080;

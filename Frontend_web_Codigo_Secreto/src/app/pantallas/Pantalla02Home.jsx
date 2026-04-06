@@ -100,9 +100,15 @@ export function Pantalla02Home() {
                             value={privateCode}
                             onChange={(e) => setPrivateCode(e.target.value.toUpperCase())}
                             maxLength={8}
-                            onClick={(e) => { e.stopPropagation(); handleJoinMission(); }}
+                            onClick={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.stopPropagation();
+                                handleJoinMission();
+                              }
+                            }}
                           />
-                          <button className="btn-validate" onClick={(e) => { e.stopPropagation(); navigate("/lobby"); }}>
+                          <button className="btn-validate" onClick={(e) => { e.stopPropagation(); handleJoinMission(); }}>
                             <ArrowRight size={16} />
                           </button>
                         </div>

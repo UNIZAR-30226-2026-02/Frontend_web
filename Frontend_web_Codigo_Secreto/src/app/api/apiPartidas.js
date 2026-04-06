@@ -92,7 +92,8 @@ export async function unirsePartidaPrivada(codigo) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || 'Código de partida inválido');
   }
-  return res.json(); // {id_partida} para redirigir al lobby.
+  const id = await res.json();
+  return { id_partida: id }; // backend retorna un Integer puro, lo encapsulamos.
 }
 // -----------------------------------------------------
 

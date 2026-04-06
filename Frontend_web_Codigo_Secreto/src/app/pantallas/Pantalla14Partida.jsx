@@ -17,7 +17,7 @@ import SockJS from "sockjs-client";
 
 import {
   Clock, Send as SendIcon, Check, Vote, Skull,
-  AlertTriangle, EyeOff, ArrowLeft
+  AlertTriangle, EyeOff, ArrowLeft, Loader2
 } from "lucide-react";
 
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp } from "../components/ScreenFrame";
@@ -228,7 +228,7 @@ function ChatPanel({ mensajes, onEnviar, esJefe, chatInputRef }) {
  * Panel para que el Jefe de Espionaje pueda dar una pista.
  * Solo visible cuando no hay una pista activa (pistaEnviada === false).
  */
-function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista }) {
+function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista, esMiTurno }) {
   const [palabra, setPalabra] = useState("");
   const [numero, setNumero] = useState(2);
 
@@ -257,6 +257,21 @@ function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista }) {
         </div>
         <p style={{ fontFamily: "var(--font-courier)", color: "#888", fontSize: "10px", marginTop: "0.5rem" }}>
           Esperando votación de los agentes...
+        </p>
+      </DarkCard>
+    );
+  }
+
+  // Si no es el turno de su equipo no puede enviar pista.
+  if (!esMiTurno) {
+    return (
+      <DarkCard className="voting-action-panel">
+        <div className="no-votes-alert" style={{ marginBottom: "0.75rem", justifyContent: "center" }}>
+          <AlertTriangle className="alert-icon-sm" />
+          <span className="alert-text-xs">NO ES TU TURNO</span>
+        </div>
+        <p style={{ fontFamily: "var(--font-courier)", color: "#888", fontSize: "11px", textAlign: "center" }}>
+          Esperando a que el equipo contrario termine su turno...
         </p>
       </DarkCard>
     );
@@ -333,12 +348,16 @@ function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista }) {
  * de si es su turno o no).
  */
 function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, votosActuales, totalJugadores, onVotar, puedoVotar }) {
+  // Corrección 3: spinner mientras el Jefe analiza el tablero (sin pista activa)
   if (!pista) {
     return (
       <DarkCard className="voting-action-panel">
-        <p style={{ fontFamily: "var(--font-courier)", color: "#888", fontSize: "11px", textAlign: "center" }}>
-          Esperando pista del Jefe de Espionaje...
-        </p>
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="animate-spin text-[#c4a060]" />
+          <p style={{ fontFamily: "var(--font-courier)", color: "#888", fontSize: "11px", textAlign: "center" }}>
+            El Jefe de Espionaje está analizando el tablero...
+          </p>
+        </div>
       </DarkCard>
     );
   }
@@ -423,6 +442,10 @@ export function PantallaPartida() {
   const [miVotoEnviado, setMiVotoEnviado] = useState(false);
   const [totalRojo, setTotalRojo] = useState(0);
   const [totalAzul, setTotalAzul] = useState(0);
+  // Estados para la fase y el marcador
+  const [faseTurno, setFaseTurno] = useState(null);
+  const [cartasRojasRestantes, setCartasRojasRestantes] = useState(0);
+  const [cartasAzulesRestantes, setCartasAzulesRestantes] = useState(0);
 
   // Chat y tiempo
   const [mensajes, setMensajes] = useState([]);
@@ -450,6 +473,14 @@ export function PantallaPartida() {
         const data = await res.json();
         setRol(data.rol);
         setEquipo(data.equipo);
+        // Importante. Para mostrar el marcador en la partida, hay que saber qué equipo empieza
+        // y asignarle 8 o 9 cartas. Se obtiene el equipo del primer turno, que empieza y tiene
+        // una carta más que desvelar que el otro equipo. No sirve con mirar el tipo de las cartas
+        // para ver cuántas hay rojas o azules, ya que los agentes reciben el tipo como null.
+        if (data.equipo_inicial !== undefined){
+          setTotalRojo(data.equipo_inicial === "rojo" ? 9 : 8);
+          setTotalAzul(data.equipo_inicial === "rojo" ? 8 : 9);
+        }
       } catch (err) {
         setError(err.message);
         setCargando(false);
@@ -471,21 +502,37 @@ export function PantallaPartida() {
     }
 
     // Actualizar cartas
-    if (data.tablero?.cartas) setCartas(data.tablero.cartas);
+    if (data.tablero?.cartas){
+      // Importante: el backend da las cartas desordenadas (en función de su fecha de actualización)
+      // y hay que ordenarlas para que siempre se muestren en el tablero en el mismo orden.
+      setCartas(data.tablero.cartas.sort((a, b) => a.id_carta_tablero - b.id_carta_tablero));
+    } 
     // Actualizar turno actual
     if (data.equipo_turno_actual !== undefined) setTurnoActual(data.equipo_turno_actual);
-    if (data.rojo_gana !== undefined) setRojoGana(data.rojo_gana);
+    console.log("Turno actual:", data.equipo_turno_actual);
+    if (data.rojo_gana !== undefined) setRojoGana(data.rojo_gana);  
+
+    // Mirar 'fase_turno' para ver si se está esperando la pista o votando.
+    if (data.fase_turno !== undefined) setFaseTurno(data.fase_turno);
+  
+    // Utilizar 'cartasRojasRestantes' y 'cartasAzulesRestantes' para mostrar el marcador de cada equipo.
+    if (data.cartas_rojas_restantes !== undefined) setCartasRojasRestantes(data.cartas_rojas_restantes);
+    if (data.cartas_azules_restantes !== undefined) setCartasAzulesRestantes(data.cartas_azules_restantes);
 
     // Manejo de pista actual:
     // - Si el backend envía una pista, significa que estamos en medio de una votación.
-    // - Si no hay pista (null), el turno actual puede continuar (si se acertó una carta y quedan más) 
+    // - Si no hay pista (null), el turno actual puede continuar (si se acertó una carta y quedan más)
     //   o ha cambiado de equipo. En cualquier caso, se permite al jefe dar una nueva pista.
     if (data.pista_actual) {
       setPistaActual(data.pista_actual);
       setPistaEnviada(true);      // El jefe ya envió esta pista
     } else {
+      // Corrección 1 (Bug 2): limpiar estado local del agente cuando no hay pista activa.
+      // Esto cubre el cambio de equipo y el inicio de turno (fase esperando_pista).
       setPistaActual(null);
-      setPistaEnviada(false);     // El jefe puede dar una nueva pista
+      setPistaEnviada(false);       // El jefe puede dar una nueva pista
+      setMiVotoEnviado(false);      // Permitir votar en la siguiente ronda
+      setCartaSeleccionada(null);   // Limpiar selección anterior del tablero
     }
 
     // Actualizar votos si vienen
@@ -504,14 +551,6 @@ export function PantallaPartida() {
         if (!res.ok) return;
         const data = await res.json();
         aplicarEstadoTablero(data);
-        // Importante. Para mostrar el marcador en la partida, hay que saber qué equipo empieza
-        // y asignarle 8 o 9 cartas. Se obtiene el equipo del primer turno, que empieza y tiene
-        // una carta más que desvelar que el otro equipo. No sirve con mirar el tipo de las cartas
-        // para ver cuántas hay rojas o azules, ya que los agentes reciben el tipo como null.
-        if (data.equipo_turno_actual !== undefined){
-          setTotalRojo(data.equipo_turno_actual === "rojo" ? 9 : 8);
-          setTotalAzul(data.equipo_turno_actual === "rojo" ? 8 : 9);
-        }
       } catch (err) {
         console.warn("Error cargando estado inicial", err);
       } finally {
@@ -522,15 +561,16 @@ export function PantallaPartida() {
   }, [idPartida, rol, aplicarEstadoTablero]);
 
   // ------------------------------------------------------------
-  // 4. LIMPIAR SELECCIÓN Y VOTO LOCAL CUANDO CAMBIA EL TURNO
-  //    Evita que un agente vote fuera de su turno.
+  // 4. LIMPIAR SELECCIÓN Y VOTO LOCAL CUANDO CAMBIA EL TURNO O LA FASE
+  //    Corrección 2 (Bug 1): también resetea cuando faseTurno pasa a "esperando_pista",
+  //    lo que cubre el cambio de equipo y el inicio de cada turno.
   // ------------------------------------------------------------
   useEffect(() => {
-    if (turnoActual !== equipo) {
+    if (turnoActual !== equipo || faseTurno === "esperando_pista") {
       setCartaSeleccionada(null);
       setMiVotoEnviado(false);
     }
-  }, [turnoActual, equipo]);
+  }, [turnoActual, equipo, faseTurno]);
 
   // ------------------------------------------------------------
   // 5. WEBSOCKETS: SUSCRIPCIÓN A EVENTOS EN TIEMPO REAL
@@ -558,8 +598,17 @@ export function PantallaPartida() {
         client.subscribe(`/user/queue/partidas/${idPartida}/estado`, (msg) => {
           const data = JSON.parse(msg.body);
           aplicarEstadoTablero(data);
-          setMiVotoEnviado(false);
-          setCartaSeleccionada(null);
+          // Corrección 5 (Bug 5): reset condicional.
+          // Si hay votos registrados es una actualización parcial (otros agentes votando):
+          //   → NO resetear, el agente que ya votó no debe poder volver a votar.
+          // Si no hay votos es una nueva ronda dentro del mismo turno (backend limpió votos):
+          //   → SÍ resetear para permitir votar la siguiente carta.
+          // Cambio de equipo/fase: gestionado por el useEffect de faseTurno/equipo.
+          const hayVotos = (data.votos_turno_actual?.length || 0) > 0;
+          if (!hayVotos) {
+            setMiVotoEnviado(false);
+            setCartaSeleccionada(null);
+          }
         });
 
         // Temporizador del turno
@@ -644,23 +693,25 @@ export function PantallaPartida() {
    * @param {number} id_carta - ID de la carta seleccionada
    */
   const handleVotar = useCallback((id_carta) => {
+    // Si no estoy conectado, no tengo carta, ya voté o la fase no es correcta, bloquear.
+  //if (!stompRef.current?.connected || !id_carta || miVotoEnviado || !pistaActual) return;
   if (!stompRef.current?.connected || !id_carta || miVotoEnviado || !pistaActual) return;
-  const idTurno = pistaActual.idTurno; // ESTO NO SE SI DEBERÍA SER ASÍ PERO EL BACKEND PIDE ID_TURNO
-  if (!idTurno) {
+  //const idTurno = pistaActual.idTurno; // ESTO NO SE SI DEBERÍA SER ASÍ PERO EL BACKEND PIDE ID_TURNO
+  /*if (!idTurno) {
     console.error("No se puede votar: falta idTurno en la pista");
     return;
-  }
+  }*/
   stompRef.current.publish({
     destination: `/app/partidas/${idPartida}/votar`,
     body: JSON.stringify({
-      idCartaTablero: id_carta,   
-      tag: user?.tag || "Agente",
-      equipo: equipo,
-      idTurno: idTurno
+      id_carta_tablero: id_carta,   
+      //tag: user?.tag || "Agente",
+      //equipo: equipo,
+      //idTurno: idTurno
     })
   });
   setMiVotoEnviado(true);
-}, [idPartida, miVotoEnviado, pistaActual, user?.tag, equipo]);
+}, [idPartida, miVotoEnviado, pistaActual/*puedoVotar*/]);
 
     /**
    * Enviar mensaje al chat del equipo.
@@ -693,7 +744,10 @@ export function PantallaPartida() {
   // ------------------------------------------------------------
   const esJefe = rol === "lider";
   const esMiTurno = turnoActual === equipo;
-  const puedoVotar = !esJefe && esMiTurno && !miVotoEnviado && pistaActual !== null;
+  //const puedoVotar = !esJefe && esMiTurno && !miVotoEnviado && pistaActual !== null;
+  const puedoVotar = !esJefe && esMiTurno && faseTurno === "votando" && !miVotoEnviado;
+
+  console.log("esJefe: " + esJefe + " | esMiTurno: " + esMiTurno + " | faseTurno: " + faseTurno + " | puedoVotar: " + puedoVotar, + miVotoEnviado);
 
   const cartaSeleccionadaObj = cartas.find(c => c.id_carta_tablero === cartaSeleccionada);
   const palabraSeleccionada = cartaSeleccionadaObj?.palabra;
@@ -751,7 +805,7 @@ export function PantallaPartida() {
       {/* Barra superior con estadísticas y controles */}
       <div className="relative flex justify-between items-center w-full mb-6 min-h-[4rem]">
         
-        {/* 1. IZQUIERDA: Botón Abortar y Marcador */}
+        {/* IZQUIERDA: Botón Abortar y Marcador */}
         <div className="flex items-center gap-4 z-10">
           
           {/* Botón Abortar (Color más apagado, sin resplandor, estilo más rústico) */}
@@ -770,7 +824,7 @@ export function PantallaPartida() {
           </DarkCard>
         </div>
 
-        {/* 2. CENTRO: Rol del Jugador */}
+        {/* CENTRO: Rol del Jugador */}
         <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none z-0">
           <span className="font-['Courier_Prime',monospace] text-sm text-[#e8dcc8] tracking-widest font-bold uppercase leading-tight">
             Eres
@@ -783,11 +837,11 @@ export function PantallaPartida() {
           </span>
         </div>
 
-        {/* 3. DERECHA: Turno y Temporizador (Alineados horizontalmente) */}
+        {/* DERECHA: Turno y Temporizador (Alineados horizontalmente) */}
         <div className="flex items-center gap-4 z-10 mr-16">
           
-          {/* Turno */}
-          <div className="current-turn-badge">
+          {/* Turno. Se pone de color azul o rojo en función del equipo que tenga el turno actual.*/}
+          <div className={`current-turn-badge ${turnoActual?.toLowerCase() || ""}`}>
             <span>TURNO {turnoActual?.toUpperCase() || "..."}</span>
           </div>
 
@@ -825,7 +879,7 @@ export function PantallaPartida() {
         <div className="side-panels-column">
           <ChatPanel mensajes={mensajes} onEnviar={handleEnviarMensaje} esJefe={esJefe} chatInputRef={chatInputRef} />
           {esJefe ? (
-            <PanelPistaJefe onEnviarPista={handleEnviarPista} pistaEnviada={pistaEnviada} pista={pistaActual} />
+            <PanelPistaJefe onEnviarPista={handleEnviarPista} pistaEnviada={pistaEnviada} pista={pistaActual} esMiTurno={esMiTurno} />
           ) : (
             <PanelVotacionAgente
               pista={pistaActual}
