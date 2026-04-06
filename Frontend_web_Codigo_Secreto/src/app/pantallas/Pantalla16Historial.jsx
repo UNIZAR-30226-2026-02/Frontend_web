@@ -7,16 +7,16 @@ import { IconoBala } from "../components/IconoBala";
 
 // Datos de ejemplo
 const history = [
-  { id: 1, name: "Misión de Béjar", date: "24/02/2026", result: "Victoria", role: "Agente", team: "Rojo", duration: "12:34", reward: 20 },
-  { id: 2, name: "Misión de Adriana", date: "23/02/2026", result: "Derrota", role: "Jefe", team: "Azul", duration: "08:45", reward: 10 },
-  { id: 3, name: "Misión de Berta", date: "23/02/2026", result: "Victoria", role: "Agente", team: "Rojo", duration: "15:02", reward: 20 },
-  { id: 4, name: "Misión de Lidia", date: "22/02/2026", result: "Victoria", role: "Jefe", team: "Rojo", duration: "10:18", reward: 20 },
-  { id: 5, name:"Misión de Imad", date: "22/02/2026", result: "Derrota", role: "Agente", team: "Azul", duration: "06:30", reward: 10 },
-  { id: 6, name: "Misión de Rocío", date: "21/02/2026", result: "Victoria", role: "Agente", team: "Rojo", duration: "11:55", reward: 20 },
-  { id: 7, name: "Misión de Bellido", date: "21/02/2026", result: "Derrota", role: "Jefe", team: "Azul", duration: "09:12", reward: 10 },
-  { id: 8, name: "Misión de Blasco", date: "20/02/2026", result: "Victoria", role: "Agente", team: "Azul", duration: "14:08", reward: 20 },
-  { id: 9, name: "Misión de Jordi", date: "20/02/2026", result: "Derrota", role: "Agente", team: "Rojo", duration: "07:33", reward: 10 },
-  { id: 10, name: "Misión de Zarazaga", date: "19/02/2026", result: "Victoria", role: "Jefe", team: "Rojo", duration: "13:20", reward: 20 },
+  //{ id: 1, name: "Misión de Béjar", date: "24/02/2026", result: "Victoria", role: "Agente", team: "Rojo", duration: "12:34", reward: 20 },
+  //{ id: 2, name: "Misión de Adriana", date: "23/02/2026", result: "Derrota", role: "Jefe", team: "Azul", duration: "08:45", reward: 10 },
+  //{ id: 3, name: "Misión de Berta", date: "23/02/2026", result: "Victoria", role: "Agente", team: "Rojo", duration: "15:02", reward: 20 },
+ // { id: 4, name: "Misión de Lidia", date: "22/02/2026", result: "Victoria", role: "Jefe", team: "Rojo", duration: "10:18", reward: 20 },
+ // { id: 5, name:"Misión de Imad", date: "22/02/2026", result: "Derrota", role: "Agente", team: "Azul", duration: "06:30", reward: 10 },
+ // { id: 6, name: "Misión de Rocío", date: "21/02/2026", result: "Victoria", role: "Agente", team: "Rojo", duration: "11:55", reward: 20 },
+ // { id: 7, name: "Misión de Bellido", date: "21/02/2026", result: "Derrota", role: "Jefe", team: "Azul", duration: "09:12", reward: 10 },
+ // { id: 8, name: "Misión de Blasco", date: "20/02/2026", result: "Victoria", role: "Agente", team: "Azul", duration: "14:08", reward: 20 },
+  //{ id: 9, name: "Misión de Jordi", date: "20/02/2026", result: "Derrota", role: "Agente", team: "Rojo", duration: "07:33", reward: 10 },
+  { id: 1, name: "Misión de Zarazaga", date: "06/04/2026", result: "Victoria", role: "Jefe", team: "Rojo", duration: "07:33", reward: 20}
 ];
 
 export function Pantalla16Historial() {

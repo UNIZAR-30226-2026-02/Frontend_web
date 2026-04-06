@@ -486,6 +486,33 @@
     position: relative;
 }
 
+.card-image-wrapper {
+    position: relative;
+}
+
+.card-preview-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    display: grid;
+    place-items: center;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #111;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 150ms ease, background-color 150ms ease;
+    z-index: 2;
+}
+
+.card-preview-button:hover {
+    transform: scale(1.05);
+    background-color: rgba(255, 255, 255, 1);
+}
+
 /* Icono de calavera (equipo rojo) */
 .rev-icon-skull {
     width: 1.5rem;
@@ -550,6 +577,54 @@
     font-family: var(--font-courier);
     font-size: clamp(8px, 1.5vw, 11px);
 }
+
+.image-preview-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(10, 10, 10, 0.9);
+}
+
+.image-preview-box {
+    position: relative;
+    width: min(90vw, 760px);
+    max-height: 90vh;
+    overflow: hidden;
+    border-radius: 1rem;
+    background: rgba(20, 20, 20, 0.98);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+}
+
+.image-preview-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.image-preview-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    border-radius: 9999px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #f8f4e3;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 150ms ease;
+}
+
+.image-preview-close:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
 /* Colores del texto según estado */
 .card-idle .card-word-text { color: #4a3a20; }
 .card-revealed .card-word-text { text-decoration: line-through; }

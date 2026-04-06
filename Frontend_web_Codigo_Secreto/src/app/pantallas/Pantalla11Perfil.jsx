@@ -47,10 +47,10 @@ const TEMAS_VISUALES = [
 // DATOS ESTADÍSTICOS (vendrán del backend)
   const datosAgente = {
     balas: 500,
-    partidas_jugadas: 137,
-    victorias: 79,
-    numAciertos: 789,
-    numFallos: 342
+    partidas_jugadas: 0,
+    victorias: 0,
+    numAciertos: 0,
+    numFallos: 0
   };
 
   // Cálculos derivados
@@ -64,7 +64,7 @@ export function Pantalla11Perfil() {
   const navegar = useNavigate();
   
   // Estados del perfil
-  const [nombreAgente, setNombreAgente] = useState("Agente_Shadow");
+  const [nombreAgente, setNombreAgente] = useState("Zarazaga");
   const [editandoNombre, setEditandoNombre] = useState(false);
   const [avatarSeleccionado, setAvatarSeleccionado] = useState(1);
   const [mostrarSelector, setMostrarSelector] = useState(false);
@@ -315,7 +315,7 @@ export function Pantalla11Perfil() {
                   <Trophy className="w-6 h-6 text-[#d4b878]" />
                   <div>
                     <p className="fuente-elite text-[#e8dcc8] tracking-[0.1em]" style={{ fontSize: 14 }}>LOGROS Y MEDALLAS</p>
-                    <p className="fuente-courier text-[#888]" style={{ fontSize: 10 }}>6/11 desbloqueados</p>
+                    <p className="fuente-courier text-[#888]" style={{ fontSize: 10 }}>0/11 desbloqueados</p>
                   </div>
                 </div>
                 <span className="fuente-courier text-[#d4b878]" style={{ fontSize: 14 }}>→</span>

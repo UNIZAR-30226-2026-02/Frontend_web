@@ -24,9 +24,36 @@ import { ScreenFrame, ManilaFolder, DarkCard, RedStamp } from "../components/Scr
 import { UserContext } from "../components/UserContext";
 import "../components/Partidas.css";
 
+import carta1 from "../../assets/Cartas/carta1.png";
+import carta2 from "../../assets/Cartas/carta2.png";
+import carta3 from "../../assets/Cartas/carta3.png";
+import carta4 from "../../assets/Cartas/carta4.png";
+import carta5 from "../../assets/Cartas/carta5.png";
+import carta6 from "../../assets/Cartas/carta6.png";
+import carta7 from "../../assets/Cartas/carta7.png";
+import carta8 from "../../assets/Cartas/carta8.png";
+import carta9 from "../../assets/Cartas/carta9.png";
+import carta10 from "../../assets/Cartas/carta10.png";
+import carta11 from "../../assets/Cartas/carta11.png";
+import carta12 from "../../assets/Cartas/carta12.png";
+import carta13 from "../../assets/Cartas/carta13.png";
+import carta14 from "../../assets/Cartas/carta14.png";
+import carta15 from "../../assets/Cartas/carta15.png";
+import carta16 from "../../assets/Cartas/carta16.png";
+import carta17 from "../../assets/Cartas/carta17.png";
+import carta18 from "../../assets/Cartas/carta18.png";
+import carta19 from "../../assets/Cartas/carta19.png";
+import carta20 from "../../assets/Cartas/carta20.png";
+
 // Configuración de conexión WebSocket y API
 const WS_URL = "http://localhost:8080/ws";
 const API_BASE = "http://localhost:8080/api";
+
+const isSimulacion = true; // Lo añadimos para simular la partida sin que las fotos vengan del backend, para el video. Cambiar a false luego
+const simulatedCardImages = [
+  carta1, carta2, carta3, carta4, carta5, carta6, carta7, carta8, carta9, carta10,
+  carta11, carta12, carta13, carta14, carta15, carta16, carta17, carta18, carta19, carta20
+];
 
 /**
  * Formatea segundos a formato MM:SS
@@ -44,11 +71,12 @@ function formatearTiempo(seconds) {
  * Muestra la imagen, la palabra y según el rol (jefe/agente) puede mostrar el color oculto.
  * También muestra el fingerprint (Check) cuando está seleccionada.
  */
-function GameCard({ carta, isSelected, isRevealed, canSelect, onSelect, isJefe }) {
+function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect, onPreview, isJefe }) {
   // Clase CSS dinámica según el estado y tipo de carta
   // Si está revelada: muestra el color real (rojo/azul/asesino/civil)
   // Si es jefe y no revelada: muestra una previsualización del color (borde inferior)
   // Si no: estilo neutral
+  const imageUrl = carta.imagen_url || carta.imagenUrl;
   const colorClass = isRevealed
     ? `card-revealed color-${carta.tipo}`
     : isJefe && carta.tipo
@@ -56,27 +84,74 @@ function GameCard({ carta, isSelected, isRevealed, canSelect, onSelect, isJefe }
     : "card-idle";
 
   const disabled = !canSelect && !isRevealed;
+  const clickTimeout = useRef(null);
+
+  const handleCardClick = (e) => {
+    e.stopPropagation();
+    if (clickTimeout.current) {
+      clearTimeout(clickTimeout.current);
+      clickTimeout.current = null;
+      if (canSelect && onSelect) {
+        onSelect({ id: carta.id_carta_tablero, position });
+      }
+      return;
+    }
+
+    clickTimeout.current = window.setTimeout(() => {
+      clickTimeout.current = null;
+      if (onPreview && imageUrl) {
+        onPreview(imageUrl);
+      }
+    }, 220);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (clickTimeout.current) {
+        clearTimeout(clickTimeout.current);
+      }
+    };
+  }, []);
 
   return (
     <div
       className={`game-card ${colorClass} ${isSelected ? "card-selected" : ""} ${disabled && !isJefe ? "card-disabled" : ""}`}
-      onClick={() => canSelect && onSelect(carta.id_carta_tablero)}
       style={{ cursor: canSelect ? "pointer" : "default" }}
     >
       {/* Parte superior: imagen o iconos de revelado */}
       <div className="card-inner-top" style={{ position: "relative", overflow: "hidden" }}>
         {/* Imagen de fondo (si existe y la carta no está revelada) */}
-        {carta.imagen_url && !isRevealed ? (
-          <img
-            src={carta.imagen_url}
-            alt={carta.palabra || "Carta"}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              opacity: isSelected ? 0.7 : 1, 
-            }}
-          />
+        {imageUrl && !isRevealed ? (
+          <div className="card-image-wrapper" onClick={handleCardClick}>
+            <img
+              src={imageUrl}
+              alt={carta.palabra || "Carta"}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                opacity: isSelected ? 0.7 : 1,
+                cursor: "zoom-in",
+              }}
+            />
+            {onPreview && (
+              <button
+                type="button"
+                className="card-preview-button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (clickTimeout.current) {
+                    clearTimeout(clickTimeout.current);
+                    clickTimeout.current = null;
+                  }
+                  onPreview(imageUrl);
+                }}
+                aria-label="Ver carta ampliada"
+              >
+                🔍
+              </button>
+            )}
+          </div>
         ) : null}
 
         {/* Iconos/tokens cuando la carta está revelada */}
@@ -121,13 +196,7 @@ function GameCard({ carta, isSelected, isRevealed, canSelect, onSelect, isJefe }
           }} />
         )}
       </div>
-
-      {/* Parte inferior: palabra de la carta */}
-      <div className="card-inner-bottom">
-        <p className="card-word-text">
-          {carta.palabra || `Carta ${carta.id_carta_tablero}`}
-        </p>
-      </div>
+      
     </div>
   );
 }
@@ -397,7 +466,7 @@ function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, vo
       {cartaSeleccionada && (
         <div className="current-selection-badge" style={{ marginBottom: "0.75rem" }}>
           <span className="voting-label-xs">SELECCIÓN:</span>
-          <p className="selected-word-display">{palabraSeleccionada || `Carta #${cartaSeleccionada}`}</p>
+          <p className="selected-word-display">Carta #{cartaSeleccionada.position}</p>
         </div>
       )}
 
@@ -409,8 +478,8 @@ function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, vo
       )}
 
       <button
-        onClick={() => onVotar(cartaSeleccionada)}
-        disabled={!cartaSeleccionada || !puedoVotar}
+        onClick={() => onVotar(cartaSeleccionada?.id)}
+        disabled={!cartaSeleccionada?.id || !puedoVotar}
         className="submit-vote-btn"
         style={{ width: "100%" }}
       >
@@ -450,6 +519,7 @@ export function PantallaPartida() {
   // Chat y tiempo
   const [mensajes, setMensajes] = useState([]);
   const [tiempoRestante, setTiempoRestante] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -505,7 +575,13 @@ export function PantallaPartida() {
     if (data.tablero?.cartas){
       // Importante: el backend da las cartas desordenadas (en función de su fecha de actualización)
       // y hay que ordenarlas para que siempre se muestren en el tablero en el mismo orden.
-      setCartas(data.tablero.cartas.sort((a, b) => a.id_carta_tablero - b.id_carta_tablero));
+      const sortedCartas = [...data.tablero.cartas].sort((a, b) => a.id_carta_tablero - b.id_carta_tablero);
+      const cartasConSimulacion = sortedCartas.map((carta, index) => ({
+        ...carta,
+        imagen_url: carta.imagen_url || carta.imagenUrl || (isSimulacion ? simulatedCardImages[index % simulatedCardImages.length] : carta.imagen_url),
+        palabra: isSimulacion ? (carta.palabra || `Carta ${carta.id_carta_tablero}`) : carta.palabra,
+      }));
+      setCartas(cartasConSimulacion);
     } 
     // Actualizar turno actual
     if (data.equipo_turno_actual !== undefined) setTurnoActual(data.equipo_turno_actual);
@@ -537,7 +613,7 @@ export function PantallaPartida() {
 
     // Actualizar votos si vienen
     if (data.votos_turno_actual) setVotosActuales(data.votos_turno_actual);
-  }, [navigate, idPartida]); // Dependencias necesarias para la redirección a fin de partida.
+  }, [navigate, idPartida, isSimulacion, simulatedCardImages]); // Dependencias necesarias para la redirección a fin de partida.
 
   // ------------------------------------------------------------
   // 3. OBTENER ESTADO INICIAL DE LA PARTIDA (REST)
@@ -749,7 +825,7 @@ export function PantallaPartida() {
 
   console.log("esJefe: " + esJefe + " | esMiTurno: " + esMiTurno + " | faseTurno: " + faseTurno + " | puedoVotar: " + puedoVotar, + miVotoEnviado);
 
-  const cartaSeleccionadaObj = cartas.find(c => c.id_carta_tablero === cartaSeleccionada);
+  const cartaSeleccionadaObj = cartas.find(c => c.id_carta_tablero === cartaSeleccionada?.id);
   const palabraSeleccionada = cartaSeleccionadaObj?.palabra;
 
   // Conteo de cartas descubiertas para la puntuación
@@ -861,14 +937,16 @@ export function PantallaPartida() {
         <div className="board-and-voting-area">
           <ManilaFolder>
             <div className="board-grid-5cols">
-              {cartas.map((carta) => (
+              {cartas.map((carta, index) => (
                 <GameCard
                   key={carta.id_carta_tablero}
                   carta={carta}
-                  isSelected={cartaSeleccionada === carta.id_carta_tablero}
+                  position={index + 1}
+                  isSelected={cartaSeleccionada?.id === carta.id_carta_tablero}
                   isRevealed={carta.estado === "revelada"}
                   canSelect={puedoVotar && carta.estado !== "revelada"}
-                  onSelect={setCartaSeleccionada}
+                  onSelect={(selection) => setCartaSeleccionada(selection)}
+                  onPreview={(url) => setPreviewImage(url)}
                   isJefe={esJefe}
                 />
               ))}
@@ -893,6 +971,16 @@ export function PantallaPartida() {
           )}
         </div>
       </div>
+      {previewImage && (
+        <div className="image-preview-overlay" onClick={() => setPreviewImage(null)}>
+          <div className="image-preview-box" onClick={(e) => e.stopPropagation()}>
+            <button className="image-preview-close" onClick={() => setPreviewImage(null)} aria-label="Cerrar vista ampliada">
+              ×
+            </button>
+            <img src={previewImage} alt="Carta ampliada" className="image-preview-img" />
+          </div>
+        </div>
+      )}
       <div className="agent-footer-row"><RedStamp text="CLASSIFIED" /></div>
     </ScreenFrame>
   );

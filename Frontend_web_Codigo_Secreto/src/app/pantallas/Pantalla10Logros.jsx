@@ -150,9 +150,9 @@ const listaMedallas = [
 
 // DATOS DE EJEMPLO DEL PERFIL DEL USUARIO (en producción vendrán del backend)
 const perfilEjemplo = {
-  partidasJugadas: 100,      // partidas totales jugadas
-  partidasGanadas: 45,       // partidas ganadas
-  amigos: 3,                 // amigos añadidos
+  partidasJugadas: 1,      // partidas totales jugadas
+  partidasGanadas: 1,       // partidas ganadas
+  amigos: 1,                 // amigos añadidos
   partidaSinFallos: false,   // si alguna vez acabó sin fallos (logro puntería)
   todosPaquetes: false,      // si tiene todos los paquetes y temas (fiebre de balas)
 };
