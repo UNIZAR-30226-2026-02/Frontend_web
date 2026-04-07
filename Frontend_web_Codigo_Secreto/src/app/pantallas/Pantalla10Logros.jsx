@@ -53,6 +53,20 @@ const configuracionRareza = {
 // - icono: componente Lucide (representativo)
 // - desbloqueado: booleano calculado
 
+// Icono decorativo por nombre de logro (to cutre yo que sé)
+function IconoPorNombre({ nombre, className = "w-5 h-5" }) {
+  const n = nombre?.toLowerCase() || "";
+  if (n.includes("misión") || n.includes("partida")) return <Gamepad2 className={className} />;
+  if (n.includes("victoria") || n.includes("oficial") || n.includes("inspector")) return <Trophy className={className} />;
+  if (n.includes("medalla") || n.includes("bronce") || n.includes("plata") || n.includes("oro")) return <Medal className={className} />;
+  if (n.includes("puntería") || n.includes("extrema")) return <Target className={className} />;
+  if (n.includes("sociable") || n.includes("amigo")) return <Users className={className} />;
+  if (n.includes("corona") || n.includes("líder") || n.includes("inspector")) return <Crown className={className} />;
+  if (n.includes("fiebre") || n.includes("balas") || n.includes("tienda")) return <ShoppingBag className={className} />;
+  return <Star className={className} />;
+}
+
+/*
 const listaLogros = [
   {
     id: "principiante",
@@ -147,8 +161,8 @@ const listaMedallas = [
   },
 ];
 
-
-// DATOS DE EJEMPLO DEL PERFIL DEL USUARIO (en producción vendrán del backend)
+*/
+/*// DATOS DE EJEMPLO DEL PERFIL DEL USUARIO (en producción vendrán del backend)
 const perfilEjemplo = {
   partidasJugadas: 1,      // partidas totales jugadas
   partidasGanadas: 1,       // partidas ganadas
@@ -156,7 +170,7 @@ const perfilEjemplo = {
   partidaSinFallos: false,   // si alguna vez acabó sin fallos (logro puntería)
   todosPaquetes: false,      // si tiene todos los paquetes y temas (fiebre de balas)
 };
-
+*/
 // FUNCIONES DE CÁLCULO DE PROGRESO (simulan lógica de backend)
 
 /**
@@ -165,7 +179,7 @@ const perfilEjemplo = {
  * - progreso: valor actual (0..max)
  * - desbloqueado: boolean
  * - max: número máximo para completar
- */
+ 
 const calcularLogros = (perfil) => {
   return listaLogros.map(logro => {
     let progreso = 0;
@@ -204,21 +218,21 @@ const calcularLogros = (perfil) => {
   });
 };
 
-/**
+
  * Calcula las medallas obtenidas según las partidas ganadas.
- */
+ 
 const calcularMedallas = (partidasGanadas) => {
   return listaMedallas.map(medalla => ({
     ...medalla,
     obtenida: partidasGanadas >= medalla.partidasRequeridas,
   }));
 };
-
+*/
 // COMPONENTE PRINCIPAL
 export function Pantalla10Logros() {
   const navigate = useNavigate();
 
-  // Obtener datos calculados del perfil
+  /*// Obtener datos calculados del perfil
   const logros = calcularLogros(perfilEjemplo);
   const medallas = calcularMedallas(perfilEjemplo.partidasGanadas);
 
@@ -235,6 +249,47 @@ export function Pantalla10Logros() {
   const totalElementos = totalLogros + totalMedallas;
   const totalDesbloqueados = logrosDesbloqueados + medallasObtenidas;
   const progresoGlobal = Math.round((totalDesbloqueados / totalElementos) * 100);
+  */
+
+  const [logros, setLogros]     = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError]       = useState(null);
+ 
+  useEffect(() => {
+    obtenerLogros()
+      .then(data => setLogros(Array.isArray(data) ? data : []))
+      .catch(err => setError(err.message))
+      .finally(() => setCargando(false));
+  }, []);
+ 
+  if (cargando) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[#c4a060] animate-spin" />
+      </div>
+    );
+  }
+ 
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="font-['Courier_Prime',monospace] text-[#8b2020]">{error}</p>
+        <button onClick={() => navigate("/home")} className="font-['Courier_Prime',monospace] text-[#8a7a60]">← Volver</button>
+      </div>
+    );
+  }
+
+  const medallas          = logros.filter(l => l.es_logro === false);
+  const logrosNormales    = logros.filter(l => l.es_logro === true);
+  const totalLogros       = logrosNormales.length;
+  const totalMedallas     = medallas.length;
+  const logrosDesbloq     = logrosNormales.filter(l => l.completado).length;
+  const medallasObt       = medallas.filter(l => l.completado).length;
+  const totalElem         = totalLogros + totalMedallas;
+  const totalDesbloq      = logrosDesbloq + medallasObt;
+  const progresoGlobal    = totalElem > 0 ? Math.round((totalDesbloq / totalElem) * 100) : 0;
+  const balasGanadas      = logros.filter(l => l.completado && l.balas_recompensa > 0)
+                                  .reduce((s, l) => s + (l.balas_recompensa || 0), 0);
 
   return (
     <ScreenFrame title="LOGROS Y MEDALLAS">
@@ -273,21 +328,21 @@ export function Pantalla10Logros() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
               <TarjetaResumen
                 icono={Trophy}
-                valor={`${logrosDesbloqueados}/${totalLogros}`}
+                valor={`${logrosDesbloq}/${totalLogros}`}
                 etiqueta="LOGROS"
                 color="#d4b878"
               />
               <TarjetaResumen
                 icono={Medal}
-                valor={`${medallasObtenidas}/${totalMedallas}`}
+                valor={`${medallasObt}/${totalMedallas}`}
                 etiqueta="MEDALLAS"
                 color="#c4a060"
               />
               <TarjetaResumen
-                icono={Star}
+                icono={Flame}
                 valor={balasGanadas}
                 etiqueta="BALAS GANADAS"
-                color="#f0c840"
+                color="#50a050"
               />
               <TarjetaResumen
                 icono={Crown}
@@ -381,12 +436,12 @@ function TarjetaResumen({ icono: Icono, valor, etiqueta, color }) {
  */
 function ElementoLogro({ logro }) {
   const config = configuracionRareza[logro.rareza];
-  const porcentaje = Math.round((logro.progreso / logro.max) * 100);
+  const porcentaje = Math.round((logro.progreso_actual / logro.progreso_max) * 100);
   const Icono = logro.icono;
 
   return (
     <DarkCard
-      className={`achievement-card ${config.clase} ${!logro.desbloqueado ? "opacity-70" : ""}`}
+      className={`achievement-card ${config.clase} ${!logro.completado ? "opacity-70" : ""}`}
     >
       {/* Franja superior decorativa */}
       <div className="medalla-stripe" />
@@ -394,7 +449,7 @@ function ElementoLogro({ logro }) {
       <div className="flex items-start gap-3 mt-1">
         {/* Icono o candado según desbloqueo */}
         <div className="icon-container">
-          {logro.desbloqueado ? (
+          {logro.completado ? (
             <Icono className="w-5 h-5 text-[var(--rarity-text)]" />
           ) : (
             <Lock className="w-4 h-4 text-[#666]" />
@@ -404,7 +459,7 @@ function ElementoLogro({ logro }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p
-              className={`font-elite ${logro.desbloqueado ? "text-[#e8dcc8]" : "text-[#888]"} truncate`}
+              className={`font-elite ${logro.completado ? "text-[#e8dcc8]" : "text-[#888]"} truncate`}
               style={{ fontSize: 13 }}
             >
               {logro.nombre}
@@ -419,12 +474,12 @@ function ElementoLogro({ logro }) {
           <div className="mt-2">
             <div className="flex items-center justify-between mb-1 font-courier" style={{ fontSize: 9 }}>
               <span className="text-[#666]">
-                {logro.progreso}/{logro.max}
+                {logro.progreso_actual}/{logro.progreso_max}
               </span>
-              {logro.desbloqueado ? (
+              {logro.completado ? (
                 <span className="text-[#50a050]">✓ COMPLETADO</span>
               ) : (
-                <span className="text-[#a0a060]">+{logro.recompensa} balas</span>
+                <span className="text-[#a0a060]">+{logro.balas_recompensa} balas</span>
               )}
             </div>
             <div className="progress-bar-container">
@@ -432,7 +487,7 @@ function ElementoLogro({ logro }) {
                 className="progress-fill"
                 style={{
                   width: `${porcentaje}%`,
-                  backgroundColor: logro.desbloqueado ? "#50a050" : config.color,
+                  backgroundColor: logro.completado ? "#50a050" : config.color,
                 }}
               />
             </div>

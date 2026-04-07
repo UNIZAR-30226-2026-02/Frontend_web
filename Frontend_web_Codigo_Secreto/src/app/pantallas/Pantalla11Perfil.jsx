@@ -1,11 +1,7 @@
-/*
- * Pantalla de perfil del agente: Aquí se muestra la información personal del jugador y se permite su edición.
- * Ajustada a los nuevos requisitos, muestra solo las estadísticas que se pueden obtener con los datos del endpoint
- */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Trophy, Target, Flame, Eye, Crown, Edit3, 
-  Check, LogOut, ArrowLeft, X, Camera, AlertTriangle, Palette, TrendingUp,
+  Check, LogOut, ArrowLeft, X, Camera, AlertTriangle, Palette, TrendingUp, Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 
@@ -16,17 +12,18 @@ import {
 } from "../components/ScreenFrame";
 import { IconoBala } from "../components/IconoBala";
 
+// API
+import { obtenerPerfil, actualizarPerfil } from "../api/apiJugador";
+
 // Estilos
 import "../components/Perfil.css";
 
+// Assets
 import Magia from '../../assets/1_magia.jpeg';
 import Hist from '../../assets/2_historico.jpeg';
 import Subm from "../../assets/3_vidasubmarina.jpeg";
-import Cyber from "../../assets/4_cyberpunk.jpeg"
-import Natur from "../../assets/5_naturaleza.jpeg"
-
-
-/* OPCIONES DE AVATAR: IMÁGENES DESDE LA CARPETA ASSETS                       */
+import Cyber from "../../assets/4_cyberpunk.jpeg";
+import Natur from "../../assets/5_naturaleza.jpeg";
 
 const OPCIONES_AVATAR = [
   { id: 1, src: Magia, alt: "Agente 1" },
@@ -44,50 +41,93 @@ const TEMAS_VISUALES = [
   { id: "rose", name: "Cuarzo rosa", color: "#c67b8a", borderColor: "#a05060", bgColor: "#2a1820" },
 ];
 
-// DATOS ESTADÍSTICOS (vendrán del backend)
-  const datosAgente = {
-    balas: 500,
-    partidas_jugadas: 0,
-    victorias: 0,
-    numAciertos: 0,
-    numFallos: 0
-  };
-
-  // Cálculos derivados
-  const totalIntentos = datosAgente.numAciertos + datosAgente.numFallos;
-  const tasaExito = totalIntentos > 0 ? ((datosAgente.numAciertos / totalIntentos) * 100).toFixed(1) : 0;
-  const porcentajeVictorias = datosAgente.partidas_jugadas > 0 
-    ? ((datosAgente.victorias / datosAgente.partidas_jugadas) * 100).toFixed(0) 
-    : 0;
-
 export function Pantalla11Perfil() {
   const navegar = useNavigate();
   
   // Estados del perfil
-  const [nombreAgente, setNombreAgente] = useState("Zarazaga");
-  const [editandoNombre, setEditandoNombre] = useState(false);
+  const [perfil, setPerfil] = useState(null);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Estados de edición
+  const [tagEditado, setTagEditado] = useState('');
+  const [editandoTag, setEditandoTag] = useState(false);
+  const [guardandoTag, setGuardandoTag] = useState(false);
+  const [errorTag, setErrorTag] = useState('');
+
+  // Estados de personalización
   const [avatarSeleccionado, setAvatarSeleccionado] = useState(1);
   const [mostrarSelector, setMostrarSelector] = useState(false);
+  const [temaMarco, setTemaMarco] = useState('gold');
+  const [temaTablero, setTemaTablero] = useState('gold');
 
-  // Estado para controlar la visibilidad del popup de desactivación.
-  const [mostrarPopupDesactivar, setMostrarPopupDesactivar] = useState(false);
+  // Craga inicial
+  useEffect(() => {
+    const cargar = async () => {
+      try {
+        const data = await obtenerPerfil();
+        setPerfil(data);
+        setTagEditado(data.tag || '');
+        if (data.avatar_id) setAvatarSeleccionado(data.avatar_id);
+      } catch (err) {
+        setError("No se pudo cargar el expediente del agente.");
+        console.error(err);
+      } finally {
+        setCargando(false);
+      }
+    };
+    cargar();
+  }, []);
 
-  // Estados de Personalización
-  const [temaMarco, setTemaMarco] = useState("gold");
-  const [temaTablero, setTemaTablero] = useState("sage");
+  // Guardar cambios de tag
+  const handleGuardarTag = async () => {
+    const nuevoTag = tagEditado.trim();
+    if (nuevoTag.length < 3) {
+      setErrorTag("El nombre debe tener al menos 3 caracteres.");
+      return;
+    }
+    setGuardandoTag(true);
+    setErrorTag('');
+    try {
+      const actualizado = await actualizarPerfil({ tag: nuevoTag });
+      setPerfil(actualizado);
+      setEditandoTag(false);
+    } catch (err) {
+      if (err.message?.includes('DUPLICADO')) {
+        setErrorTag("Este nombre ya está en uso.");
+      } else {
+        setErrorTag("Error al conectar con la central.");
+      }
+    } finally {
+      setGuardandoTag(false);
+    }
+  };
 
-  const avatarActual = OPCIONES_AVATAR.find(a => a.id === avatarSeleccionado);
+  // Pantalla de carga
+  if (cargando) {
+    return (
+      <ScreenFrame title="ACCEDIENDO...">
+        <div className="flex flex-col items-center justify-center h-64 gap-4">
+          <Loader2 className="w-10 h-10 animate-spin text-[#d4b878]" />
+          <p className="fuente-courier text-[#d4b878] animate-pulse">DESCRIPTANDO EXPEDIENTE...</p>
+        </div>
+      </ScreenFrame>
+    );
+  }
 
-  // TODO: lógica de desactivación de cuenta
-  /*const manejarDesactivacionCuenta = async () => {
-    await apiDesactivarCuenta()
-    console.log("Desactivando cuenta del agente...");
-    setMostrarPopupDesactivar(false);
-    
-    // Limpiar sesión y volver al login
-    sessionStorage.removeItem('jwt_token');
-    navegar("/");
-  };*/
+  // Desestructuración 
+  const {
+    tag = "Anónimo",
+    foto_perfil,
+    balas = 0,
+    partidas_jugadas = 0,
+    victorias = 0,
+    num_aciertos = 0,
+    num_fallos = 0,
+  } = perfil || {};
+
+  const derrotas = Math.max(0, partidas_jugadas - victorias);
+  const avatarActual = OPCIONES_AVATAR.find(a => a.id === avatarSeleccionado) || OPCIONES_AVATAR[0];
 
   return (
     <ScreenFrame title="PERFIL DEL AGENTE">
@@ -128,19 +168,17 @@ export function Pantalla11Perfil() {
                 >
                   <div className="polaroid-container">
                     <div className="polaroid-foto bg-[#1a1208] flex items-center justify-center overflow-hidden">
-                      {/* Imagen de perfil real */}
                       <img
-                        src={avatarActual.src}
+                        src={foto_perfil || avatarActual.src}
                         alt={avatarActual.alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <p className="fuente-courier text-[#5a4a30] text-center mt-1.5" style={{ fontSize: 8 }}>
-                      {nombreAgente.toUpperCase()}
+                      {tag.toUpperCase()}
                     </p>
                   </div>
                   
-                  {/* Overlay de cámara al pasar el ratón */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                     <div className="bg-[#1a1208]/70 rounded-full p-2">
                       <Camera className="w-5 h-5 text-[#d4b878]" />
@@ -177,14 +215,9 @@ export function Pantalla11Perfil() {
                           >
                             <div className="bg-[#f0e8d4] p-1 pb-2.5 shadow-[1px_1px_5px_rgba(0,0,0,0.3)]">
                               <div className="w-full aspect-square bg-[#2a2418] flex items-center justify-center overflow-hidden">
-                                <img
-                                  src={av.src}
-                                  alt={av.alt}
-                                  className="w-full h-full object-cover"
-                                />
+                                <img src={av.src} alt={av.alt} className="w-full h-full object-cover" />
                               </div>
                             </div>
-                            {avatarSeleccionado === av.id && <Check className="w-3 h-3 text-[#50a050] mx-auto mt-0.5" />}
                           </button>
                         ))}
                       </div>
@@ -196,62 +229,77 @@ export function Pantalla11Perfil() {
               {/* Detalles del nombre y rango */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
-                  {editandoNombre ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={nombreAgente}
-                        onChange={(e) => setNombreAgente(e.target.value)}
-                        className="bg-[#f5edd8] border-2 border-[#a08050]/50 rounded-sm px-3 py-1.5 fuente-elite text-[#3a2a10] outline-none"
-                        style={{ fontSize: 'clamp(16px, 3vw, 22px)' }}
-                        autoFocus
-                      />
-                      <button onClick={() => setEditandoNombre(false)} className="bg-[#2a5a2a] text-white p-1.5 rounded-sm cursor-pointer">
-                        <Check className="w-4 h-4" />
-                      </button>
+                  {editandoTag ? (
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={tagEditado}
+                          onChange={(e) => setTagEditado(e.target.value)}
+                          onKeyDown={(e) => { 
+                            if (e.key === 'Enter') handleGuardarTag(); 
+                            if (e.key === 'Escape') { setEditandoTag(false); setTagEditado(tag); }
+                          }}
+                          className="bg-[#f5edd8] border-2 border-[#a08050]/50 rounded-sm px-3 py-1.5 fuente-elite text-[#3a2a10] outline-none w-full max-w-[200px]"
+                          style={{ fontSize: 18 }}
+                          maxLength={15}
+                          autoFocus
+                          disabled={guardandoTag}
+                        />
+                        <button onClick={handleGuardarTag} disabled={guardandoTag} className="bg-[#2a5a2a] text-white p-1.5 rounded-sm cursor-pointer disabled:opacity-50">
+                          {guardandoTag ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                        </button>
+                        <button onClick={() => { setEditandoTag(false); setTagEditado(tag); setErrorTag(''); }} className="text-[#8a7a60] hover:text-[#cc3333] cursor-pointer p-1.5">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {errorTag && <p className="fuente-courier text-[#8b2020] text-[10px]">{errorTag}</p>}
                     </div>
                   ) : (
                     <>
                       <h2 className="fuente-elite text-[#3a2a10] tracking-[0.05em]" style={{ fontSize: 'clamp(18px, 3vw, 24px)' }}>
-                        {nombreAgente}
+                        {tag}
                       </h2>
-                      <button onClick={() => setEditandoNombre(true)} className="text-[#8a7a60] hover:text-[#5a4a30] cursor-pointer p-1">
+                      <button onClick={() => {setEditandoTag(true); setTagEditado(tag);} } className="text-[#8a7a60] hover:text-[#5a4a30] cursor-pointer p-1">
                         <Edit3 className="w-4 h-4" />
                       </button>
                     </>
                   )}
                 </div>
-
+                
                 <div className="flex items-center gap-3 mt-1.5 flex-wrap fuente-courier text-[#5a4a30]" style={{ fontSize: 12 }}>
-                  <span className="flex items-center gap-1"><IconoBala size={14} /> 500 BALAS</span>
+                  <span className="flex items-center gap-1">
+                    <IconoBala size={14} />
+                    {balas.toLocaleString()} BALAS
+                  </span>
                 </div>
                 
                 <div className="flex items-center gap-3 mt-3 flex-wrap">
                   <div className="border-2 border-[#4a3a20] rounded-sm px-3 py-1">
-                    <span className="fuente-elite text-[#4a3a20] tracking-[0.1em]" style={{ fontSize: 11 }}>AGENTE DE ORO</span>
+                    <span className="fuente-elite text-[#4a3a20] tracking-[0.1em]" style={{ fontSize: 11 }}>AGENTE ACTIVO</span>
                   </div>
                   <RedStamp text="TOP SECRET" className="rotate-[-6deg]" />
                 </div>
               </div>
             </div>
 
-            {/* Estadísticas de Servicio: Solo Partidas y Votos en un Grid simétrico */}
+            {/* Estadísticas de Servicio */}
             <SubsectionLabel label="RESUMEN OPERATIVO" borderColor="#4a3a20" />
             <div className="grid grid-cols-2 gap-3 mb-8">
               <DarkCard className="p-4 border-l-4 border-emerald-700">
-                <p className="fuente-courier text-[#d4b878] text-2xl sm:text-3xl">{datosAgente.victorias}</p>
+                <p className="fuente-courier text-[#d4b878] text-2xl sm:text-3xl">{victorias}</p>
                 <p className="fuente-courier text-[#888] text-[10px] uppercase">Partidas Ganadas</p>
               </DarkCard>
               <DarkCard className="p-4 border-l-4 border-red-900">
-                <p className="fuente-courier text-[#d4b878] text-2xl sm:text-3xl">{datosAgente.partidas_jugadas - datosAgente.victorias}</p>
+                <p className="fuente-courier text-[#d4b878] text-2xl sm:text-3xl">{derrotas}</p>
                 <p className="fuente-courier text-[#888] text-[10px] uppercase">Partidas Perdidas</p>
               </DarkCard>
               <DarkCard className="p-4 border-l-4 border-emerald-700">
-                <p className="fuente-courier text-[#d4b878] text-2xl sm:text-3xl">{datosAgente.numAciertos}</p>
+                <p className="fuente-courier text-[#d4b878] text-2xl sm:text-3xl">{num_aciertos}</p>
                 <p className="fuente-courier text-[#888] text-[10px] uppercase">Votos Acertados</p>
               </DarkCard>
               <DarkCard className="p-4 border-l-4 border-red-900">
-                <p className="fuente-courier text-[#d4b878] text-2xl sm:text-3xl">{datosAgente.numFallos}</p>
+                <p className="fuente-courier text-[#d4b878] text-2xl sm:text-3xl">{num_fallos}</p>
                 <p className="fuente-courier text-[#888] text-[10px] uppercase">Votos Fallados</p>
               </DarkCard>
             </div>
@@ -264,9 +312,8 @@ export function Pantalla11Perfil() {
                 <p className="fuente-elite text-[#e8dcc8] tracking-widest text-sm">PERSONALIZAR INTERFAZ</p>
               </div>
 
-              {/* Selector de Marco */}
               <div className="mb-6">
-                <p className="fuente-courier text-[#a09070] text-xs mb-3 ">ESTILO DE MARCO DE CARTAS:</p>
+                <p className="fuente-courier text-[#a09070] text-xs mb-3">ESTILO DE MARCO DE CARTAS:</p>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {TEMAS_VISUALES.map((tema) => (
                     <button
@@ -276,7 +323,7 @@ export function Pantalla11Perfil() {
                         temaMarco === tema.id ? "border-[#d4b878] bg-[#3a3228]" : "border-[#444] bg-[#1a1a1a]"
                       }`}
                     >
-                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: tema.bgColor, border: `2px solid ${tema.borderColor}` }} />
+                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: tema.color, opacity: 0.5 }} />
                       <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{tema.name}</p>
                       {temaMarco === tema.id && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
                     </button>
@@ -284,9 +331,8 @@ export function Pantalla11Perfil() {
                 </div>
               </div>
 
-              {/* Selector de Tablero */}
               <div>
-                <p className="fuente-courier text-[#a09070] text-xs mb-3 ">COLOR DE FONDO DEL TABLERO:</p>
+                <p className="fuente-courier text-[#a09070] text-xs mb-3">COLOR DE FONDO DEL TABLERO:</p>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {TEMAS_VISUALES.map((tema) => (
                     <button
@@ -296,7 +342,7 @@ export function Pantalla11Perfil() {
                         temaTablero === tema.id ? "border-[#d4b878] bg-[#3a3228]" : "border-[#444] bg-[#1a1a1a]"
                       }`}
                     >
-                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: tema.bgColor }} />
+                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: tema.color, opacity: 0.3 }} />
                       <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{tema.name}</p>
                       {temaTablero === tema.id && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
                     </button>
@@ -315,7 +361,6 @@ export function Pantalla11Perfil() {
                   <Trophy className="w-6 h-6 text-[#d4b878]" />
                   <div>
                     <p className="fuente-elite text-[#e8dcc8] tracking-[0.1em]" style={{ fontSize: 14 }}>LOGROS Y MEDALLAS</p>
-                    <p className="fuente-courier text-[#888]" style={{ fontSize: 10 }}>0/11 desbloqueados</p>
                   </div>
                 </div>
                 <span className="fuente-courier text-[#d4b878]" style={{ fontSize: 14 }}>→</span>
@@ -324,7 +369,10 @@ export function Pantalla11Perfil() {
 
             {/* Cerrar Sesión */}
             <button
-              onClick={() => navegar("/login")}
+              onClick={() => {
+                sessionStorage.clear();
+                navegar("/login");
+              }}
               className="w-full bg-[#3a1a1a] hover:bg-[#4a2020] border border-[#5a2020]/50 text-white py-3 rounded-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg"
             >
               <LogOut className="w-4 h-4 text-[#e08080]" />
@@ -339,25 +387,5 @@ export function Pantalla11Perfil() {
         </ManilaFolder>
       </div>
     </ScreenFrame>
-  );
-}
-
-// Subcomponente para las tarjetas de estadísticas individuales: REUTILIZAR LOGROS?
-
-function TarjetaEstadistica({ icono: Icono, titulo, valor, subtexto, colorBarra, porcentaje, iconoColor }) {
-  return (
-    <DarkCard className="p-4 sm:p-5">
-      <div className="flex items-center justify-between mb-2">
-        <Icono className="w-5 h-5" style={{ color: iconoColor }} />
-        <div className="bg-[#8b2020] rounded-full px-3 py-1 flex items-center justify-center border-2 border-[#a03030]">
-          <span className="fuente-courier text-white font-bold" style={{ fontSize: 13 }}>{valor}</span>
-        </div>
-      </div>
-      <p className="fuente-elite text-[#e8dcc8] tracking-[0.1em]" style={{ fontSize: 13 }}>{titulo}</p>
-      <p className="fuente-courier text-[#888] mt-1" style={{ fontSize: 10 }}>{subtexto}</p>
-      <div className="mt-2 h-1 bg-[#444] rounded-full overflow-hidden">
-        <div className="h-full rounded-full" style={{ width: porcentaje, backgroundColor: colorBarra }} />
-      </div>
-    </DarkCard>
   );
 }
