@@ -74,7 +74,7 @@ export async function obtenerLeaderboardGlobal() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Error al obtener el ranking global');
+  if (!res.ok) throw new Error('Error al obtener el leaderboard global');
   return res.json(); // Array: { tag, foto_perfil, victorias, num_aciertos }
 }
 
@@ -84,6 +84,6 @@ export async function obtenerLeaderboardAmigos() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Error al obtener el ranking de amigos');
+  if (!res.ok) throw new Error('Error al obtener el leaderboard de amigos');
   return res.json();
 }

@@ -9,20 +9,25 @@ import SockJS from 'sockjs-client';
 
 const WS_URL = 'http://localhost:8080/ws';
 
+// Suscripciones de un único cliente a todos los canales de WebSockets del apartado de 
+// Social.
 // PARA LA LISTA DE AMIGOS EN TIEMPO REAL (Pestaña "Amigos")
-export function useAmigos(onAmigosActualizados, onError, token) {
+// PARA LEADERBOARDS EN TIEMPO REAL (Pestaña "CLASIFICACIÓN")
+export function useSocialWebSockets(onAmigosActualizados, onGlobalActualizado,
+  onAmigosLeaderboardActualizado, onError, token) {
   const clientRef = useRef(null);
 
   useEffect(() => {
     if (!token) return;
 
+    // Creación de un único cliente STOMP para todas las suscripciones de WebSockets.
     const client = new Client({
       webSocketFactory: () => new SockJS(WS_URL),
       connectHeaders: { Authorization: `Bearer ${token}` },
       onConnect: () => {
-        console.log('Conectado a la central: Actualizaciones de Amigos');
+        console.log('Conectado a la central: Actualizaciones Sociales y Clasificaciones');
         
-        // Suscripción al canal de amigos
+        // Suscripción Lista de Amigos (Pestaña Amigos)
         client.subscribe('/user/queue/amigos', (msg) => {
           try {
             const data = JSON.parse(msg.body);
@@ -33,23 +38,45 @@ export function useAmigos(onAmigosActualizados, onError, token) {
             if (onError) onError('Error al descifrar la transmisión de contactos.');
           }
         });
+
+        // Suscripción Broadcast Leaderboard (Global)
+        client.subscribe('/topic/leaderboard/global', (msg) => {
+          try {
+            const data = JSON.parse(msg.body);
+            onGlobalActualizado(data);
+          } catch (err) {
+            console.error('Error al descifrar el ranking global:', err);
+            if (onError) onError('Error al descifrar el ranking global.');
+          }
+        });
+
+        // 3. Suscripción canal personal Leaderboard (Amigos)
+        client.subscribe('/user/queue/leaderboard/amigos', (msg) => {
+          try {
+            const data = JSON.parse(msg.body);
+            onAmigosLeaderboardActualizado(data);
+          } catch (err) {
+            console.error('Error al descifrar el ranking de amigos:', err);
+            if (onError) onError('Error al descifrar el ranking de amigos.');
+          }
+        });
       },
       onStompError: (frame) => {
-        console.error('STOMP error en amigos:', frame);
-        if (onError) onError('Conexión perdida con la central de contactos.');
+        console.error('STOMP error:', frame);
+        if (onError) onError('Conexión perdida con la central de comunicaciones.');
       },
       onWebSocketError: (event) => {
-        console.error('WS error en amigos:', event);
-        if (onError) onError('Los canales de comunicación de contactos están caídos.');
+        console.error('WS error:', event);
+        if (onError) onError('Los canales de comunicación están caídos.');
       }
     });
 
     client.activate();
     clientRef.current = client;
 
-    // Desconexión limpia al salir de la pantalla Social
+    // Desconexión limpia al salir de la pantalla
     return () => client.deactivate();
-  }, [onAmigosActualizados, onError, token]);
+  }, [onAmigosActualizados, onGlobalActualizado, onAmigosLeaderboardActualizado, onError, token]);
 
   return clientRef;
 }

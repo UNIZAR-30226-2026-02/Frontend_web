@@ -8,8 +8,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 
 // Importamos la API y el Hook de WebSockets
-import { obtenerAmigos } from "../api/apiSocial";
-import { useAmigos} from "../hooks/hooksSocial"; 
+import { obtenerAmigos, obtenerLeaderboardAmigos, obtenerLeaderboardGlobal } from "../api/apiSocial";
+import { useSocialWebSockets } from "../hooks/hooksSocial"; 
 
 // Datos de prueba (Comentados porque se conecta con el backend)
 /*
@@ -23,6 +23,7 @@ const friends = [
 ];
 */
 
+/*
 const leaderboard = [
   { pos: 1, name: "ProAgente99", wins: 342, rate: "78%", streak: 12, badge: "🏆" },
   { pos: 2, name: "EspíaMaestro", wins: 298, rate: "72%", streak: 8, badge: "🥈" },
@@ -43,6 +44,7 @@ const friendsLeaderboard = [
   { pos: 4, name: "PhantomX", wins: 28, rate: "55%", streak: 1, badge: "" },
   { pos: 5, name: "SilentViper", wins: 19, rate: "50%", streak: 1, badge: "" },
 ];
+*/
 
 // Datos iniciales de solicitudes
 const initialFriendRequests = [
@@ -65,9 +67,14 @@ export function Pantalla08Social() {
 
   // ESTADOS DE AMIGOS
   const [amigos, setAmigos] = useState([]);
+  
+  // ESTADOS DE LEADERBOARDS (global y amigos)
+  const [leaderboardGlobal, setLeaderboardGlobal] = useState([]);
+  const [leaderboardAmigos, setLeaderboardAmigos] = useState([]);
+  
   const tokenActual = sessionStorage.getItem('jwt_token');
 
-  // Cargar lista de amigos iniciales por usando 'apiSocial.js' al entrar a la pantalla
+  // Cargar lista de amigos iniciales usando 'apiSocial.js' al entrar a la pantalla
   useEffect(() => {
     const cargarAmigos = async () => {
       try {
@@ -77,7 +84,28 @@ export function Pantalla08Social() {
         console.error("Error al obtener la lista de amigos:", error);
       }
     };
+
+    const cargarLeaderboardAmigos = async () => {
+      try {
+        const datosLeaderboardAmigos = await obtenerLeaderboardAmigos();
+        setLeaderboardAmigos(datosLeaderboardAmigos);
+      } catch (error) {
+        console.error("Error al obtener el leaderboard de amigos:", error);
+      }
+    }
+      
+    const cargarLeaderboardGlobal = async () => {
+      try {
+        const datosLeaderboardGlobal = await obtenerLeaderboardGlobal();
+        setLeaderboardGlobal(datosLeaderboardGlobal);
+      } catch (error) {
+        console.error("Error al obtener el leaderboard global:", error);
+      }
+    }
+
     cargarAmigos();
+    cargarLeaderboardAmigos();
+    cargarLeaderboardGlobal();
   }, []);
 
   // Escuchar actualizaciones en tiempo real (WebSockets)
@@ -85,12 +113,24 @@ export function Pantalla08Social() {
     setAmigos(data);
   }, []);
 
+  // Callback para actualizaciones del leaderboard global
+  const onGlobalLeaderboardActualizado = useCallback((data) => {
+    setLeaderboardGlobal(data);
+  }, []);
+
+  // Callback para actualizaciones del leaderboard de amigos
+  const onAmigosLeaderboardActualizado = useCallback((data) => {
+    setLeaderboardAmigos(data);
+  }, []);
+
   const onWsError = useCallback((errorMsg) => {
     console.error("WS Error:", errorMsg);
   }, []);
 
-  // Se invoca 'hooksSocial.js' para recibir actualizaciones en tiempo real de la lista de amigos.
-  useAmigos(onAmigosActualizados, onWsError, tokenActual);
+  // Se invoca 'hooksSocial.js' para recibir actualizaciones en tiempo real de la lista de amigos
+  // y de los leaderboards.
+  useSocialWebSockets(onAmigosActualizados, onGlobalLeaderboardActualizado, 
+    onAmigosLeaderboardActualizado, onWsError, tokenActual);
 
   const handleAgnadir = () => {
     if (nombreAmigo.trim()) {
@@ -143,17 +183,19 @@ export function Pantalla08Social() {
               ))}
             </div>
 
-            {/* Buscador */}
-            <div className="relative mb-5">
-              <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8a7a60]" />
-              <input type="text" placeholder="Buscar agente por nombre clave..." className="w-full bg-[#f5edd8] border-2 border-[#a08050]/40 rounded-sm pl-10 sm:pl-12 pr-12 py-2.5 font-['Courier_Prime',monospace] text-[#3a2a10] placeholder:text-[#a09070] outline-none" style={{ fontSize: 12 }} />
-              <button 
-                onClick={() => setMostrarAgnadir(true)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#2a2a2a] p-1.5 rounded-sm cursor-pointer hover:bg-[#3a3a3a] transition-colors"
-              >
-                <UserPlus className="w-4 h-4 text-[#d4b878]" />
-              </button>
-            </div>
+            {/* Buscador: Solo visible en Amigos y Solicitudes */}
+            {(tab === "friends" || tab === "requests") && (
+              <div className="relative mb-5">
+                <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8a7a60]" />
+                <input type="text" placeholder="Buscar agente por nombre clave..." className="w-full bg-[#f5edd8] border-2 border-[#a08050]/40 rounded-sm pl-10 sm:pl-12 pr-12 py-2.5 font-['Courier_Prime',monospace] text-[#3a2a10] placeholder:text-[#a09070] outline-none" style={{ fontSize: 12 }} />
+                <button 
+                  onClick={() => setMostrarAgnadir(true)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#2a2a2a] p-1.5 rounded-sm cursor-pointer hover:bg-[#3a3a3a] transition-colors"
+                >
+                  <UserPlus className="w-4 h-4 text-[#d4b878]" />
+                </button>
+              </div>
+            )}
 
             {/* CONTENIDO DE TABS */}
             {tab === "friends" && (
@@ -219,29 +261,79 @@ export function Pantalla08Social() {
 
                 {/* Contenedor del podio con mt-6 para dejar espacio al 1º puesto */}
                 <div className="flex items-end justify-center gap-3 sm:gap-4 mb-5 mt-12">
-                  {(mostrarRankingAmigos ? [friendsLeaderboard[1], friendsLeaderboard[0], friendsLeaderboard[2]] : [leaderboard[1], leaderboard[0], leaderboard[2]])
+                  {/* Usamos los estados y 'p &&' por si el array está vacío inicialmente */}
+                  {(mostrarRankingAmigos ? [leaderboardAmigos[1], leaderboardAmigos[0], leaderboardAmigos[2]] : [leaderboardGlobal[1], leaderboardGlobal[0], leaderboardGlobal[2]])
                     .map((p, i) => (
-                      <DarkCard 
-                        key={p.name} 
-                        className={`p-3 sm:p-4 text-center transition-transform ${i === 1 ? "w-[140px] sm:w-[180px] -translate-y-6 border-[#d4b878]/30 shadow-[0_8px_20px_rgba(212,184,120,0.15)] z-10" : "w-[110px] sm:w-[150px]"}`}
-                      >
-                        <span className="text-2xl sm:text-3xl">{p.badge}</span>
-                        <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] mt-1 truncate" style={{ fontSize: 11 }}>{p.name}</p>
-                        <p className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 18 }}>{p.wins}</p>
-                        <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 9 }}>victorias</p>
-                      </DarkCard>
+                      p && (
+                        <DarkCard 
+                          key={p.tag} 
+                          className={`p-3 sm:p-4 text-center transition-transform ${i === 1 ? "w-[140px] sm:w-[180px] -translate-y-6 border-[#d4b878]/30 shadow-[0_8px_20px_rgba(212,184,120,0.15)] z-10" : "w-[110px] sm:w-[150px]"}`}
+                        >
+                          <span className="text-2xl sm:text-3xl">{p.badge}</span>
+                          <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] mt-1 truncate" style={{ fontSize: 11 }}>{p.name}</p>
+                          <p className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 18 }}>{p.wins}</p>
+                          <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 9 }}>victorias</p>
+                        </DarkCard>
+                      )
                     ))}
                 </div>
 
                 <div className="space-y-2">
-                  {(mostrarRankingAmigos ? friendsLeaderboard.slice(3) : leaderboard.slice(3)).map((p) => (
-                    <DarkCard key={p.name} className="px-4 sm:px-5 py-3 flex items-center justify-between">
+                  {/* Usamos los estados correspondientes */}
+                  {(mostrarRankingAmigos ? leaderboardAmigos.slice(3) : leaderboardGlobal.slice(3)).map((p) => (
+                    <DarkCard key={p.tag} className="px-4 sm:px-5 py-3 flex items-center justify-between">
                       <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                         <span className="font-['Courier_Prime',monospace] text-[#888] w-6 sm:w-8 flex-shrink-0" style={{ fontSize: 14 }}>#{p.pos}</span>
                         <div className="min-w-0">
                           <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 12 }}>{p.name}</p>
                           <p className="font-['Courier_Prime',monospace] text-[#888] hidden sm:block" style={{ fontSize: 9 }}>
                             <Trophy className="w-3 h-3 inline" /> {p.wins} — <TrendingUp className="w-3 h-3 inline ml-1" /> {p.rate} — <Flame className="w-3 h-3 inline ml-1" /> {p.streak} racha
+                          </p>
+                        </div>
+                      </div>
+                    </DarkCard>
+                  ))}
+                </div>
+
+                {/* Contenedor del podio con mt-6 para dejar espacio al 1º puesto */}
+                <div className="flex items-end justify-center gap-3 sm:gap-4 mb-5 mt-12">
+                  {/* Usamos los estados y comprobamos que el objeto exista antes de renderizarlo */}
+                  {(mostrarRankingAmigos ? [leaderboardAmigos[1], leaderboardAmigos[0], leaderboardAmigos[2]] : [leaderboardGlobal[1], leaderboardGlobal[0], leaderboardGlobal[2]])
+                    .map((p, i) => {
+                      if (!p) return null; // Evita errores si el array no tiene al menos 3 elementos aún
+
+                      // Asignamos medallas según el índice en este array específico:
+                      // El índice 1 es el primer lugar, el 0 es el segundo, el 2 es el tercero.
+                      const medalla = i === 1 ? "🏆" : i === 0 ? "🥈" : "🥉";
+
+                      return (
+                        <DarkCard 
+                          key={p.tag} 
+                          className={`p-3 sm:p-4 text-center transition-transform ${i === 1 ? "w-[140px] sm:w-[180px] -translate-y-6 border-[#d4b878]/30 shadow-[0_8px_20px_rgba(212,184,120,0.15)] z-10" : "w-[110px] sm:w-[150px]"}`}
+                        >
+                          {/* TODO: se puede añadir p.foto_perfil, con un <img src={p.foto_perfil}/>
+                           aquí, aunque igual no es necesario.*/}
+                          <span className="text-2xl sm:text-3xl">{medalla}</span>
+                          <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] mt-1 truncate" style={{ fontSize: 11 }}>{p.tag}</p>
+                          <p className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 18 }}>{p.victorias}</p>
+                          <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 9 }}>victorias</p>
+                        </DarkCard>
+                      );
+                    })}
+                </div>
+
+                <div className="space-y-2">
+                  {/* Usamos los estados correspondientes
+                      Parámetro 'index' en el map para calcular la posición */}
+                  {(mostrarRankingAmigos ? leaderboardAmigos.slice(3) : leaderboardGlobal.slice(3)).map((p, index) => (
+                    <DarkCard key={p.tag} className="px-4 sm:px-5 py-3 flex items-center justify-between">
+                      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                        {/* Calculamos la posición: el índice 0 de este slice es el 4º lugar */}
+                        <span className="font-['Courier_Prime',monospace] text-[#888] w-6 sm:w-8 flex-shrink-0" style={{ fontSize: 14 }}>#{index + 4}</span>
+                        <div className="min-w-0">
+                          <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 12 }}>{p.tag}</p>
+                          <p className="font-['Courier_Prime',monospace] text-[#888] hidden sm:block" style={{ fontSize: 9 }}>
+                            <Trophy className="w-3 h-3 inline" /> {p.victorias} — <TrendingUp className="w-3 h-3 inline ml-1" /> {p.num_aciertos} aciertos
                           </p>
                         </div>
                       </div>
