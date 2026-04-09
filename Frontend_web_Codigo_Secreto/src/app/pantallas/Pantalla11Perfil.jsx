@@ -128,7 +128,7 @@ export function Pantalla11Perfil() {
   } = perfil || {};
 
   const derrotas = Math.max(0, partidas_jugadas - victorias);
-  const avatarActual = OPCIONES_AVATAR.find(a => a.id === avatarSeleccionado) || OPCIONES_AVATAR[0];
+  const avatarActual = OPCIONES_AVATAR.find(a => a.foto_perfil === avatarSeleccionado) || OPCIONES_AVATAR[0];
 
   return (
     <ScreenFrame title="PERFIL DEL AGENTE">
