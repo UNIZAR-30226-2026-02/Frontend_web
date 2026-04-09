@@ -46,6 +46,10 @@ export function Pantalla01Login() {
         navigate("/nombre-usuario-nuevo", { state: { idToken: idToken } });
 
       } else{
+        // Para que acepte las notificaciones.
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission();
+        }
 
         // El usuario ya existe.
         console.log("Acceso concedido. Redirigiendo al Home...");

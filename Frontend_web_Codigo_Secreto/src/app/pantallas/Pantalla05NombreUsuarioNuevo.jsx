@@ -58,6 +58,11 @@ export function Pantalla05NombreUsuarioNuevo() {
       // Se guardan los datos del jugador logueado en el UserContext.
       loginUsuario(res.jugador);
 
+      // Para que acepte las notificaciones.
+      if ("Notification" in window && Notification.permission === "default") {
+          Notification.requestPermission();
+      }
+
       console.log("Agente registrado con éxito. Redirigiendo al Home...");
       navigate("/home");
 

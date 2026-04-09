@@ -6,7 +6,7 @@
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { BookOpen } from "lucide-react";
 import woodTexture from '../../assets/wood.png';
-import { IconoBala } from "../components/iconoBala";
+import { IconoBala } from "./iconoBala";
 import { UserContext } from "./UserContext";
 import { useContext } from "react";
 
@@ -16,10 +16,12 @@ import avatar from '../../assets/1_magia.jpeg';
 import { SoundProvider } from '../context/SoundContext';
 import { BackgroundMusic } from '../context/MusicaFondo';
 import { GlobalSoundEffects } from '../context/GlobalSoundEffects';
+// Importación para las notificaciones globales del usuario.
+import { NotificacionesProvider } from '../context/NotificacionesContext';
 
 // Pantallas en las que NO se van a mostrar los iconos persistentes de las esquinas 
 // (foto de agente ni contador de balas).
-const hideProfileRoutes = ["/","/login", "/partida","/manual", "/nombre-usuario-nuevo"];
+const hideProfileRoutes = ["/","/login", "/partida","/manual", "/nombre-usuario-nuevo", "/perfil"];
 const hideBulletsRoutes = ["/","/login", "/partida","/manual", "/nombre-usuario-nuevo", "/tienda"];
 // Pantallas en las que NO se quiere mostrar el icono del manual.
 const hideManualRoutes = ["/","/login","/manual", "/nombre-usuario-nuevo"];
@@ -51,9 +53,14 @@ export function Layout() {
   
 
   return (
-    // NEnvolvemos toda la aplicación con SoundProvider para que los componentes hijos
+    // Envolvemos toda la aplicación con SoundProvider para que los componentes hijos
     // puedan acceder al contexto de sonido (volumen, funciones de reproducción).
     <SoundProvider>
+
+      {/* Envolvemos toda la aplicación con NotificacionesProvider para que los componentes hijos
+          puedan acceder al contexto de notificaciones */}
+      <NotificacionesProvider>
+
       {/* Componente que gestiona la música de fondo (inicio automático tras primera interacción) */}
       <BackgroundMusic />
       
@@ -138,6 +145,7 @@ export function Layout() {
           <Outlet />
         </main>
       </div>
+      </NotificacionesProvider>
     </SoundProvider>
   );
 }
