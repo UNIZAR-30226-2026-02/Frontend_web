@@ -9,6 +9,51 @@ import SockJS from 'sockjs-client';
 
 const WS_URL = 'http://localhost:8080/ws';
 
+// PARA LA LISTA DE AMIGOS EN TIEMPO REAL (Pestaña "Amigos")
+export function useAmigos(onAmigosActualizados, onError, token) {
+  const clientRef = useRef(null);
+
+  useEffect(() => {
+    if (!token) return;
+
+    const client = new Client({
+      webSocketFactory: () => new SockJS(WS_URL),
+      connectHeaders: { Authorization: `Bearer ${token}` },
+      onConnect: () => {
+        console.log('Conectado a la central: Actualizaciones de Amigos');
+        
+        // Suscripción al canal de amigos
+        client.subscribe('/user/queue/amigos', (msg) => {
+          try {
+            const data = JSON.parse(msg.body);
+            // 'data' será el array actualizado: [{tag, foto_perfil, victorias, num_aciertos}, ...]
+            onAmigosActualizados(data);
+          } catch (err) {
+            console.error('Error al descifrar la lista de amigos:', err);
+            if (onError) onError('Error al descifrar la transmisión de contactos.');
+          }
+        });
+      },
+      onStompError: (frame) => {
+        console.error('STOMP error en amigos:', frame);
+        if (onError) onError('Conexión perdida con la central de contactos.');
+      },
+      onWebSocketError: (event) => {
+        console.error('WS error en amigos:', event);
+        if (onError) onError('Los canales de comunicación de contactos están caídos.');
+      }
+    });
+
+    client.activate();
+    clientRef.current = client;
+
+    // Desconexión limpia al salir de la pantalla Social
+    return () => client.deactivate();
+  }, [onAmigosActualizados, onError, token]);
+
+  return clientRef;
+}
+
 // PARA LAS NOTIFICACIONES PERSONALES (Global a toda la app)
 
 // El parámetro 'onNotificacionRecibida' se ejecuta cada vez que el backend envía 

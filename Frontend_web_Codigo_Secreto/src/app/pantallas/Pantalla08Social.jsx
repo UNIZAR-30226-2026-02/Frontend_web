@@ -3,11 +3,16 @@
  */
 
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader } from "../components/ScreenFrame";
-import { Search, UserPlus, Trophy, TrendingUp, Flame, ArrowLeft, X, Users, UserCheck, UserX, Clock } from "lucide-react";
-import { useState } from "react";
+import { Search, UserPlus, Trophy, TrendingUp, Flame, ArrowLeft, X, Users, UserCheck, UserX, Clock, User } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 
-// Datos de prueba
+// Importamos la API y el Hook de WebSockets
+import { obtenerAmigos } from "../api/apiSocial";
+import { useAmigos} from "../hooks/hooksSocial"; 
+
+// Datos de prueba (Comentados porque se conecta con el backend)
+/*
 const friends = [
   { name: "LoboÁrtico", rank: "Capitán", online: true, wins: 34 },
   { name: "PhantomX", rank: "Teniente", online: true, wins: 28 },
@@ -16,6 +21,7 @@ const friends = [
   { name: "CodigoSecreto", rank: "General", online: true, wins: 87 },
   { name: "EspíaMaestro", rank: "Coronel", online: false, wins: 298 },
 ];
+*/
 
 const leaderboard = [
   { pos: 1, name: "ProAgente99", wins: 342, rate: "78%", streak: 12, badge: "🏆" },
@@ -56,6 +62,35 @@ export function Pantalla08Social() {
   
   // ESTADO DE SOLICITUDES
   const [requests, setRequests] = useState(initialFriendRequests);
+
+  // ESTADOS DE AMIGOS
+  const [amigos, setAmigos] = useState([]);
+  const tokenActual = sessionStorage.getItem('jwt_token');
+
+  // Cargar lista de amigos iniciales por usando 'apiSocial.js' al entrar a la pantalla
+  useEffect(() => {
+    const cargarAmigos = async () => {
+      try {
+        const datosAmigos = await obtenerAmigos();
+        setAmigos(datosAmigos);
+      } catch (error) {
+        console.error("Error al obtener la lista de amigos:", error);
+      }
+    };
+    cargarAmigos();
+  }, []);
+
+  // Escuchar actualizaciones en tiempo real (WebSockets)
+  const onAmigosActualizados = useCallback((data) => {
+    setAmigos(data);
+  }, []);
+
+  const onWsError = useCallback((errorMsg) => {
+    console.error("WS Error:", errorMsg);
+  }, []);
+
+  // Se invoca 'hooksSocial.js' para recibir actualizaciones en tiempo real de la lista de amigos.
+  useAmigos(onAmigosActualizados, onWsError, tokenActual);
 
   const handleAgnadir = () => {
     if (nombreAmigo.trim()) {
@@ -123,19 +158,41 @@ export function Pantalla08Social() {
             {/* CONTENIDO DE TABS */}
             {tab === "friends" && (
               <div className="grid grid-cols-1 gap-3">
-                {friends.map((f) => (
-                  <DarkCard key={f.name} className="p-3 sm:p-4 flex items-center justify-between gap-3">
-                    {/* Nombre alineado a la izquierda (ocupa el espacio disponible y se trunca si es muy largo) */}
-                    <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 14 }}>
-                      {f.name}
+                {amigos.length > 0 ? (
+                  amigos.map((f, index) => (
+                    <DarkCard key={index} className="p-3 sm:p-4 flex items-center justify-between gap-3 animate-in fade-in">
+                      
+                      {/* Contenedor con icono y tag del usuario amigo */}
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        {/* Icono de usuario */}
+                        <div
+                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                          style={{ backgroundColor: "rgba(232, 220, 200, 0.1)", border: "1px solid rgba(232, 220, 200, 0.3)" }}
+                        >
+                          <User className="w-3.5 h-3.5 text-[#e8dcc8]" />
+                        </div>
+
+                        {/* TODO: se podría añadir el dato 'foto_perfil' en vez de icono de user. */}
+                        
+                        {/* Nombre alineado a la izquierda */}
+                        <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 14 }}>
+                          {f.tag}
+                        </p>
+                      </div>
+
+                      {/* Victorias alineadas a la derecha */}
+                      <p className="font-['Courier_Prime',monospace] text-[#888] flex-shrink-0" style={{ fontSize: 11 }}>
+                        {f.victorias} victorias
+                      </p>
+                    </DarkCard>
+                  ))
+                ) : (
+                  <div className="text-center py-10">
+                    <p className="font-['Courier_Prime',monospace] text-[#423D36]" style={{ fontSize: 12 }}>
+                      No hay contactos consolidados en tu red.
                     </p>
-                    
-                    {/* Victorias alineadas a la derecha (flex-shrink-0 evita que se encoja el texto) */}
-                    <p className="font-['Courier_Prime',monospace] text-[#888] flex-shrink-0" style={{ fontSize: 11 }}>
-                      {f.wins} victorias
-                    </p>
-                  </DarkCard>
-                ))}
+                  </div>
+                )}
               </div>
             )}
 

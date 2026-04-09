@@ -95,7 +95,7 @@ export function Pantalla07Lobby() {
     }
 
     // Si la partida fue finalizada (creador abandonó), volver al home
-    if (data.estado === "finalizado") {
+    if (data.estado === "finalizada") {
       navigate("/home");
     }
   }, [user?.tag, navigate]);

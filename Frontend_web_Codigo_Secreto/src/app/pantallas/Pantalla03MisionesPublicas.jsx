@@ -243,7 +243,7 @@ export function Pantalla03MisionesPublicas() {
 
                 {filtered.length === 0 && (
                   <div className="text-center py-8">
-                    <p className="font-['Courier_Prime',monospace] text-[#8a7a60]" style={{ fontSize: 12 }}>
+                    <p className="font-['Courier_Prime',monospace] text-[#423D36]" style={{ fontSize: 12 }}>
                       No se encontraron misiones disponibles.
                     </p>
                   </div>
