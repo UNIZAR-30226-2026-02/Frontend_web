@@ -14,7 +14,7 @@ const WS_URL = 'http://localhost:8080/ws';
 // PARA LA LISTA DE AMIGOS EN TIEMPO REAL (Pestaña "Amigos")
 // PARA LEADERBOARDS EN TIEMPO REAL (Pestaña "CLASIFICACIÓN")
 export function useSocialWebSockets(onAmigosActualizados, onGlobalActualizado,
-  onAmigosLeaderboardActualizado, onError, token) {
+  onAmigosLeaderboardActualizado, onSolicitudesActualizadas, onError, token) {
   const clientRef = useRef(null);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export function useSocialWebSockets(onAmigosActualizados, onGlobalActualizado,
           }
         });
 
-        // 3. Suscripción canal personal Leaderboard (Amigos)
+        // Suscripción canal personal Leaderboard (Amigos)
         client.subscribe('/user/queue/leaderboard/amigos', (msg) => {
           try {
             const data = JSON.parse(msg.body);
@@ -58,6 +58,18 @@ export function useSocialWebSockets(onAmigosActualizados, onGlobalActualizado,
           } catch (err) {
             console.error('Error al descifrar el ranking de amigos:', err);
             if (onError) onError('Error al descifrar el ranking de amigos.');
+          }
+        });
+
+        // Suscripción canal personal Solicitudes
+        client.subscribe('/user/queue/solicitudes', (msg) => {
+          try {
+            const data = JSON.parse(msg.body);
+            // 'data' será el array actualizado de solicitudes pendientes
+            onSolicitudesActualizadas(data);
+          } catch (err) {
+            console.error('Error al descifrar las solicitudes:', err);
+            if (onError) onError('Error al descifrar las solicitudes pendientes.');
           }
         });
       },

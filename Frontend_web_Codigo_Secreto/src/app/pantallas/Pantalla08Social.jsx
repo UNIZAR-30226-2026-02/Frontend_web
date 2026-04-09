@@ -8,7 +8,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 
 // Importamos la API y el Hook de WebSockets
-import { obtenerAmigos, obtenerLeaderboardAmigos, obtenerLeaderboardGlobal } from "../api/apiSocial";
+import { obtenerAmigos, obtenerLeaderboardAmigos, obtenerLeaderboardGlobal, obtenerSolicitudes,
+                            responderSolicitud, enviarSolicitudAmistad } from "../api/apiSocial";
 import { useSocialWebSockets } from "../hooks/hooksSocial"; 
 
 // Datos de prueba (Comentados porque se conecta con el backend)
@@ -46,13 +47,36 @@ const friendsLeaderboard = [
 ];
 */
 
-// Datos iniciales de solicitudes
-const initialFriendRequests = [
+/*const initialFriendRequests = [
   { name: "RedWolf_87", rank: "Teniente", wins: 42, timeAgo: "Hace 2 horas" },
   { name: "GhostRider", rank: "Capitán", wins: 67, timeAgo: "Hace 5 horas" },
   { name: "IronEagle_01", rank: "Sargento", wins: 23, timeAgo: "Hace 1 día" },
   { name: "StealthOps", rank: "Comandante", wins: 91, timeAgo: "Hace 2 días" },
-];
+];*/
+
+// Función para calcular el tiempo transcurrido transcurrido desde que se envió esa solicitud.
+function calcularTiempoTranscurrido(fechaString) {
+  const fecha = new Date(fechaString);
+  const ahora = new Date();
+  const diferenciaSegundos = Math.floor((ahora - fecha) / 1000);
+
+  if (diferenciaSegundos < 60) return "Hace un momento";
+  
+  const minutos = Math.floor(diferenciaSegundos / 60);
+  if (minutos < 60) return `Hace ${minutos} minuto${minutos !== 1 ? 's' : ''}`;
+  
+  const horas = Math.floor(minutos / 60);
+  if (horas < 24) return `Hace ${horas} hora${horas !== 1 ? 's' : ''}`;
+  
+  const dias = Math.floor(horas / 24);
+  if (dias < 30) return `Hace ${dias} día${dias !== 1 ? 's' : ''}`;
+  
+  const meses = Math.floor(dias / 30);
+  if (meses < 12) return `Hace ${meses} mes${meses !== 1 ? 'es' : ''}`;
+  
+  const agnos = Math.floor(dias / 365);
+  return `Hace ${agnos} año${agnos !== 1 ? 's' : ''}`;
+}
 
 export function Pantalla08Social() {
   const [tab, setTab] = useState("friends");
@@ -62,8 +86,8 @@ export function Pantalla08Social() {
   const [nombreAmigo, setNombreAmigo] = useState("");
   const [mostrarRankingAmigos, setMostrarRankingAmigos] = useState(false);
   
-  // ESTADO DE SOLICITUDES
-  const [requests, setRequests] = useState(initialFriendRequests);
+  // ESTADO DE SOLICITUDES (array)
+  const [requests, setRequests] = useState([]);
 
   // ESTADOS DE AMIGOS
   const [amigos, setAmigos] = useState([]);
@@ -71,6 +95,10 @@ export function Pantalla08Social() {
   // ESTADOS DE LEADERBOARDS (global y amigos)
   const [leaderboardGlobal, setLeaderboardGlobal] = useState([]);
   const [leaderboardAmigos, setLeaderboardAmigos] = useState([]);
+
+  // Estados para las barras de búsqueda
+  const [busquedaAmigos, setBusquedaAmigos] = useState("");
+  const [busquedaSolicitudes, setBusquedaSolicitudes] = useState("");
   
   const tokenActual = sessionStorage.getItem('jwt_token');
 
@@ -103,9 +131,19 @@ export function Pantalla08Social() {
       }
     }
 
+    const cargarSolicitudes = async () => {
+      try {
+        const datosSolicitudes = await obtenerSolicitudes();
+        setRequests(datosSolicitudes);
+      } catch (error) {
+        console.error("Error al obtener las solicitudes:", error);
+      }
+    };
+
     cargarAmigos();
     cargarLeaderboardAmigos();
     cargarLeaderboardGlobal();
+    cargarSolicitudes();
   }, []);
 
   // Escuchar actualizaciones en tiempo real (WebSockets)
@@ -123,6 +161,11 @@ export function Pantalla08Social() {
     setLeaderboardAmigos(data);
   }, []);
 
+  // Callback para actualizaciones en tiempo real de las solicitudes
+  const onSolicitudesActualizadas = useCallback((data) => {
+    setRequests(data);
+  }, []);
+
   const onWsError = useCallback((errorMsg) => {
     console.error("WS Error:", errorMsg);
   }, []);
@@ -130,21 +173,53 @@ export function Pantalla08Social() {
   // Se invoca 'hooksSocial.js' para recibir actualizaciones en tiempo real de la lista de amigos
   // y de los leaderboards.
   useSocialWebSockets(onAmigosActualizados, onGlobalLeaderboardActualizado, 
-    onAmigosLeaderboardActualizado, onWsError, tokenActual);
+    onAmigosLeaderboardActualizado, onSolicitudesActualizadas, onWsError, tokenActual);
 
-  const handleAgnadir = () => {
-    if (nombreAmigo.trim()) {
-      console.log("Añadiendo agente:", nombreAmigo);
-      setNombreAmigo("");
-      setMostrarAgnadir(false);
+  // FUNCIÓN PARA GESTIONAR ENVÍO DE SOLICITUDES.
+  const handleAgnadir = async () => {
+    const tag = nombreAmigo.trim();
+    if (tag) {
+      try {
+        // Llamada a 'apiSocial.js'.
+        await enviarSolicitudAmistad(tag);
+        
+        console.log(`Solicitud enviada con éxito a: ${tag}`);
+        
+        // Si la petición es exitosa, limpiamos el input y cerramos el modal
+        setNombreAmigo("");
+        setMostrarAgnadir(false);
+        
+      } catch (error) {
+        console.error("Error al enviar la solicitud:", error);
+        alert(error.message || "No se pudo enviar la solicitud.");
+      }
     }
   };
 
   // FUNCIÓN PARA GESTIONAR ACCIONES DE SOLICITUD
-  const handleActionRequest = (name, action) => {
-    console.log(`${action === 'accept' ? 'Aceptando' : 'Rechazando'} a:`, name);
-    setRequests(prev => prev.filter(r => r.name !== name));
+  const handleActionRequest = async (id_solicitante, action) => {
+    const estado = action === 'accept' ? 'aceptada' : 'pendiente';
+    
+    try {
+      // Invocar función de 'apiSocial' para notificar el estado de la solicitud al backend.
+      await responderSolicitud(id_solicitante, estado);
+      
+      // Quitamos la solicitud del estado local para dar feedback visual inmediato
+      setRequests(prev => prev.filter(r => r.id_solicitante !== id_solicitante));
+    } catch (error) {
+      console.error(`Error al intentar ${estado} la solicitud:`, error);
+    }
   };
+
+  // Filtrado local de amigos
+  const amigosFiltrados = amigos.filter((amigo) => 
+    amigo.tag.toLowerCase().startsWith(busquedaAmigos.toLowerCase())
+  );
+
+  // Filtrado local de solicitudes
+  const solicitudesFiltradas = requests.filter((r) => 
+    r.tag_solicitante.toLowerCase().startsWith(busquedaSolicitudes.toLowerCase())
+  );
 
   return (
     <ScreenFrame title="RED DE CONTACTOS">
@@ -183,11 +258,39 @@ export function Pantalla08Social() {
               ))}
             </div>
 
-            {/* Buscador: Solo visible en Amigos y Solicitudes */}
-            {(tab === "friends" || tab === "requests") && (
+            {/* Buscador: Solo visible en Amigos */}
+            {tab === "friends" && (
               <div className="relative mb-5">
                 <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8a7a60]" />
-                <input type="text" placeholder="Buscar agente por nombre clave..." className="w-full bg-[#f5edd8] border-2 border-[#a08050]/40 rounded-sm pl-10 sm:pl-12 pr-12 py-2.5 font-['Courier_Prime',monospace] text-[#3a2a10] placeholder:text-[#a09070] outline-none" style={{ fontSize: 12 }} />
+                <input 
+                  type="text" 
+                  value={busquedaAmigos}
+                  onChange={(e) => setBusquedaAmigos(e.target.value)}
+                  placeholder="Buscar agente en tu red..." 
+                  className="w-full bg-[#f5edd8] border-2 border-[#a08050]/40 rounded-sm pl-10 sm:pl-12 pr-12 py-2.5 font-['Courier_Prime',monospace] text-[#3a2a10] placeholder:text-[#a09070] outline-none" 
+                  style={{ fontSize: 12 }} 
+                />
+                <button 
+                  onClick={() => setMostrarAgnadir(true)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#2a2a2a] p-1.5 rounded-sm cursor-pointer hover:bg-[#3a3a3a] transition-colors"
+                >
+                  <UserPlus className="w-4 h-4 text-[#d4b878]" />
+                </button>
+              </div>
+            )}
+
+            {/* Buscador: Solo visible en Solicitudes */}
+            {tab === "requests" && (
+              <div className="relative mb-5">
+                <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8a7a60]" />
+                <input 
+                  type="text" 
+                  value={busquedaSolicitudes}
+                  onChange={(e) => setBusquedaSolicitudes(e.target.value)}
+                  placeholder="Buscar agentes solicitantes..." 
+                  className="w-full bg-[#f5edd8] border-2 border-[#a08050]/40 rounded-sm pl-10 sm:pl-12 pr-12 py-2.5 font-['Courier_Prime',monospace] text-[#3a2a10] placeholder:text-[#a09070] outline-none" 
+                  style={{ fontSize: 12 }} 
+                />
                 <button 
                   onClick={() => setMostrarAgnadir(true)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#2a2a2a] p-1.5 rounded-sm cursor-pointer hover:bg-[#3a3a3a] transition-colors"
@@ -200,8 +303,8 @@ export function Pantalla08Social() {
             {/* CONTENIDO DE TABS */}
             {tab === "friends" && (
               <div className="grid grid-cols-1 gap-3">
-                {amigos.length > 0 ? (
-                  amigos.map((f, index) => (
+                {amigosFiltrados.length > 0 ? (
+                  amigosFiltrados.map((f, index) => (
                     <DarkCard key={index} className="p-3 sm:p-4 flex items-center justify-between gap-3 animate-in fade-in">
                       
                       {/* Contenedor con icono y tag del usuario amigo */}
@@ -346,30 +449,36 @@ export function Pantalla08Social() {
             {/* VISTA DE SOLICITUDES */}
             {tab === "requests" && (
               <div className="space-y-3">
-                {requests.length > 0 ? (
-                  requests.map((r) => (
-                    <DarkCard key={r.name} className="p-4 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-1">
+                {solicitudesFiltradas.length > 0 ? (
+                  solicitudesFiltradas.map((r) => (
+                    <DarkCard key={r.id_solicitante} className="p-4 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-1">
                       <div className="flex items-center gap-4 min-w-0">
+                        {/* TODO: Se puede usar r.foto_perfil_solicitante aquí como imagen */}
                         <div className="bg-[#3a2a10] p-2 rounded-sm">
                           <Clock className="w-5 h-5 text-[#d4b878]" />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 14 }}>{r.name}</p>
+                          <p className="font-['Courier_Prime',monospace] text-[#e8dcc8] truncate" style={{ fontSize: 14 }}>{r.tag_solicitante}</p>
                           <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 10 }}>
-                            {r.wins} victorias • <span className="italic text-[#b89055]">{r.timeAgo}</span>
+                            {/* Usamos la función para calcular el tiempo transcurrido desde 
+                                que se envió esa solicitud. */}
+                            <span className="italic text-[#b89055]">{calcularTiempoTranscurrido(r.fecha_solicitud)}</span>
                           </p>
                         </div>
                       </div>
                       <div className="flex gap-2">
+                        {/* Botón para aceptar la solicitud. */}
                         <button 
-                          onClick={() => handleActionRequest(r.name, 'accept')}
+                          onClick={() => handleActionRequest(r.id_solicitante, 'accept')}
                           className="bg-[#2a5a2a] hover:bg-[#3a6a3a] text-white p-2 rounded-sm cursor-pointer transition-colors"
                           title="Aceptar"
                         >
                           <UserCheck className="w-5 h-5" />
                         </button>
+
+                        {/* Botón para rechazar la solicitud. */}
                         <button 
-                          onClick={() => handleActionRequest(r.name, 'reject')}
+                          onClick={() => handleActionRequest(r.id_solicitante, 'reject')}
                           className="bg-[#8b2020] hover:bg-[#a03030] text-white p-2 rounded-sm cursor-pointer transition-colors"
                           title="Rechazar"
                         >
@@ -380,7 +489,9 @@ export function Pantalla08Social() {
                   ))
                 ) : (
                   <div className="text-center py-10">
-                    <p className="font-['Courier_Prime',monospace] text-[#8a7a60]">No hay solicitudes pendientes en el archivo.</p>
+                    <p className="font-['Courier_Prime',monospace] text-[#423D36]" style={{ fontSize: 12 }}>
+                      No hay solicitudes pendientes en el archivo.
+                    </p>
                   </div>
                 )}
               </div>
@@ -420,7 +531,7 @@ export function Pantalla08Social() {
                   onClick={handleAgnadir} 
                   disabled={!nombreAmigo.trim()}
                   className="flex-1 bg-[#2a5a2a] disabled:bg-[#2a2a2a] text-white py-2.5 rounded-sm cursor-pointer"
-                >AÑADIR</button>
+                >ENVIAR SOLICITUD</button>
               </div>
             </div>
           </div>

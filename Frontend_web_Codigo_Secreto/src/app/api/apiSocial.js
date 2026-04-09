@@ -36,12 +36,12 @@ export async function buscarJugadores(tag) {
 }
 
 // Enviar solicitud de amistad → POST /api/amigos/solicitudes
-export async function enviarSolicitudAmistad(id_receptor) {
+export async function enviarSolicitudAmistad(tag_receptor) {
   const res = await fetch(`${BASE_URL}/amigos/solicitudes`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body: JSON.stringify({ id_receptor }),
+    body: JSON.stringify({ tag_receptor }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
