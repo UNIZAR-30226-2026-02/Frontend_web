@@ -22,10 +22,10 @@
  * y calcula el estado de cada logro/medalla. Se muestra el porcentaje de progreso global,
  * la colección desbloqueada y un resumen estadístico.
  */
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Trophy, Medal, Star, Shield, Crosshair, Eye,
-  Flame, Target, Users, Lock, Crown, ArrowLeft, Gamepad2, ShoppingBag
+  Flame, Target, Users, Lock, Crown, ArrowLeft, Gamepad2, ShoppingBag, Loader2
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import {
@@ -33,6 +33,7 @@ import {
   FBISeal, SectionHeader, SubsectionLabel
 } from "../components/ScreenFrame";
 import "../components/Logros.css";
+import { obtenerLogros } from "../api/apiJugador";
 
 // Configuración de rareza para estilos visuales
 const configuracionRareza = {
@@ -228,6 +229,7 @@ const calcularMedallas = (partidasGanadas) => {
   }));
 };
 */
+
 // COMPONENTE PRINCIPAL
 export function Pantalla10Logros() {
   const navigate = useNavigate();

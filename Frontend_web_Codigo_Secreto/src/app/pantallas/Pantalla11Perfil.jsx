@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 
+
 // Componentes del sistema
 import { 
   ScreenFrame, ManilaFolder, DarkCard, RedStamp, 
@@ -58,8 +59,8 @@ export function Pantalla11Perfil() {
   // Estados de personalización
   const [avatarSeleccionado, setAvatarSeleccionado] = useState(1);
   const [mostrarSelector, setMostrarSelector] = useState(false);
-  const [temaMarco, setTemaMarco] = useState('gold');
-  const [temaTablero, setTemaTablero] = useState('gold');
+  const [temaMarco, setTemaMarco] = useState('');
+  const [temaTablero, setTemaTablero] = useState('');
 
   // Craga inicial
   useEffect(() => {
@@ -68,7 +69,7 @@ export function Pantalla11Perfil() {
         const data = await obtenerPerfil();
         setPerfil(data);
         setTagEditado(data.tag || '');
-        if (data.avatar_id) setAvatarSeleccionado(data.avatar_id);
+        if (data.foto_perfil) setAvatarSeleccionado(data.foto_perfil);
       } catch (err) {
         setError("No se pudo cargar el expediente del agente.");
         console.error(err);
@@ -109,7 +110,7 @@ export function Pantalla11Perfil() {
       <ScreenFrame title="ACCEDIENDO...">
         <div className="flex flex-col items-center justify-center h-64 gap-4">
           <Loader2 className="w-10 h-10 animate-spin text-[#d4b878]" />
-          <p className="fuente-courier text-[#d4b878] animate-pulse">DESCRIPTANDO EXPEDIENTE...</p>
+          <p className="fuente-courier text-[#d4b878] animate-pulse">DESENCRIPTANDO EXPEDIENTE...</p>
         </div>
       </ScreenFrame>
     );
