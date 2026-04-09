@@ -57,7 +57,7 @@ export async function obtenerLogros() {
     credentials: 'include',
   });
   if (!res.ok) throw new Error('Error al obtener los logros');
-  return res.json(); // Array de { id_logro, nombre, descripcion, progreso_actual, completado, fecha_desbloqueo, ... }
+  return res.json(); // Array de { id_logro, nombre, descripcion, progreso_actual, completado, ... }
 }
  
 // Personalizaciones del jugador → GET /api/jugadores/personalizaciones
