@@ -1,31 +1,74 @@
 /* Pantalla de historial de partidas: Muestra las últimas 30 partidas */
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { ArrowLeft, Trophy, Skull, Clock, Users } from "lucide-react";
+import { ArrowLeft, Trophy, Skull, Clock, Users, Loader2 } from "lucide-react";
 import { ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader } from "../components/ScreenFrame";
 import { IconoBala } from "../components/IconoBala";
 
-// Datos de ejemplo
-const history = [
-  //{ id: 1, name: "Misión de Béjar", date: "24/02/2026", result: "Victoria", role: "Agente", team: "Rojo", duration: "12:34", reward: 20 },
-  //{ id: 2, name: "Misión de Adriana", date: "23/02/2026", result: "Derrota", role: "Jefe", team: "Azul", duration: "08:45", reward: 10 },
-  //{ id: 3, name: "Misión de Berta", date: "23/02/2026", result: "Victoria", role: "Agente", team: "Rojo", duration: "15:02", reward: 20 },
- // { id: 4, name: "Misión de Lidia", date: "22/02/2026", result: "Victoria", role: "Jefe", team: "Rojo", duration: "10:18", reward: 20 },
- // { id: 5, name:"Misión de Imad", date: "22/02/2026", result: "Derrota", role: "Agente", team: "Azul", duration: "06:30", reward: 10 },
- // { id: 6, name: "Misión de Rocío", date: "21/02/2026", result: "Victoria", role: "Agente", team: "Rojo", duration: "11:55", reward: 20 },
- // { id: 7, name: "Misión de Bellido", date: "21/02/2026", result: "Derrota", role: "Jefe", team: "Azul", duration: "09:12", reward: 10 },
- // { id: 8, name: "Misión de Blasco", date: "20/02/2026", result: "Victoria", role: "Agente", team: "Azul", duration: "14:08", reward: 20 },
-  //{ id: 9, name: "Misión de Jordi", date: "20/02/2026", result: "Derrota", role: "Agente", team: "Rojo", duration: "07:33", reward: 10 },
-  { id: 1, name: "Misión de Zarazaga", date: "06/04/2026", result: "Victoria", role: "Jefe", team: "Rojo", duration: "07:33", reward: 20}
-];
+import { obtenerHistorial } from "../api/apiJugador"; 
 
 export function Pantalla16Historial() {
   const navigate = useNavigate();
   
-  // Cálculo de victorias
+  // Estados para guardar los datos, el estado de carga y posibles errores
+  const [history, setHistory] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Cargamos los datos al montar el componente
+  useEffect(() => {
+    const cargarHistorial = async () => {
+      try {
+        setCargando(true);
+        const data = await obtenerHistorial();
+        
+        // Mapeamos los datos del backend (PartidaResumenDTO) al formato de la UI
+        const partidasMapeadas = (data.partidas || []).map(p => ({
+          id: p.id_partida,
+          // Usamos el tag_creador para el nombre de la misión
+          name: `Misión de ${p.tag_creador || p.nombre_tema || "Desconocido"}`,
+          // Formateamos la fecha (viene como LocalDateTime, ej: "2026-04-06T10:30:00")
+          date: new Date(p.fecha_fin).toLocaleDateString('es-ES'),
+          result: p.victoria ? "Victoria" : "Derrota",
+          role: p.rol_jugador?.toLowerCase() === "lider" ? "Jefe" : "Agente",
+          team: p.equipo_jugador?.toLowerCase() === "rojo" ? "Rojo" : "Azul",
+          // Reemplazamos la "duración" por los aciertos/fallos si es agente
+          statsExtra: p.rol_jugador?.toLowerCase() === "agente" 
+            ? `${p.num_aciertos}✔ ${p.num_fallos}✖` 
+            : p.nombre_tema, // Si es Jefe, mostramos el tema
+          // Lógica de recompensa: +20 si es victoria, +10 si es derrota
+          reward: p.victoria ? 20 : 10 
+        }));
+
+        setHistory(partidasMapeadas);
+      } catch (err) {
+        console.error("Error al cargar historial:", err);
+        setError("No se pudo acceder al archivo de la central.");
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarHistorial();
+  }, []); // Se ejecuta solo una vez, al cargar la página.
+  
+  // Cálculos dinámicos basados en el estado
   const wins = history.filter(h => h.result === "Victoria").length;
   const totalMissions = history.length;
-  const winRatio = Math.round((wins / totalMissions) * 100);
+  // Evitamos NaN si el historial está vacío
+  const winRatio = totalMissions > 0 ? Math.round((wins / totalMissions) * 100) : 0;
+
+  // Pantalla de carga mientras se obtienen los datos
+  if (cargando) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[#1a1a1a]">
+        <Loader2 className="w-10 h-10 animate-spin text-[#d4b878]" />
+        <p className="font-['Courier_Prime',monospace] text-[#d4b878] animate-pulse">
+          EXTRAYENDO ARCHIVOS DE LA CENTRAL...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-4 sm:p-8 lg:p-12 pt-16 sm:pt-12">
@@ -61,19 +104,19 @@ export function Pantalla16Historial() {
                 <div>
                   <SectionHeader title="HISTORIAL DE MISIONES" />
                   <p className="font-['Courier_Prime',monospace] text-[#6a5a40] mt-1" style={{ fontSize: 11 }}>
-                    Registro de las últimas 30 operaciones — {wins}/{totalMissions} victorias
+                    {error ? error : `Registro de las últimas 30 operaciones — ${wins}/${totalMissions} victorias`}
                   </p>
                 </div>
                 <FBISeal size={44} />
               </div>
 
               {/* Resumen de estadísticas */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
                 {[
                   { label: "TOTAL", value: totalMissions.toString(), icon: <Clock className="w-4 h-4 text-[#5a4a30]" /> },
                   { label: "VICTORIAS", value: wins.toString(), icon: <Trophy className="w-4 h-4 text-[#2a5a2a]" /> },
                   { label: "DERROTAS", value: (totalMissions - wins).toString(), icon: <Skull className="w-4 h-4 text-[#5a2a2a]" /> },
-                  { label: "RATIO", value: `${winRatio}%`, icon: <Users className="w-4 h-4 text-[#5a4a30]" /> },
+                  //{ label: "RATIO", value: `${winRatio}%`, icon: <Users className="w-4 h-4 text-[#5a4a30]" /> },
                 ].map((s) => (
                   <div key={s.label} className="bg-[#f5edd0]/70 border border-[#c4a060]/25 rounded-sm p-3 text-center">
                     <div className="flex justify-center mb-1">{s.icon}</div>
@@ -85,6 +128,11 @@ export function Pantalla16Historial() {
 
               {/* Listado de misiones */}
               <div className="space-y-2">
+                {history.length === 0 && !error && (
+                  <p className="font-['Courier_Prime',monospace] text-center text-[#8a7a60] py-8">
+                    NO HAY REGISTROS OPERATIVOS TODAVÍA.
+                  </p>
+                )}
                 {history.map((h) => {
                   const isWin = h.result === "Victoria";
                   return (
@@ -98,8 +146,9 @@ export function Pantalla16Historial() {
                               isWin ? "bg-[#2a5a2a]/15 text-[#2a5a2a]" : "bg-[#5a2a2a]/15 text-[#5a2a2a]"
                             }`} style={{ fontSize: 8 }}>{h.result}</span>
                           </div>
+                          {/* Subtítulo con información de la partida */}
                           <p className="font-['Courier_Prime',monospace] text-[#8a7a60] mt-0.5" style={{ fontSize: 9 }}>
-                            {h.date} — {h.role} — Equipo {h.team} — {h.duration}
+                            {h.date} — {h.role} — Equipo {h.team} — {h.statsExtra}
                           </p>
                         </div>
                       </div>

@@ -33,7 +33,7 @@ export function Layout() {
   const hideBullets = hideBulletsRoutes.some(r => location.pathname === r || location.pathname.startsWith(`${r}/`));
   const hideManual = hideManualRoutes.some(r => location.pathname === r || location.pathname.startsWith(`${r}/`));
 
-  /* DESCOMENTAR PARA CONEXIÓN CON BACKEND.
+  // Se usa UserContext, que contiene el objeto del Jugador logueado con toda la información actualizada.
   const { user, isLoading } = useContext(UserContext);
 
   // PANTALLA DE CARGA (Mientras el backend valida la cookie)
@@ -47,9 +47,10 @@ export function Layout() {
     );
   }
 
-  // LÓGICA PARA INICIALES Y BALAS (Con fallback por si user es null)
-  //const initials = user?.alias ? user.alias.substring(0, 2).toUpperCase() : "??";
-  const balas = user?.balas ?? 0;*/
+  // LÓGICA PARA BALAS Y FOTO (Con fallback por si user es null)
+  const balas = user?.balas ?? 0;
+  // Extraemos la foto en snake_case o usamos la importada por defecto
+  const fotoDePerfil = user?.foto_perfil || avatar;
   
 
   return (
@@ -84,7 +85,7 @@ export function Layout() {
         <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.5)_100%)]" />
 
         {/* ====== Iconos persistentes en las esquinas ====== */}
-        {!hideProfile /*&& user*/ && (  // Solo se muestra si hay sesión.
+        {!hideProfile && user && (  // Solo se muestra si hay sesión.
           <>
             {/* Agent photo — top left → Profile */}
             <button
@@ -95,6 +96,7 @@ export function Layout() {
               <div className="relative">
                 {/* Polaroid frame */}
                 <div className="bg-[#f0e8d4] p-[3px] pb-[10px] shadow-[2px_3px_10px_rgba(0,0,0,0.6)] rotate-[-4deg] group-hover:rotate-[-1deg] transition-transform">
+                    {/* TODO: cambiar por imagen actual */}
                     <img src={avatar} alt="Avatar" className="w-8 h-8 sm:w-12 sm:h-12 object-cover"  />
                 </div>
                 {/* Red dot */}
@@ -110,16 +112,13 @@ export function Layout() {
             <div className="fixed top-14 right-3 sm:top-16 sm:right-4 z-50">
               <div className="flex items-center gap-1.5 bg-[#1a1208]/90 border border-[#5a4a20]/30 rounded-sm px-2 py-1 shadow-[1px_2px_6px_rgba(0,0,0,0.4)]">
                 <IconoBala size={15} />
-                {/* Balas de prueba */}
+                {/* Balas de prueba 
                 <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 13 }}>500</span>
-                {/* TODO: descomentar para conectar con backend.
-                    BALAS DINÁMICAS            
-                <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 11 }}>
+                */}
+                {/* Balas dinámicas del usuario */}            
+                <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 13 }}>
                   {balas}
                 </span>
-                */} 
-                
-                
               </div>
             </div>
           </>
