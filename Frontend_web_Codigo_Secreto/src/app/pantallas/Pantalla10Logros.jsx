@@ -346,12 +346,6 @@ export function Pantalla10Logros() {
                 etiqueta="BALAS GANADAS"
                 color="#50a050"
               />
-              <TarjetaResumen
-                icono={Crown}
-                valor={perfilEjemplo.partidasGanadas}
-                etiqueta="PARTIDAS GANADAS"
-                color="#c090e0"
-              />
             </div>
 
             {/* Sección de Logros Operativos (RF-7) */}
