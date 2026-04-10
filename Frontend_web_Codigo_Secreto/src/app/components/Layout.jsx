@@ -1,5 +1,4 @@
-/* 
- * Fichero con la estética de la estructura principal de todas las pantallas de la aplicación. 
+/* * Fichero con la estética de la estructura principal de todas las pantallas de la aplicación. 
  * MODIFICADO: Se ha añadido soporte para música de fondo y efectos de sonido globales.
  */
 
@@ -10,7 +9,12 @@ import { IconoBala } from "./iconoBala";
 import { UserContext } from "./UserContext";
 import { useContext } from "react";
 
-import avatar from '../../assets/1_magia.jpeg';
+// Importaciones de todos los avatares disponibles
+import Magia from '../../assets/1_magia.jpeg';
+import Hist from '../../assets/2_historico.jpeg';
+import Subm from "../../assets/3_vidasubmarina.jpeg";
+import Cyber from "../../assets/4_cyberpunk.jpeg";
+import Natur from "../../assets/5_naturaleza.jpeg";
 
 // Importaciones para el sistema de sonido
 import { SoundProvider } from '../context/SoundContext';
@@ -25,6 +29,15 @@ const hideProfileRoutes = ["/","/login", "/partida","/manual", "/nombre-usuario-
 const hideBulletsRoutes = ["/","/login", "/partida","/manual", "/nombre-usuario-nuevo", "/tienda"];
 // Pantallas en las que NO se quiere mostrar el icono del manual.
 const hideManualRoutes = ["/","/login","/manual", "/nombre-usuario-nuevo"];
+
+// Mapa para vincular el ID de la base de datos con la imagen importada
+const MAPA_AVATARES = {
+  1: Magia,
+  2: Hist,
+  3: Subm,
+  4: Cyber,
+  5: Natur,
+};
 
 export function Layout() {
   const location = useLocation();
@@ -49,9 +62,10 @@ export function Layout() {
 
   // LÓGICA PARA BALAS Y FOTO (Con fallback por si user es null)
   const balas = user?.balas ?? 0;
-  // Extraemos la foto en snake_case o usamos la importada por defecto
-  const fotoDePerfil = user?.foto_perfil || avatar;
   
+  // Extraemos la foto en string/number y la mapeamos a la imagen real (por defecto Magia)
+  const idFoto = user?.foto_perfil ? Number(user.foto_perfil) : 1;
+  const fotoDePerfilSrc = MAPA_AVATARES[idFoto] || Magia;
 
   return (
     // Envolvemos toda la aplicación con SoundProvider para que los componentes hijos
@@ -96,8 +110,8 @@ export function Layout() {
               <div className="relative">
                 {/* Polaroid frame */}
                 <div className="bg-[#f0e8d4] p-[3px] pb-[10px] shadow-[2px_3px_10px_rgba(0,0,0,0.6)] rotate-[-4deg] group-hover:rotate-[-1deg] transition-transform">
-                    {/* TODO: cambiar por imagen actual */}
-                    <img src={avatar} alt="Avatar" className="w-8 h-8 sm:w-12 sm:h-12 object-cover"  />
+                    {/* Imagen actual del agente mapeada desde el UserContext */}
+                    <img src={fotoDePerfilSrc} alt="Avatar" className="w-8 h-8 sm:w-12 sm:h-12 object-cover"  />
                 </div>
                 {/* Red dot */}
                 <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#cc3333] rounded-full border border-[#8b2020] shadow-[0_0_6px_rgba(200,50,50,0.5)]" />
