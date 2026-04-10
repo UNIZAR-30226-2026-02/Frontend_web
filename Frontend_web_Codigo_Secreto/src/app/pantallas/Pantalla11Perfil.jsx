@@ -47,7 +47,7 @@ export function Pantalla11Perfil() {
   const navegar = useNavigate();
 
   // Extraemos la función de logout del contexto global.
-  const { logout } = useContext(UserContext);
+  const { logout, setUser } = useContext(UserContext);
   
   // Estados del perfil
   const [perfil, setPerfil] = useState(null);
@@ -117,12 +117,14 @@ export function Pantalla11Perfil() {
   const handleCambiarAvatar = async (idAvatar) => {
     try {
       // Actualizamos la UI inmediatamente (Optimistic update)
+      
       setAvatarSeleccionado(idAvatar);
       setMostrarSelector(false);
-      
+      setUser(idAvatar); // Actualizamos el contexto global para que el cambio se refleje en toda la app (foto de perfil en la esquina)
       // Enviamos el cambio al backend como texto ("1", "2", etc.)
       const actualizado = await actualizarPerfil({ foto_perfil: String(idAvatar) });
       setPerfil(actualizado);
+      setUser(actualizado); // Actualizamos el contexto global con la respuesta completa del backend (incluyendo el nuevo id de foto_perfil)
     } catch (err) {
       console.error("Error al guardar la fotografía:", err);
     }

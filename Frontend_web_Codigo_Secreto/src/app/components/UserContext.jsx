@@ -138,7 +138,7 @@ export function UserProvider({ children }) {
 
   return (
     // Funciones y datos que se exponen al exterior.
-    <UserContext.Provider value={{ user, isLoading, loginUsuario, /*updateBullets,*/ logout, checkSession }}>
+    <UserContext.Provider value={{ user, isLoading, loginUsuario, /*updateBullets,*/ logout, setUser,checkSession }}>
       {children}
     </UserContext.Provider>
   );
