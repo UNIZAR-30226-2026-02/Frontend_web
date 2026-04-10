@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { 
   Trophy, Target, Flame, Eye, Crown, Edit3, 
   Check, LogOut, ArrowLeft, X, Camera, AlertTriangle, Palette, TrendingUp, Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 
+import { UserContext } from "../components/UserContext";
 
 // Componentes del sistema
 import { 
@@ -44,6 +45,9 @@ const TEMAS_VISUALES = [
 
 export function Pantalla11Perfil() {
   const navegar = useNavigate();
+
+  // Extraemos la función de logout del contexto global.
+  const { logout } = useContext(UserContext);
   
   // Estados del perfil
   const [perfil, setPerfil] = useState(null);
@@ -370,8 +374,10 @@ export function Pantalla11Perfil() {
 
             {/* Cerrar Sesión */}
             <button
-              onClick={() => {
-                sessionStorage.clear();
+              onClick={async () => {
+                // Llamar a la funcióm de logout del UserContext para que limpie la cookie, 
+                // el user y el WebSocket.
+                await logout(); 
                 navegar("/login");
               }}
               className="w-full bg-[#3a1a1a] hover:bg-[#4a2020] border border-[#5a2020]/50 text-white py-3 rounded-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg"

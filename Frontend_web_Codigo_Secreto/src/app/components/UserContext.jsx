@@ -3,10 +3,14 @@
  * básica.
  */
 
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useRef } from "react";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
-// URL base del backend
+// URL base para API REST
 const API_BASE_URL = "http://localhost:8080";
+// URL base para WebSockets
+const WS_BASE_URL = "http://localhost:8080/ws";
 
 // Creamos el contexto
 export const UserContext = createContext();
@@ -16,16 +20,67 @@ export function UserProvider({ children }) {
   const [user, setUser] = useState(null); // Aquí guardamos: {id_google, tag, fotoPerfil, balas, partidas_jugadas, victorias, numAciertos, numFallos}
   const [isLoading, setIsLoading] = useState(true); // Para la pantalla de carga inicial
 
+  // Referencia para mantener la conexión WebSocket activa
+  const stompClientRef = useRef(null);
+
   // Se ejecuta al refrescar la página (F5) o abrir la app
   useEffect(() => {
     checkSession();
   }, []);
 
+  // Efecto para gestionar la conexión WebSocket a la cola privada del jugador.
+  useEffect(() => {
+    // Si no hay usuario logueado, limpiamos la conexión si existe
+    if (!user) {
+      if (stompClientRef.current) {
+        stompClientRef.current.deactivate();
+        stompClientRef.current = null;
+      }
+      return;
+    }
+
+    const client = new Client({
+      webSocketFactory: () => new SockJS(WS_BASE_URL),
+      // Se añade el token a los headers
+      connectHeaders: {
+        Authorization: `Bearer ${sessionStorage.getItem('jwt_token')}`
+      },
+      reconnectDelay: 3000,
+      onConnect: () => {
+        console.log("Conectado al WebSocket de UserContext");
+
+        // Nos suscribimos a la cola privada del usuario, para ser notificados de cambios en 
+        // su perfil.
+        // TODO: comprobar que funciona con el endpoint utilizado en backend.
+        client.subscribe("/user/queue/jugadores", (message) => {
+          if (message.body) {
+            // Actualización del objeto 'user'.
+            const datosActualizados = JSON.parse(message.body);
+            setUser(datosActualizados);
+          }
+        });
+      },
+      onDisconnect: () => {
+        console.log("Desconectado del WebSocket de UserContext");
+      },
+    });
+
+    client.activate();
+    stompClientRef.current = client;
+
+    // Desconectar al desmontar o cambiar de usuario
+    return () => {
+      if (client.active) {
+        client.deactivate();
+      }
+    };
+    
+  }, [user?.id_google]); // Se ejecuta este useEffect cuando cambia el id_google del usuario logueado.
+
   // Función para preguntar al backend: "¿Tengo una cookie de sesión válida?" y recuperar
   // todos los datos del jugador logueado, si lo hay.
   const checkSession = async () => {
     try {
-      // TODO: añadir la URI del backend.
       // Se utiliza 'credentials: include' para pedirle al navegador la cookie 
       // HttpOnly con el ID de usuario. Se envía al backend para que verifique si
       // es válida y devuelva el perfil del agente.
@@ -64,14 +119,6 @@ export function UserProvider({ children }) {
     setUser(datosJugador);
   };
 
-  // Función para actualizar balas globalmente (ej: al comprar en la Tienda o 
-  // al ganar una partida)
-  const updateBullets = (amount) => {
-    if (user) {
-      setUser({ ...user, balas: user.balas + amount });
-    }
-  };
-
   // TODO: conectarla con el backend.
   // Función para cerrar sesión (Limpiamos el estado en React)
   const logout = async () => {
@@ -91,7 +138,7 @@ export function UserProvider({ children }) {
 
   return (
     // Funciones y datos que se exponen al exterior.
-    <UserContext.Provider value={{ user, isLoading, loginUsuario, updateBullets, logout, checkSession }}>
+    <UserContext.Provider value={{ user, isLoading, loginUsuario, /*updateBullets,*/ logout, checkSession }}>
       {children}
     </UserContext.Provider>
   );
