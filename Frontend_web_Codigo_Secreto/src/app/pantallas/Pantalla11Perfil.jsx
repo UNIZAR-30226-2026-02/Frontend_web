@@ -66,14 +66,19 @@ export function Pantalla11Perfil() {
   const [temaMarco, setTemaMarco] = useState('');
   const [temaTablero, setTemaTablero] = useState('');
 
-  // Craga inicial
+  // Carga inicial
   useEffect(() => {
     const cargar = async () => {
       try {
         const data = await obtenerPerfil();
         setPerfil(data);
         setTagEditado(data.tag || '');
-        if (data.foto_perfil) setAvatarSeleccionado(data.foto_perfil);
+        
+        // Si foto_perfil es null, asigna 1 por defecto. Convertimos a Number para coincidir con 
+        // OPCIONES_AVATAR.
+        const idFoto = data.foto_perfil ? Number(data.foto_perfil) : 1;
+        setAvatarSeleccionado(idFoto);
+
       } catch (err) {
         setError("No se pudo cargar el expediente del agente.");
         console.error(err);
@@ -108,6 +113,21 @@ export function Pantalla11Perfil() {
     }
   };
 
+  // Función para actualizar el avatar en el backend
+  const handleCambiarAvatar = async (idAvatar) => {
+    try {
+      // Actualizamos la UI inmediatamente (Optimistic update)
+      setAvatarSeleccionado(idAvatar);
+      setMostrarSelector(false);
+      
+      // Enviamos el cambio al backend como texto ("1", "2", etc.)
+      const actualizado = await actualizarPerfil({ foto_perfil: String(idAvatar) });
+      setPerfil(actualizado);
+    } catch (err) {
+      console.error("Error al guardar la fotografía:", err);
+    }
+  };
+
   // Pantalla de carga
   if (cargando) {
     return (
@@ -123,7 +143,7 @@ export function Pantalla11Perfil() {
   // Desestructuración 
   const {
     tag = "Anónimo",
-    foto_perfil,
+    // foto_perfil, // Se usa 'avatarSeleccionado'
     balas = 0,
     partidas_jugadas = 0,
     victorias = 0,
@@ -132,7 +152,8 @@ export function Pantalla11Perfil() {
   } = perfil || {};
 
   const derrotas = Math.max(0, partidas_jugadas - victorias);
-  const avatarActual = OPCIONES_AVATAR.find(a => a.foto_perfil === avatarSeleccionado) || OPCIONES_AVATAR[0];
+
+  const avatarActual = OPCIONES_AVATAR.find(a => a.id === avatarSeleccionado) || OPCIONES_AVATAR[0];
 
   return (
     <ScreenFrame title="PERFIL DEL AGENTE">
@@ -174,7 +195,9 @@ export function Pantalla11Perfil() {
                   <div className="polaroid-container">
                     <div className="polaroid-foto bg-[#1a1208] flex items-center justify-center overflow-hidden">
                       <img
-                        src={foto_perfil || avatarActual.src}
+                        // Carga siempre la ruta importada del src basada en la selección de foto
+                        // de perfil.
+                        src={avatarActual.src}
                         alt={avatarActual.alt}
                         className="w-full h-full object-cover"
                       />
@@ -213,8 +236,8 @@ export function Pantalla11Perfil() {
                             key={av.id}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setAvatarSeleccionado(av.id);
-                              setMostrarSelector(false);
+                              // --- MODIFICADO: Llamamos a la nueva función que actualiza estado y BBDD ---
+                              handleCambiarAvatar(av.id);
                             }}
                             className={`cursor-pointer transition-all ${avatarSeleccionado === av.id ? "ring-2 ring-[#d4b878] scale-105" : "opacity-60 hover:opacity-100 hover:scale-105"}`}
                           >
