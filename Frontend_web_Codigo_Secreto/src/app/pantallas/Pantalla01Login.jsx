@@ -87,7 +87,8 @@ export function Pantalla01Login() {
   // ------ Interfaz gráfica ------
   return (
     // Envolvemos toda la pantalla con el Provider obligatorio de Google
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+    // TODO: revisar si poner aquí el ID de localhost o del despliegue.
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <ScreenFrame title="ACCESO CLASIFICADO">
         <div className="flex items-center justify-center min-h-[80vh]">
           <ManilaFolder className="w-full max-w-xl">
