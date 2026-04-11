@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { ArrowLeft, Trophy, Skull, Clock, Users, Loader2 } from "lucide-react";
 import { ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader } from "../components/ScreenFrame";
-import { IconoBala } from "../components/IconoBala";
+import { IconoBala } from "../components/iconoBala";
 
 import { obtenerHistorial } from "../api/apiJugador"; 
 
