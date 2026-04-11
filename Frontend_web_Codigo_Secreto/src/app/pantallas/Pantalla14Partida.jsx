@@ -85,6 +85,10 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
 
   const disabled = !canSelect && !isRevealed;
   const clickTimeout = useRef(null);
+  
+  // TODO: obtener tema visual del backend.
+  // Color de prueba.
+  const colorBordePrueba = "#d4af37"; // Dorado / Oro envejecido
 
   const handleCardClick = (e) => {
     e.stopPropagation();
@@ -116,7 +120,12 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
   return (
     <div
       className={`game-card ${colorClass} ${isSelected ? "card-selected" : ""} ${disabled && !isJefe ? "card-disabled" : ""}`}
-      style={{ cursor: canSelect ? "pointer" : "default" }}
+      style={{ cursor: canSelect ? "pointer" : "default",
+        // Propiedades de estilo para el marco personalizado
+        border: `5px solid ${colorBordePrueba}`, // Grosor y color del borde
+        borderRadius: "6px",                     // Suaviza las esquinas
+        boxShadow: `0 0 8px ${colorBordePrueba}60` // Ligero resplandor del mismo color
+       }}
     >
       {/* Parte superior: imagen o iconos de revelado */}
       <div className="card-inner-top" style={{ position: "relative", overflow: "hidden" }}>
@@ -134,7 +143,7 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
                 cursor: "zoom-in",
               }}
             />
-            {onPreview && (
+            {/* {onPreview && (
               <button
                 type="button"
                 className="card-preview-button"
@@ -150,7 +159,7 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
               >
                 🔍
               </button>
-            )}
+            )}*/}
           </div>
         ) : null}
 
