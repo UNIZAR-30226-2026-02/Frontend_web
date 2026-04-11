@@ -1,0 +1,34 @@
+name: Desplegar Frontend React en Azure
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: 
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Descargar código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: 📦 Instalar dependencias y compilar
+      working-directory: ./Frontend_web_Codigo_Secreto
+      run: |
+        npm install
+        npm run build
+
+    - name: Desplegar en Azure Web App
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: 'CodenamesReactWeb' 
+        publish-profile: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
+        # OJO: Si al compilar tu proyecto se crea una carpeta 'build' en lugar de 'dist', cambia esta última palabra
+        package: '${{ github.workspace }}/Frontend_web_Codigo_Secreto/dist'
