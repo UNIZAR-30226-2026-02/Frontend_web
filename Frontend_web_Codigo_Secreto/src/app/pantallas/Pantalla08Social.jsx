@@ -82,6 +82,27 @@ export function Pantalla08Social() {
   const [tab, setTab] = useState("friends");
   const navigate = useNavigate();
 
+  // Estado que servirá como "reloj interno" para actualizar el tiempo transcurrido 
+  // desde las solicitudes recibidas.
+  const [tickReloj, setTickReloj] = useState(0);
+
+  // Efecto que actualiza el reloj cada 60 segundos solo si estamos en la pestaña de solicitudes.
+  // Por ejemplo: pasa de 'Hace 1 minuto' a 'Hace 2 minutos', dinámicamente.
+  useEffect(() => {
+    let intervalo;
+    // Si el usuario está viendo las solicitudes, activamos el temporizador
+    if (tab === "requests") {
+      intervalo = setInterval(() => {
+        setTickReloj((prev) => prev + 1); // Al cambiar el estado, forzamos el re-render
+      }, 60000); // 60000 ms = 60 segundos
+    }
+    
+    // Limpieza: si cambia de pestaña o se desmonta la pantalla, destruimos el temporizador
+    return () => {
+      if (intervalo) clearInterval(intervalo);
+    };
+  }, [tab]); // Este efecto reacciona cada vez que el usuario cambia de 'tab'
+
   const [mostrarAgnadir, setMostrarAgnadir] = useState(false);
   const [nombreAmigo, setNombreAmigo] = useState("");
   const [mostrarRankingAmigos, setMostrarRankingAmigos] = useState(false);

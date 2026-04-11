@@ -47,7 +47,8 @@ export async function enviarSolicitudAmistad(tag_receptor) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || 'Error al enviar solicitud');
   }
-  return res.json();
+  //return res.json();
+  return true; // El backend devuelve void.
 }
 
 
@@ -64,7 +65,8 @@ export async function responderSolicitud(id_solicitante, estado) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || 'Error al responder solicitud');
   }
-  return res.json();
+  //return res.json();
+  return true; // El backend devuelve void.
 }
 
 
