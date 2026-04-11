@@ -490,6 +490,35 @@ function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, vo
   );
 }
 
+// Función auxiliar que evalúa si se ha revelado una carta nueva y dispara el popup de retroalimentación.
+const evaluarFeedbackCartaRevelada = (cartasViejas, cartasNuevas, turnoAnterior, setFeedbackCarta) => {
+  if (cartasViejas.length === 0) return;
+
+  // Busca las antiguas reveladas y las nuevas reveladas.
+  const reveladasViejas = cartasViejas.filter(c => c.estado === "revelada").length;
+  const reveladasNuevas = cartasNuevas.filter(c => c.estado === "revelada").length;
+
+  // Mira si hay exactamente 1 carta más revelada ahora que antes.
+  if (reveladasNuevas === reveladasViejas + 1) {
+    // Buscamos cuál es la carta nueva revelada
+    const nuevaCarta = cartasNuevas.find(cn => 
+      cn.estado === "revelada" && 
+      !cartasViejas.find(cv => cv.id_carta_tablero === cn.id_carta_tablero && cv.estado === "revelada")
+    );
+
+    if (nuevaCarta) {
+      // Comprueba si la nueva carta revelada pertenece al equipo del jugador que la ha seleccionado
+      // o no.
+      const esCorrecta = nuevaCarta.tipo?.toLowerCase() === turnoAnterior?.toLowerCase();
+      
+      setFeedbackCarta({ correcta: esCorrecta });
+      
+      // Ocultar el modal al segundo y medio.
+      setTimeout(() => setFeedbackCarta(null), 1500);
+    }
+  }
+};
+
 // PANTALLA PRINCIPAL DE LA PARTIDA
 export function PantallaPartida() {
   const navigate = useNavigate();
@@ -526,6 +555,23 @@ export function PantallaPartida() {
 
   const stompRef = useRef(null);
   const chatInputRef = useRef(null);
+
+  // Estados para el feedback de carta revelada
+  const [feedbackCarta, setFeedbackCarta] = useState(null);
+
+  // Guardamos las cartas anteriores y el turno sin provocar re-renderizados, para poder
+  // detectar si la carta revelada era de un equipo u otro.
+  const cartasAnterioresRef = useRef([]);
+  const turnoAnteriorRef = useRef(null);
+
+  // Sincronizamos las refs cada vez que las variables oficiales cambien.
+  useEffect(() => { 
+    cartasAnterioresRef.current = cartas; 
+  }, [cartas]);
+
+  useEffect(() => { 
+    turnoAnteriorRef.current = turnoActual; 
+  }, [turnoActual]);
 
   // ------------------------------------------------------------
   // 1. OBTENER ROL DEL USUARIO EN LA PARTIDA
@@ -576,6 +622,11 @@ export function PantallaPartida() {
       // Importante: el backend da las cartas desordenadas (en función de su fecha de actualización)
       // y hay que ordenarlas para que siempre se muestren en el tablero en el mismo orden.
       const sortedCartas = [...data.tablero.cartas].sort((a, b) => a.id_carta_tablero - b.id_carta_tablero);
+      
+      // Función para evaluar qué tiene que mostrar en el modal de retroalimentación para el usuario.
+      evaluarFeedbackCartaRevelada(cartasAnterioresRef.current, sortedCartas, turnoAnteriorRef.current, 
+                                                                                   setFeedbackCarta);
+      
       const cartasConSimulacion = sortedCartas.map((carta, index) => ({
         ...carta,
         imagen_url: carta.imagen_url || carta.imagenUrl || (isSimulacion ? simulatedCardImages[index % simulatedCardImages.length] : carta.imagen_url),
@@ -981,6 +1032,34 @@ export function PantallaPartida() {
           </div>
         </div>
       )}
+
+      {/* Popup de Retroalimentación de Carta */}
+      {feedbackCarta && (
+        <>
+          {/* Fondo desenfocado */}
+          <div className="fixed inset-0 bg-black/50 z-50 backdrop-blur-[2px]" />
+
+          {/* Caja del modal con animación de entrada */}
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] w-[90%] max-w-sm animate-in fade-in zoom-in duration-200">
+            <div className="bg-[#1e1810] border-2 border-[#5a4a30] rounded-sm shadow-[6px_8px_32px_rgba(0,0,0,0.8)] p-6">
+
+              {/* Detalle del resultado */}
+              <div className="bg-[#2a2218] border border-[#5a4a30]/40 rounded-sm p-5 text-center shadow-inner">
+                <p
+                  className={`font-['Special_Elite',cursive] tracking-wide ${feedbackCarta.correcta ? 'text-[#50a050]' : 'text-[#cc3333]'}`}
+                  style={{ fontSize: 16 }}
+                >
+                  {feedbackCarta.correcta 
+                    ? "¡Carta correcta!" 
+                    : "Carta incorrecta. Cambio de turno."}
+                </p>
+              </div>
+              
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="agent-footer-row"><RedStamp text="CLASSIFIED" /></div>
     </ScreenFrame>
   );

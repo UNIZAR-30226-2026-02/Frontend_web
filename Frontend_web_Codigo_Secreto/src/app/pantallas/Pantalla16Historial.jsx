@@ -129,8 +129,8 @@ export function Pantalla16Historial() {
               {/* Listado de misiones */}
               <div className="space-y-2">
                 {history.length === 0 && !error && (
-                  <p className="font-['Courier_Prime',monospace] text-center text-[#8a7a60] py-8">
-                    NO HAY REGISTROS OPERATIVOS TODAVÍA.
+                  <p className="font-['Courier_Prime',monospace] text-center text-[#423D36] py-8" style={{ fontSize: 12 }}>
+                    No hay registros operativos todavía.
                   </p>
                 )}
                 {history.map((h) => {

@@ -238,7 +238,7 @@ export function Pantalla11Perfil() {
                             key={av.id}
                             onClick={(e) => {
                               e.stopPropagation();
-                              // --- MODIFICADO: Llamamos a la nueva función que actualiza estado y BBDD ---
+                              // Llamamos a la nueva función que actualiza estado y BBDD
                               handleCambiarAvatar(av.id);
                             }}
                             className={`cursor-pointer transition-all ${avatarSeleccionado === av.id ? "ring-2 ring-[#d4b878] scale-105" : "opacity-60 hover:opacity-100 hover:scale-105"}`}

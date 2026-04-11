@@ -174,7 +174,7 @@ export function Pantalla15FinPartida() {
           </div>
         </ManilaFolder>
 
-        <div className="absolute bottom-11 left-8 z-20 rotate-[-10deg] opacity-90">
+        <div className="absolute bottom-7.5 left-8 z-20 rotate-[-10deg] opacity-90">
           <RedStamp text="MISION CUMPLIDA" size="medium" />
         </div>
       </div>
