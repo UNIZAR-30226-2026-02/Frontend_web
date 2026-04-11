@@ -43,6 +43,24 @@ const configuracionRareza = {
   platino: { clase: "medalla-platino", insignia: "💎", color: "#b0c4de" },
 };
 
+function normalizarLogroApi(item) {
+  const defaultRareza = item.rareza || "bronce";
+  const rarezaDetectada = item.nombre?.toLowerCase().includes("plata")
+    ? "plata"
+    : item.nombre?.toLowerCase().includes("oro")
+    ? "oro"
+    : defaultRareza;
+
+  return {
+    id: item.id || item.id_logro || `${item.nombre}-${item.progreso_actual ?? 0}`,
+    ...item,
+    rareza: item.rareza || rarezaDetectada,
+    progreso_actual: item.progreso_actual ?? 0,
+    progreso_max: item.progreso_max ?? 1,
+    balas_recompensa: item.balas_recompensa ?? 0,
+  };
+}
+
 // DEFINICIÓN DE LOGROS SEGÚN DICCIONARIO
 // Cada logro tiene:
 // - id: identificador único
@@ -259,7 +277,7 @@ export function Pantalla10Logros() {
  
   useEffect(() => {
     obtenerLogros()
-      .then(data => setLogros(Array.isArray(data) ? data : []))
+      .then(data => setLogros(Array.isArray(data) ? data.map(normalizarLogroApi) : []))
       .catch(err => setError(err.message))
       .finally(() => setCargando(false));
   }, []);
@@ -355,7 +373,7 @@ export function Pantalla10Logros() {
               borderColor="#8b2020"
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-              {logros.map((logro) => (
+              {logrosNormales.map((logro) => (
                 <ElementoLogro key={logro.id} logro={logro} />
               ))}
             </div>
@@ -431,9 +449,9 @@ function TarjetaResumen({ icono: Icono, valor, etiqueta, color }) {
  * Recibe un objeto 'logro' que ya contiene 'progreso', 'max' y 'desbloqueado'.
  */
 function ElementoLogro({ logro }) {
-  const config = configuracionRareza[logro.rareza];
-  const porcentaje = Math.round((logro.progreso_actual / logro.progreso_max) * 100);
-  const Icono = logro.icono;
+  const config = configuracionRareza[logro.rareza] || configuracionRareza.bronce;
+  const porcentaje = logro.progreso_max > 0 ? Math.round((logro.progreso_actual / logro.progreso_max) * 100) : 0;
+  const Icono = logro.icono || ((props) => <IconoPorNombre nombre={logro.nombre} {...props} />);
 
   return (
     <DarkCard
@@ -499,12 +517,18 @@ function ElementoLogro({ logro }) {
  * Muestra emoji, nombre, descripción y estado obtenida/no obtenida.
  */
 function ElementoMedalla({ medalla }) {
-  const obtenida = medalla.obtenida;
+  const obtenida = medalla.completado;
+  const emoji = medalla.emoji || (
+    medalla.nombre?.toLowerCase().includes("plata") ? "🥈" :
+    medalla.nombre?.toLowerCase().includes("oro") ? "🏅" :
+    medalla.nombre?.toLowerCase().includes("bronce") ? "🥉" :
+    "🏅"
+  );
 
   return (
     <DarkCard className={`p-4 text-center ${!obtenida ? "opacity-50" : ""}`}>
       <div className={`text-4xl mb-2 ${!obtenida ? "grayscale" : ""}`}>
-        {medalla.emoji}
+        {emoji}
       </div>
       <p
         className={`font-elite ${obtenida ? "text-[#e8dcc8]" : "text-[#666]"} truncate`}
