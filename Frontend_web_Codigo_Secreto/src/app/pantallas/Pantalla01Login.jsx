@@ -12,7 +12,8 @@ import { UserContext } from "../components/UserContext";
 
 // TODO: quitar de aquí.
 // Client ID del cliente web generado en Google Cloud Console.
-const GOOGLE_CLIENT_ID = "271645130319-f9agsfadvl8njoaoitevnaspuchj5fb9.apps.googleusercontent.com";
+//const GOOGLE_CLIENT_ID = "271645130319-f9agsfadvl8njoaoitevnaspuchj5fb9.apps.googleusercontent.com";
+//const GOOGLE_CLIENT_ID = "271645130319-2raursujnehhvpjcj6g015kpn9rqfnbs.apps.googleusercontent.com";
 
 export function Pantalla01Login() {
   const navigate = useNavigate();

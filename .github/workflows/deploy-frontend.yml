@@ -21,6 +21,9 @@ jobs:
 
     - name: 📦 Instalar dependencias y compilar
       working-directory: ./Frontend_web_Codigo_Secreto
+      # Secreto guardado en GitHub con el ID del cliente.
+      env:
+        VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
       run: |
         npm install
         npm run build
