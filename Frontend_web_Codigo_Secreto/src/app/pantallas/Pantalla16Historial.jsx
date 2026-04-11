@@ -23,22 +23,62 @@ export function Pantalla16Historial() {
         const data = await obtenerHistorial();
         
         // Mapeamos los datos del backend (PartidaResumenDTO) al formato de la UI
-        const partidasMapeadas = (data.partidas || []).map(p => ({
-          id: p.id_partida,
-          // Usamos el tag_creador para el nombre de la misión
-          name: `Misión de ${p.tag_creador || p.nombre_tema || "Desconocido"}`,
-          // Formateamos la fecha (viene como LocalDateTime, ej: "2026-04-06T10:30:00")
-          date: new Date(p.fecha_fin).toLocaleDateString('es-ES'),
-          result: p.victoria ? "Victoria" : "Derrota",
-          role: p.rol_jugador?.toLowerCase() === "lider" ? "Jefe" : "Agente",
-          team: p.equipo_jugador?.toLowerCase() === "rojo" ? "Rojo" : "Azul",
-          // Reemplazamos la "duración" por los aciertos/fallos si es agente
-          statsExtra: p.rol_jugador?.toLowerCase() === "agente" 
-            ? `${p.num_aciertos}✔ ${p.num_fallos}✖` 
-            : p.nombre_tema, // Si es Jefe, mostramos el tema
-          // Lógica de recompensa: +20 si es victoria, +10 si es derrota
-          reward: p.victoria ? 20 : 10 
-        }));
+
+        // Guarda la lista de partidas obtenidas del backend.
+        const listaPartidas = Array.isArray(data) ? data : (data.partidas || []);
+        
+        const partidasMapeadas = listaPartidas.map(p => {
+          // Extraemos variables
+          const id = p.id_partida;
+          const fechaRaw = p.fecha_fin;
+          const equipoRaw = p.equipo || "";
+          const rolRaw = p.rol || p.rol_jugador || "";
+          const rojoGana = p.rojo_gana !== undefined ? p.rojo_gana : p.rojoGana;
+          const aciertos = p.num_aciertos ?? p.numAciertos ?? 0;
+          const fallos = p.num_fallos ?? p.numFallos ?? 0;
+
+          // Calculamos si hubo victoria verificando si el equipo del jugador coincide con el 
+          // equipo ganador
+          const esRojo = equipoRaw.toLowerCase() === "rojo";
+          const victoria = (esRojo && rojoGana === true) || (!esRojo && rojoGana === false);
+
+          // Parseo seguro de la fecha por si viene en array [yyyy, mm, dd] o string
+          let fechaFormateada = "Fecha desconocida";
+          if (fechaRaw) {
+            if (Array.isArray(fechaRaw)) {
+              const [year, month, day] = fechaRaw;
+              fechaFormateada = new Date(year, month - 1, day).toLocaleDateString('es-ES');
+            } else {
+              fechaFormateada = new Date(fechaRaw).toLocaleDateString('es-ES');
+            }
+          }
+
+          const rol = rolRaw.toLowerCase() === "lider" ? "Jefe" : "Agente";
+          const equipo = esRojo ? "Rojo" : "Azul";
+
+          // Nombre del tema
+          const nombreTema = p.tag_creador || p.tagCreador || p.nombre_tema || p.nombreTema || "Desconocido";
+
+          let textoExtra = p.nombre_tema || p.nombreTema || "Gestión de equipo"; 
+          if (rol === "Agente") {
+            textoExtra = `${aciertos}✔ ${fallos}✖`;
+          }
+
+          return {
+            id: id,
+            // Usamos el tag_creador para el nombre de la misión
+            name: `Misión de ${nombreTema}`,
+            // Formateamos la fecha (viene como LocalDateTime, ej: "2026-04-06T10:30:00")
+            date: fechaFormateada,
+            result: victoria ? "Victoria" : "Derrota",
+            role: rol,
+            team: equipo,
+            // Reemplazamos la "duración" por los aciertos/fallos si es agente
+            statsExtra: textoExtra, // Si es Jefe, mostramos el tema
+            // Lógica de recompensa: +20 si es victoria, +10 si es derrota
+            reward: victoria ? 20 : 10 
+          };
+        });
 
         setHistory(partidasMapeadas);
       } catch (err) {

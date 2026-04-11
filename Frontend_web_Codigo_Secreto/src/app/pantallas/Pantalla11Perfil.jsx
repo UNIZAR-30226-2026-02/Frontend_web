@@ -12,7 +12,7 @@ import {
   ScreenFrame, ManilaFolder, DarkCard, RedStamp, 
   FBISeal, SectionHeader, SubsectionLabel 
 } from "../components/ScreenFrame";
-import { IconoBala } from "../components/IconoBala";
+import { IconoBala } from "../components/iconoBala";
 
 // API
 import { obtenerPerfil, actualizarPerfil } from "../api/apiJugador";

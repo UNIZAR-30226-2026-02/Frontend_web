@@ -127,8 +127,9 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
         boxShadow: `0 0 8px ${colorBordePrueba}60` // Ligero resplandor del mismo color
        }}
     >
-      {/* Parte superior: imagen o iconos de revelado */}
-      <div className="card-inner-top" style={{ position: "relative", overflow: "hidden" }}>
+      {/* Parte superior: imagen o iconos de revelado, de forma cuadrada */}
+      <div className="card-inner-top" style={{ position: "relative", overflow: "hidden",
+          aspectRatio: "1 / 1", }}>
         {/* Imagen de fondo (si existe y la carta no está revelada) */}
         {imageUrl && !isRevealed ? (
           <div className="card-image-wrapper" onClick={handleCardClick}>
@@ -565,6 +566,11 @@ export function PantallaPartida() {
   const stompRef = useRef(null);
   const chatInputRef = useRef(null);
 
+  // TODO: integrar con backend
+  // Dato de prueba para el fondo del tablero
+  // Ejemplo: Un verde oscuro estilo tapete militar/póker
+  const colorFondoTableroPrueba = "#2b3b2c";
+
   // Estados para el feedback de carta revelada
   const [feedbackCarta, setFeedbackCarta] = useState(null);
 
@@ -996,7 +1002,16 @@ export function PantallaPartida() {
       <div className="agent-main-layout">
         <div className="board-and-voting-area">
           <ManilaFolder>
-            <div className="board-grid-5cols">
+            <div className="board-grid-5cols"
+              style={{
+                  //backgroundColor: colorFondoTableroPrueba, // El color personalizable
+                  //borderRadius: "8px",                      // Esquinas redondeadas
+                  //border: "10px solid rgba(0,0,0,0.2)",      // Borde sutil oscuro
+                  //boxShadow: "0 4px 12px rgba(0,0,0,0.5)", // Sombra para darle profundidad
+                  // Control de tamaño para que el tablero quepa bien en la pantalla.
+                  maxWidth: "750px",
+                  margin: "0 auto",   // Centra el tablero en la pantalla
+                }}>
               {cartas.map((carta, index) => (
                 <GameCard
                   key={carta.id_carta_tablero}
