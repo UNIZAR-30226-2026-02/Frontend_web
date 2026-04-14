@@ -3,7 +3,7 @@
  * mediante API REST, referentes a las partidas.
  */
 
-const BASE_URL = 'http://localhost:8080/api';
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 // Obtener TODOS los temas activos del sistema (para el selector de la Pantalla12CrearPartida)
 export async function obtenerTemasActivos() {

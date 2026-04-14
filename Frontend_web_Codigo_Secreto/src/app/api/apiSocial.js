@@ -3,7 +3,7 @@
  * referentes a amigos y leaderboard.
  */
 
-const BASE_URL = 'http://localhost:8080/api';
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 // Lista de amigos → GET /api/amigos
 export async function obtenerAmigos() {

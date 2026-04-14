@@ -10,24 +10,10 @@ import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { loginConGoogle } from "../api/apiLogin";
 import { UserContext } from "../components/UserContext";
 
-// TODO: quitar de aquí.
-// Client ID del cliente web generado en Google Cloud Console.
-//const GOOGLE_CLIENT_ID = "271645130319-f9agsfadvl8njoaoitevnaspuchj5fb9.apps.googleusercontent.com";
-//const GOOGLE_CLIENT_ID = "271645130319-2raursujnehhvpjcj6g015kpn9rqfnbs.apps.googleusercontent.com";
-
 export function Pantalla01Login() {
   const navigate = useNavigate();
   // Se extrae la función 'loginUsuario' del UserContext para poder acceder al contexto.
   const { loginUsuario } = useContext(UserContext);
-  
-  // Función antigua (Comentada para no perder el trabajo)
-  /*
-  const iniciarSesionConGoogle = () => {
-    // TODO: lógica real de autenticación con Google OAuth
-    // Para pruebas, navegamos al home de momento
-    navigate("/home");
-  };
-  */
 
   // Conexión con el botón oficial de google y procesamiento de la respuesta.
   const handleGoogleSuccess = async (respuestaGoogle) => {

@@ -46,8 +46,8 @@ import carta19 from "../../assets/Cartas/carta19.png";
 import carta20 from "../../assets/Cartas/carta20.png";
 
 // Configuración de conexión WebSocket y API
-const WS_URL = "http://localhost:8080/ws";
-const API_BASE = "http://localhost:8080/api";
+const WS_URL = import.meta.env.VITE_WS_URL;
+const API_BASE = import.meta.env.VITE_API_URL;
 
 const isSimulacion = true; // Lo añadimos para simular la partida sin que las fotos vengan del backend, para el video. Cambiar a false luego
 const simulatedCardImages = [
@@ -122,7 +122,7 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
       className={`game-card ${colorClass} ${isSelected ? "card-selected" : ""} ${disabled && !isJefe ? "card-disabled" : ""}`}
       style={{ cursor: canSelect ? "pointer" : "default",
         // Propiedades de estilo para el marco personalizado
-        border: `5px solid ${colorBordePrueba}`, // Grosor y color del borde
+        border: `9px solid ${colorBordePrueba}`, // Grosor y color del borde
         borderRadius: "6px",                     // Suaviza las esquinas
         boxShadow: `0 0 8px ${colorBordePrueba}60` // Ligero resplandor del mismo color
        }}
@@ -1001,7 +1001,7 @@ export function PantallaPartida() {
       {/* Layout principal: tablero + paneles laterales */}
       <div className="agent-main-layout">
         <div className="board-and-voting-area">
-          <ManilaFolder>
+          <ManilaFolder folderColor={colorFondoTableroPrueba}>
             <div className="board-grid-5cols"
               style={{
                   //backgroundColor: colorFondoTableroPrueba, // El color personalizable

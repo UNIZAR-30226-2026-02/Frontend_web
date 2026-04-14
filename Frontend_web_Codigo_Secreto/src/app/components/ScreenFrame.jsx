@@ -15,7 +15,17 @@ export function ScreenFrame({ title, subtitle, children }) {
 
 /* ====== Subcomponentes reutilizables de estética FBI ====== */
 
-export function ManilaFolder({ children, className = "", showTab = true, showClip = false }) {
+export function ManilaFolder({ children, className = "", showTab = true, showClip = false, folderColor }) {
+  
+  // Si nos pasan un color personalizado lo usamos, si no, usamos el degradado original
+  // (para la personalización del color del tablero).
+  const backgroundStyle = folderColor 
+    ? folderColor 
+    : 'linear-gradient(to right, #b89055 0%, #c4a060 5%, #d4b070 15%, #c4a060 100%)';
+
+  // Si hay pestaña superior, también la pintamos del mismo color (o del por defecto)
+  const tabColor = folderColor ? folderColor : '#c4a060';
+
   return (
     <div className={`relative ${className} my-8`}>
       
@@ -36,7 +46,8 @@ export function ManilaFolder({ children, className = "", showTab = true, showCli
         
         {/* Pestaña de la carpeta - opcional */}
         {showTab && (
-          <div className="absolute -top-6 left-0 h-8 w-40 bg-[#c4a060] rounded-t-xl shadow-[-2px_-2px_5px_rgba(0,0,0,0.1)] border-t border-x border-white/20 flex items-center px-4">
+          <div className="absolute -top-6 left-0 h-8 w-40 rounded-t-xl shadow-[-2px_-2px_5px_rgba(0,0,0,0.1)] border-t border-x border-white/20 flex items-center px-4"
+            style={{ backgroundColor: tabColor}}>
              <span className="font-['Courier'] text-[10px] text-[#3a2a10] opacity-70 uppercase tracking-tighter">Subject: Classified</span>
           </div>
         )}
@@ -45,7 +56,7 @@ export function ManilaFolder({ children, className = "", showTab = true, showCli
         <div
           className="relative min-h-[550px] shadow-[2px_0_15px_rgba(0,0,0,0.3)] border-l-[10px] border-black/10"
           style={{
-            background: 'linear-gradient(to right, #b89055 0%, #c4a060 5%, #d4b070 15%, #c4a060 100%)',
+            background: backgroundStyle,
             borderRadius: '2px 15px 15px 2px'
           }}
         >

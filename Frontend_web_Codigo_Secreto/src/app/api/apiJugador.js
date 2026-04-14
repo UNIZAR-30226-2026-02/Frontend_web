@@ -3,7 +3,7 @@
  * referentes al perfil y la gestión de datos de usuarios y personalización del tablero.
  */
 
-const BASE_URL = 'http://localhost:8080/api';
+const BASE_URL = import.meta.env.VITE_API_URL;
  
 
 // Obtener perfil del jugador autenticado → GET /api/jugadores

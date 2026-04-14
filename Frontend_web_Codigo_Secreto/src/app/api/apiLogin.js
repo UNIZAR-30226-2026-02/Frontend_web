@@ -3,8 +3,7 @@
  * referentes al login y registro de usuarios.
  */
 
-// TODO: cambiar a URL segura con HTTPS.
-const BASE_URL = 'http://localhost:8080/api';
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 // RF-02: Login con Google -> POST /api/auth/login
 // Enviar el id de Google del usuario al backend y devolver la respuesta.

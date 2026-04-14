@@ -18,17 +18,26 @@ export const NotificacionesProvider = ({ children }) => {
 
   const lanzarNotificacionNativa = (data) => {
     let titulo = "Secret Panda";
-    let cuerpo = "Mensaje entrante interceptado.";
+    
+    // Extraemos el 'mensaje' que manda el backend en el payload
+    let cuerpo = data.payload?.mensaje || "Mensaje entrante interceptado.";
 
     if (data.tipo === 'solicitud_amistad') {
       titulo = "Nueva Solicitud de Amistad";
-      cuerpo = `${data.payload.nombre_usuario} quiere añadirte a su red.`;
+      // El backend manda la frase en el campo 'mensaje' a través de enviarNotificacionGeneralWS
+      cuerpo = data.payload.mensaje;
+      
     } else if (data.tipo === 'logro_desbloqueado') {
       titulo = "¡Logro Desbloqueado!";
-      cuerpo = `Has conseguido: ${data.payload.nombre_logro}`;
+      if (data.payload.recompensa) {
+        cuerpo = `${data.payload.mensaje} (+${data.payload.recompensa} balas)`;
+      } else {
+        cuerpo = data.payload.mensaje;
+      }
+
     } else if (data.tipo === 'medalla_desbloqueada') {
       titulo = "¡Medalla Desbloqueada!";
-      cuerpo = `Has conseguido: ${data.payload.nombre_medalla}`;
+      cuerpo = data.payload.mensaje;
     }
 
     const notificacion = new Notification(titulo, {

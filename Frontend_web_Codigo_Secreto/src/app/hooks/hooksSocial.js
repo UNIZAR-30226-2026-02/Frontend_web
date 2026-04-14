@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
-const WS_URL = 'http://localhost:8080/ws';
+const WS_URL = import.meta.env.VITE_WS_URL;
 
 // Suscripciones de un único cliente a todos los canales de WebSockets del apartado de 
 // Social.

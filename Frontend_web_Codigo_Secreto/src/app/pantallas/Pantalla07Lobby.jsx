@@ -16,8 +16,8 @@ import SockJS from "sockjs-client";
 import { UserContext } from "../components/UserContext";
 import { obtenerTemasJugador } from "../api/apiPartidas";
 
-const WS_URL = "http://localhost:8080/ws";
-const API_BASE = "http://localhost:8080/api";
+const WS_URL = import.meta.env.VITE_WS_URL;
+const API_BASE = import.meta.env.VITE_API_URL;
 
 // Componente de slot de jugador
 function PlayerSlot({ player, teamColor }) {
