@@ -8,9 +8,9 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
 // URL base para API REST
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 // URL base para WebSockets
-const WS_BASE_URL = "http://localhost:8080/ws";
+const WS_BASE_URL = import.meta.env.VITE_WS_URL;
 
 // Creamos el contexto
 export const UserContext = createContext();
@@ -86,7 +86,7 @@ export function UserProvider({ children }) {
       // es válida y devuelva el perfil del agente.
       
       // Petición GET para obtener la información del usuario logueado (o no).
-      const response = await fetch(`${API_BASE_URL}/api/jugadores`, {
+      const response = await fetch(`${API_BASE_URL}/jugadores`, {
         method: 'GET',
         credentials: "include" 
       });
@@ -124,7 +124,7 @@ export function UserProvider({ children }) {
   const logout = async () => {
     // Le avisamos al backend para que destruya la cookie
     try {
-      await fetch(`${API_BASE_URL}/api/auth/logout`, { 
+      await fetch(`${API_BASE_URL}/auth/logout`, { 
         method: "POST", 
         credentials: "include" 
       });

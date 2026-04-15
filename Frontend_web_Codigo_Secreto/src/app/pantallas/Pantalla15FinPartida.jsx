@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router';
 import { ManilaFolder, SectionHeader, RedStamp, FBISeal } from "../components/ScreenFrame"; 
 import { Award, ArrowLeft } from "lucide-react";
 
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export function Pantalla15FinPartida() {
   const navigate = useNavigate();
