@@ -19,7 +19,7 @@ jobs:
       with:
         node-version: '20'
 
-    - name: 📦 Instalar dependencias y compilar
+    - name: Instalar dependencias y compilar
       working-directory: ./Frontend_web_Codigo_Secreto
       # Secreto guardado en GitHub con el ID del cliente.
       env:
