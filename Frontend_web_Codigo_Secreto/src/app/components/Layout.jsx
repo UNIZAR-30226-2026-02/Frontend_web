@@ -52,7 +52,7 @@ export function Layout() {
   // PANTALLA DE CARGA (Mientras el backend valida la cookie)
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#2a1204]">
+      <div className="min-h-screen flex items-center justify-center bg-transparent">
         <span className="font-['Courier_Prime',monospace] text-[#c4a060]">
           VERIFICANDO CREDENCIALES...
         </span>
