@@ -45,19 +45,25 @@ const configuracionRareza = {
 
 function normalizarLogroApi(item) {
   const defaultRareza = item.rareza || "bronce";
-  const rarezaDetectada = item.nombre?.toLowerCase().includes("plata")
+  const nombre = item.nombre?.toLowerCase() || "";
+  const rarezaDetectada = nombre.includes("plata")
     ? "plata"
-    : item.nombre?.toLowerCase().includes("oro")
+    : nombre.includes("oro")
     ? "oro"
     : defaultRareza;
 
+  const esLogro = item.es_logro === true || item.es_logro === "true" || item.es_logro === 1 || item.es_logro === "1";
+  const completado = item.completado === true || item.completado === "true" || item.completado === 1 || item.completado === "1";
+
   return {
-    id: item.id || item.id_logro || `${item.nombre}-${item.progreso_actual ?? 0}`,
+    id: item.id || item.id_logro?.toString() || `${item.nombre}-${item.progreso_actual ?? 0}`,
     ...item,
+    es_logro: esLogro,
+    completado,
     rareza: item.rareza || rarezaDetectada,
-    progreso_actual: item.progreso_actual ?? 0,
-    progreso_max: item.progreso_max ?? 1,
-    balas_recompensa: item.balas_recompensa ?? 0,
+    progreso_actual: Number(item.progreso_actual ?? 0),
+    progreso_max: Number(item.progreso_max ?? 1) || 1,
+    balas_recompensa: Number(item.balas_recompensa ?? 0),
   };
 }
 
@@ -299,8 +305,8 @@ export function Pantalla10Logros() {
     );
   }
 
-  const medallas          = logros.filter(l => l.es_logro === false);
-  const logrosNormales    = logros.filter(l => l.es_logro === true);
+  const medallas          = logros.filter(l => !l.es_logro);
+  const logrosNormales    = logros.filter(l => l.es_logro);
   const totalLogros       = logrosNormales.length;
   const totalMedallas     = medallas.length;
   const logrosDesbloq     = logrosNormales.filter(l => l.completado).length;

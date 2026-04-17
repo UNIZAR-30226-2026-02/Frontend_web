@@ -14,6 +14,8 @@ import React, { useState, useEffect, useRef, useCallback, useContext } from "rea
 import { useNavigate, useParams } from "react-router";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useSound } from "../hooks/useSound";
+import { obtenerPersonalizaciones } from "../api/apiJugador";
 
 import {
   Clock, Send as SendIcon, Check, Vote, Skull,
@@ -49,10 +51,18 @@ import carta20 from "../../assets/Cartas/carta20.png";
 const WS_URL = import.meta.env.VITE_WS_URL;
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const isSimulacion = true; // Lo añadimos para simular la partida sin que las fotos vengan del backend, para el video. Cambiar a false luego
+const isSimulacion = false; // Lo añadimos para simular la partida sin que las fotos vengan del backend, para el video. Cambiar a false luego
 const simulatedCardImages = [
   carta1, carta2, carta3, carta4, carta5, carta6, carta7, carta8, carta9, carta10,
   carta11, carta12, carta13, carta14, carta15, carta16, carta17, carta18, carta19, carta20
+];
+
+const TEMAS_VISUALES = [
+  { id: "gold", name: "Oro envejecido", color: "#d4af37", borderColor: "#b8941f", bgColor: "#2a2518" },
+  { id: "sage", name: "Verde salvia", color: "#8a9a5b", borderColor: "#6d7a45", bgColor: "#1a2218" },
+  { id: "terracotta", name: "Terracota cálida", color: "#c65d3b", borderColor: "#a04a2a", bgColor: "#2a1c18" },
+  { id: "purple", name: "Púrpura real", color: "#8b5a8b", borderColor: "#6d456d", bgColor: "#221822" },
+  { id: "rose", name: "Cuarzo rosa", color: "#c67b8a", borderColor: "#a05060", bgColor: "#2a1820" },
 ];
 
 /**
@@ -71,7 +81,7 @@ function formatearTiempo(seconds) {
  * Muestra la imagen, la palabra y según el rol (jefe/agente) puede mostrar el color oculto.
  * También muestra el fingerprint (Check) cuando está seleccionada.
  */
-function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect, onPreview, isJefe }) {
+function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect, onPreview, isJefe, cardBorderColor }) {
   // Clase CSS dinámica según el estado y tipo de carta
   // Si está revelada: muestra el color real (rojo/azul/asesino/civil)
   // Si es jefe y no revelada: muestra una previsualización del color (borde inferior)
@@ -122,9 +132,9 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
       className={`game-card ${colorClass} ${isSelected ? "card-selected" : ""} ${disabled && !isJefe ? "card-disabled" : ""}`}
       style={{ cursor: canSelect ? "pointer" : "default",
         // Propiedades de estilo para el marco personalizado
-        border: `9px solid ${colorBordePrueba}`, // Grosor y color del borde
+        border: `9px solid ${cardBorderColor}`, // Grosor y color del borde
         borderRadius: "6px",                     // Suaviza las esquinas
-        boxShadow: `0 0 8px ${colorBordePrueba}60` // Ligero resplandor del mismo color
+        boxShadow: `0 0 8px ${cardBorderColor}60` // Ligero resplandor del mismo color
        }}
     >
       {/* Parte superior: imagen o iconos de revelado, de forma cuadrada */}
@@ -501,7 +511,7 @@ function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, vo
 }
 
 // Función auxiliar que evalúa si se ha revelado una carta nueva y dispara el popup de retroalimentación.
-const evaluarFeedbackCartaRevelada = (cartasViejas, cartasNuevas, turnoAnterior, setFeedbackCarta) => {
+const evaluarFeedbackCartaRevelada = (cartasViejas, cartasNuevas, turnoAnterior, setFeedbackCarta, onCartaIncorrecta) => {
   if (cartasViejas.length === 0) return;
 
   // Busca las antiguas reveladas y las nuevas reveladas.
@@ -521,6 +531,10 @@ const evaluarFeedbackCartaRevelada = (cartasViejas, cartasNuevas, turnoAnterior,
       // o no.
       const esCorrecta = nuevaCarta.tipo?.toLowerCase() === turnoAnterior?.toLowerCase();
       
+      if (!esCorrecta) {
+        onCartaIncorrecta?.();
+      }
+
       setFeedbackCarta({ correcta: esCorrecta });
       
       // Ocultar el modal al segundo y medio.
@@ -534,6 +548,37 @@ export function PantallaPartida() {
   const navigate = useNavigate();
   const { id_partida: idPartida } = useParams();
   const { user } = useContext(UserContext);
+  const { playDisparo, playCancelar } = useSound();
+
+  const [temaMarcoColor, setTemaMarcoColor] = useState(localStorage.getItem('tema_marco') || TEMAS_VISUALES[0].color);
+  const [temaTableroColor, setTemaTableroColor] = useState(localStorage.getItem('tema_tablero') || TEMAS_VISUALES[0].bgColor);
+  const temaMarco = { color: temaMarcoColor };
+  const temaTablero = { bgColor: temaTableroColor };
+
+  useEffect(() => {
+    const cargarTemasEquipados = async () => {
+      try {
+        const personalizaciones = await obtenerPersonalizaciones();
+        if (!Array.isArray(personalizaciones)) return;
+
+        const marcoEquipado = personalizaciones.find((item) => item.tipo === 'carta' && item.equipado);
+        const tableroEquipado = personalizaciones.find((item) => item.tipo === 'tablero' && item.equipado);
+
+        if (marcoEquipado?.valor_visual) {
+          setTemaMarcoColor(marcoEquipado.valor_visual);
+          localStorage.setItem('tema_marco', marcoEquipado.valor_visual);
+        }
+        if (tableroEquipado?.valor_visual) {
+          setTemaTableroColor(tableroEquipado.valor_visual);
+          localStorage.setItem('tema_tablero', tableroEquipado.valor_visual);
+        }
+      } catch (err) {
+        console.error("Error cargando personalizaciones de tablero:", err);
+      }
+    };
+
+    cargarTemasEquipados();
+  }, []);
 
   // Estado del juego
   const [rol, setRol] = useState(null);          // "lider" o "agente"
@@ -569,7 +614,7 @@ export function PantallaPartida() {
   // TODO: integrar con backend
   // Dato de prueba para el fondo del tablero
   // Ejemplo: Un verde oscuro estilo tapete militar/póker
-  const colorFondoTableroPrueba = "#2b3b2c";
+  const colorFondoTableroPrueba = temaTablero.bgColor;
 
   // Estados para el feedback de carta revelada
   const [feedbackCarta, setFeedbackCarta] = useState(null);
@@ -640,7 +685,7 @@ export function PantallaPartida() {
       
       // Función para evaluar qué tiene que mostrar en el modal de retroalimentación para el usuario.
       evaluarFeedbackCartaRevelada(cartasAnterioresRef.current, sortedCartas, turnoAnteriorRef.current, 
-                                                                                   setFeedbackCarta);
+                                                                                   setFeedbackCarta, playDisparo);
       
       const cartasConSimulacion = sortedCartas.map((carta, index) => ({
         ...carta,
@@ -871,14 +916,21 @@ export function PantallaPartida() {
    * Abandonar la partida (llamada REST DELETE).
    */
   const handleAbandonar = async () => {
-    if (!window.confirm("¿Está seguro de que quiere abandonar la partida?")) return;
+    if (!window.confirm("¿Está seguro de que quiere abandonar la partida?")) {
+      playCancelar();
+      return;
+    }
+
+    playCancelar();
     try {
       await fetch(`${API_BASE}/partidas/${idPartida}/participantes`, {
         method: "DELETE",
         credentials: "include"
       });
       navigate("/home");
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // ------------------------------------------------------------
@@ -1023,6 +1075,7 @@ export function PantallaPartida() {
                   onSelect={(selection) => setCartaSeleccionada(selection)}
                   onPreview={(url) => setPreviewImage(url)}
                   isJefe={esJefe}
+                  cardBorderColor={temaMarco.color}
                 />
               ))}
             </div>

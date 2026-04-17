@@ -6,6 +6,7 @@ import { ScreenFrame, ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader }
 import { Search, UserPlus, Trophy, TrendingUp, Flame, ArrowLeft, X, Users, UserCheck, UserX, Clock, User } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
+import { useSound } from "../hooks/useSound";
 
 // Importamos la API y el Hook de WebSockets
 import { obtenerAmigos, obtenerLeaderboardAmigos, obtenerLeaderboardGlobal, obtenerSolicitudes,
@@ -81,6 +82,12 @@ function calcularTiempoTranscurrido(fechaString) {
 export function Pantalla08Social() {
   const [tab, setTab] = useState("friends");
   const navigate = useNavigate();
+  const { playWhoosh, playAceptar, playCancelar } = useSound();
+
+  const cerrarModalAgregar = () => {
+    playCancelar();
+    setMostrarAgnadir(false);
+  };
 
   // Estado que servirá como "reloj interno" para actualizar el tiempo transcurrido 
   // desde las solicitudes recibidas.
@@ -227,6 +234,9 @@ export function Pantalla08Social() {
       
       // Quitamos la solicitud del estado local para dar feedback visual inmediato
       setRequests(prev => prev.filter(r => r.id_solicitante !== id_solicitante));
+      if (action === 'accept') {
+        playAceptar();
+      }
     } catch (error) {
       console.error(`Error al intentar ${estado} la solicitud:`, error);
     }
@@ -270,7 +280,10 @@ export function Pantalla08Social() {
               ].map((t) => (
                 <button 
                   key={t.key} 
-                  onClick={() => setTab(t.key)} 
+                  onClick={() => {
+                    if (tab !== t.key) playWhoosh();
+                    setTab(t.key);
+                  }}
                   className={`px-4 py-2 rounded-sm transition-all font-['Special_Elite',cursive] tracking-[0.1em] cursor-pointer ${tab === t.key ? "bg-[#f5edd8] text-[#5a4a30] border border-[#a08050]/30 shadow-md" : "bg-[#2a2a2a] text-[#e8dcc8]"}`} 
                   style={{ fontSize: 12 }}
                 >
@@ -492,10 +505,10 @@ export function Pantalla08Social() {
       {/* Modal Añadir Amigo */}
       {mostrarAgnadir && (
         <>
-          <div className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" onClick={() => setMostrarAgnadir(false)} />
+          <div className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" onClick={cerrarModalAgregar} />
           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-md">
-            <div className="bg-[#2a2218] border-2 border-[#5a4a30] rounded-sm shadow-[6px_8px_24px_rgba(0,0,0,0.7)] p-5 sm:p-6">
-              <button onClick={() => setMostrarAgnadir(false)} className="absolute top-3 right-3 text-[#8a7a60] hover:text-[#d4b878] cursor-pointer">
+            <div className="bg-[#2a2218] border-2 border-[#a08050] rounded-sm shadow-[6px_8px_24px_rgba(0,0,0,0.7)] p-5 sm:p-6">
+              <button onClick={cerrarModalAgregar} className="absolute top-3 right-3 text-[#8a7a60] hover:text-[#d4b878] cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
               <h3 className="font-['Special_Elite',cursive] text-[#e8dcc8] tracking-[0.1em] mb-1" style={{ fontSize: 16 }}>AÑADIR AGENTE</h3>
@@ -511,7 +524,7 @@ export function Pantalla08Social() {
                 autoFocus
               />
               <div className="flex gap-3">
-                <button onClick={() => setMostrarAgnadir(false)} className="flex-1 bg-[#3a2a2a] text-[#a09070] py-2.5 rounded-sm cursor-pointer">CANCELAR</button>
+                <button onClick={cerrarModalAgregar} className="flex-1 bg-[#3a2a2a] text-[#a09070] py-2.5 rounded-sm cursor-pointer">CANCELAR</button>
                 <button 
                   onClick={handleAgnadir} 
                   disabled={!nombreAmigo.trim()}

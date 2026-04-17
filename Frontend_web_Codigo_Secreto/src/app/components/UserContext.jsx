@@ -6,6 +6,7 @@
 import { createContext, useState, useEffect, useRef } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { logoutUsuario, desactivarCuentaUsuario } from "../api/apiLogin";
 
 // URL base para API REST
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -119,26 +120,32 @@ export function UserProvider({ children }) {
     setUser(datosJugador);
   };
 
-  // TODO: conectarla con el backend.
   // Función para cerrar sesión (Limpiamos el estado en React)
   const logout = async () => {
-    // Le avisamos al backend para que destruya la cookie
     try {
-      await fetch(`${API_BASE_URL}/auth/logout`, { 
-        method: "POST", 
-        credentials: "include" 
-      });
+      await logoutUsuario();
     } catch (error) {
       console.error("Error al notificar la desconexión al servidor", error);
     } finally {
-      // Limpieza de 'user' y sessionStorage.
       handleDesconexion(); 
+    }
+  };
+
+  // Función para desactivar la cuenta del usuario. Llama a la API y, si tiene éxito, cierra sesión y el backend resetea los datos.
+  const desactivarCuenta = async () => {
+    try {
+      await desactivarCuentaUsuario();
+      handleDesconexion();
+      return true;
+    } catch (error) {
+      console.error("Error al desactivar cuenta:", error);
+      return false;
     }
   };
 
   return (
     // Funciones y datos que se exponen al exterior.
-    <UserContext.Provider value={{ user, isLoading, loginUsuario, /*updateBullets,*/ logout, setUser,checkSession }}>
+    <UserContext.Provider value={{ user, isLoading, loginUsuario, /*updateBullets,*/ logout, setUser, checkSession, desactivarCuenta }}>
       {children}
     </UserContext.Provider>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { 
   Trophy, Target, Flame, Eye, Crown, Edit3, 
-  Check, LogOut, ArrowLeft, X, Camera, AlertTriangle, Palette, TrendingUp, Loader2,
+  Check, LogOut, ArrowLeft, X, Camera, Trash2, Palette, TrendingUp, Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 
@@ -15,7 +15,7 @@ import {
 import { IconoBala } from "../components/iconoBala";
 
 // API
-import { obtenerPerfil, actualizarPerfil } from "../api/apiJugador";
+import { obtenerPerfil, actualizarPerfil, obtenerPersonalizaciones, equiparPersonalizacion } from "../api/apiJugador";
 
 // Estilos
 import "../components/Perfil.css";
@@ -35,19 +35,19 @@ const OPCIONES_AVATAR = [
   { id: 5, src: Natur, alt: "Agente 5" },
 ];
 
-const TEMAS_VISUALES = [
+/*const TEMAS_VISUALES = [
   { id: "gold", name: "Oro envejecido", color: "#d4af37", borderColor: "#b8941f", bgColor: "#2a2518" },
   { id: "sage", name: "Verde salvia", color: "#8a9a5b", borderColor: "#6d7a45", bgColor: "#1a2218" },
   { id: "terracotta", name: "Terracota cálida", color: "#c65d3b", borderColor: "#a04a2a", bgColor: "#2a1c18" },
   { id: "purple", name: "Púrpura real", color: "#8b5a8b", borderColor: "#6d456d", bgColor: "#221822" },
   { id: "rose", name: "Cuarzo rosa", color: "#c67b8a", borderColor: "#a05060", bgColor: "#2a1820" },
-];
+];*/
 
 export function Pantalla11Perfil() {
   const navegar = useNavigate();
 
   // Extraemos la función de logout del contexto global.
-  const { logout, setUser } = useContext(UserContext);
+  const { logout, setUser, desactivarCuenta } = useContext(UserContext);
   
   // Estados del perfil
   const [perfil, setPerfil] = useState(null);
@@ -63,8 +63,11 @@ export function Pantalla11Perfil() {
   // Estados de personalización
   const [avatarSeleccionado, setAvatarSeleccionado] = useState(1);
   const [mostrarSelector, setMostrarSelector] = useState(false);
-  const [temaMarco, setTemaMarco] = useState('');
-  const [temaTablero, setTemaTablero] = useState('');
+  const [personalizaciones, setPersonalizaciones] = useState([]);
+  const [cargandoPersonalizaciones, setCargandoPersonalizaciones] = useState(true);
+  const [errorPersonalizaciones, setErrorPersonalizaciones] = useState('');
+  const [desactivando, setDesactivando] = useState(false);
+  const [errorDesactivar, setErrorDesactivar] = useState('');
 
   // Carga inicial
   useEffect(() => {
@@ -78,7 +81,6 @@ export function Pantalla11Perfil() {
         // OPCIONES_AVATAR.
         const idFoto = data.foto_perfil ? Number(data.foto_perfil) : 1;
         setAvatarSeleccionado(idFoto);
-
       } catch (err) {
         setError("No se pudo cargar el expediente del agente.");
         console.error(err);
@@ -86,7 +88,36 @@ export function Pantalla11Perfil() {
         setCargando(false);
       }
     };
+
+    const actualizarLocalStorageTemaEquipado = (items) => {
+    const marcoEquipado = items.find((item) => item.tipo === 'carta' && item.equipado);
+    const tableroEquipado = items.find((item) => item.tipo === 'tablero' && item.equipado);
+
+    if (marcoEquipado?.valor_visual) {
+      localStorage.setItem('tema_marco', marcoEquipado.valor_visual);
+    }
+    if (tableroEquipado?.valor_visual) {
+      localStorage.setItem('tema_tablero', tableroEquipado.valor_visual);
+    }
+  };
+
+  const cargarPersonalizaciones = async () => {
+    try {
+      setCargandoPersonalizaciones(true);
+      const lista = await obtenerPersonalizaciones();
+      const items = Array.isArray(lista) ? lista : [];
+      setPersonalizaciones(items);
+      actualizarLocalStorageTemaEquipado(items);
+    } catch (err) {
+      setErrorPersonalizaciones("No se pudieron cargar los temas disponibles.");
+      console.error(err);
+    } finally {
+      setCargandoPersonalizaciones(false);
+    }
+  };
+
     cargar();
+    cargarPersonalizaciones();
   }, []);
 
   // Guardar cambios de tag
@@ -117,7 +148,6 @@ export function Pantalla11Perfil() {
   const handleCambiarAvatar = async (idAvatar) => {
     try {
       // Actualizamos la UI inmediatamente (Optimistic update)
-      
       setAvatarSeleccionado(idAvatar);
       setMostrarSelector(false);
       setUser(idAvatar); // Actualizamos el contexto global para que el cambio se refleje en toda la app (foto de perfil en la esquina)
@@ -127,6 +157,22 @@ export function Pantalla11Perfil() {
       setUser(actualizado); // Actualizamos el contexto global con la respuesta completa del backend (incluyendo el nuevo id de foto_perfil)
     } catch (err) {
       console.error("Error al guardar la fotografía:", err);
+    }
+  };
+
+  const handleEquiparTema = async (item) => {
+    try {
+      setErrorPersonalizaciones('');
+      if (item.equipado) return;
+      await equiparPersonalizacion(item.id_personalizacion, true);
+      setPersonalizaciones((prev) => prev.map((p) => ({
+        ...p,
+        equipado: p.tipo === item.tipo ? p.id_personalizacion === item.id_personalizacion : p.equipado,
+      })));
+      localStorage.setItem(item.tipo === 'carta' ? 'tema_marco' : 'tema_tablero', item.valor_visual);
+    } catch (err) {
+      setErrorPersonalizaciones('No se pudo equipar el tema. Inténtalo de nuevo.');
+      console.error(err);
     }
   };
 
@@ -343,43 +389,75 @@ export function Pantalla11Perfil() {
               </div>
 
               <div className="mb-6">
-                <p className="fuente-courier text-[#a09070] text-xs mb-3">ESTILO DE MARCO DE CARTAS:</p>
+              <p className="fuente-courier text-[#a09070] text-xs mb-3">ESTILO DE MARCO DE CARTAS:</p>
+              {cargandoPersonalizaciones ? (
+                <div className="flex items-center gap-2 text-[#d4b878]">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Cargando temas...</span>
+                </div>
+              ) : errorPersonalizaciones ? (
+                <p className="fuente-courier text-[#d4b878] text-[11px]">{errorPersonalizaciones}</p>
+              ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                  {TEMAS_VISUALES.map((tema) => (
+                  {personalizaciones.filter((item) => item.tipo === 'carta').map((item) => (
                     <button
-                      key={tema.id}
-                      onClick={() => setTemaMarco(tema.id)}
+                      key={item.id_personalizacion}
+                      onClick={() => handleEquiparTema(item)}
                       className={`relative p-2 rounded-sm border-2 transition-all ${
-                        temaMarco === tema.id ? "border-[#d4b878] bg-[#3a3228]" : "border-[#444] bg-[#1a1a1a]"
+                        item.equipado ? "border-[#d4b878] bg-[#3a3228]" : "border-[#444] bg-[#1a1a1a]"
                       }`}
+                      disabled={!item.comprado}
                     >
-                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: tema.color, opacity: 0.5 }} />
-                      <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{tema.name}</p>
-                      {temaMarco === tema.id && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
+                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: item.valor_visual, opacity: 0.75 }} />
+                      <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{item.nombre || item.valor_visual}</p>
+                      {item.equipado && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
+                      {!item.comprado && (
+                        <span className="absolute bottom-1 left-1 right-1 text-[9px] text-[#c28a68] text-center">NO COMPRADO</span>
+                      )}
                     </button>
                   ))}
+                  {personalizaciones.filter((item) => item.tipo === 'carta').length === 0 && (
+                    <p className="fuente-courier text-[#d4b878] text-[11px]">No hay temas de marco disponibles.</p>
+                  )}
                 </div>
-              </div>
+              )}
+            </div>
 
-              <div>
-                <p className="fuente-courier text-[#a09070] text-xs mb-3">COLOR DE FONDO DEL TABLERO:</p>
+            <div>
+              <p className="fuente-courier text-[#a09070] text-xs mb-3">COLOR DE FONDO DEL TABLERO:</p>
+              {cargandoPersonalizaciones ? (
+                <div className="flex items-center gap-2 text-[#d4b878]">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Cargando temas...</span>
+                </div>
+              ) : errorPersonalizaciones ? (
+                <p className="fuente-courier text-[#d4b878] text-[11px]">{errorPersonalizaciones}</p>
+              ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                  {TEMAS_VISUALES.map((tema) => (
+                  {personalizaciones.filter((item) => item.tipo === 'tablero').map((item) => (
                     <button
-                      key={tema.id}
-                      onClick={() => setTemaTablero(tema.id)}
+                      key={item.id_personalizacion}
+                      onClick={() => handleEquiparTema(item)}
                       className={`relative p-2 rounded-sm border-2 transition-all ${
-                        temaTablero === tema.id ? "border-[#d4b878] bg-[#3a3228]" : "border-[#444] bg-[#1a1a1a]"
+                        item.equipado ? "border-[#d4b878] bg-[#3a3228]" : "border-[#444] bg-[#1a1a1a]"
                       }`}
+                      disabled={!item.comprado}
                     >
-                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: tema.color, opacity: 0.3 }} />
-                      <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{tema.name}</p>
-                      {temaTablero === tema.id && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
+                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: item.valor_visual, opacity: 0.75 }} />
+                      <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{item.nombre || item.valor_visual}</p>
+                      {item.equipado && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
+                      {!item.comprado && (
+                        <span className="absolute bottom-1 left-1 right-1 text-[9px] text-[#c28a68] text-center">NO COMPRADO</span>
+                      )}
                     </button>
                   ))}
+                  {personalizaciones.filter((item) => item.tipo === 'tablero').length === 0 && (
+                    <p className="fuente-courier text-[#d4b878] text-[11px]">No hay temas de tablero disponibles.</p>
+                  )}
                 </div>
-              </div>
-            </DarkCard>
+              )}
+            </div>
+          </DarkCard>
 
             {/* Enlace a Logros */}
             <DarkCard 
@@ -410,6 +488,38 @@ export function Pantalla11Perfil() {
               <LogOut className="w-4 h-4 text-[#e08080]" />
               <span className="fuente-elite text-[#e08080] tracking-[0.2em]" style={{ fontSize: 13 }}>CERRAR SESIÓN</span>
             </button>
+
+
+            {/* Desactivar cuenta*/}
+            <button
+              onClick={async () => {
+                const confirmacion = window.confirm(
+                  "¿Seguro que quieres desactivar tu cuenta? Esta acción cerrará tu sesión y borrará todos los datos de tus partidas. Dejarás de aparecer en las tablas de clasificación y listas de amigos, y perderás tu progreso. Esta acción es irreversible."
+                );
+                if (!confirmacion) return;
+
+                setDesactivando(true);
+                setErrorDesactivar('');
+                const exito = await desactivarCuenta();
+                setDesactivando(false);
+
+                if (exito) {
+                  navegar("/login");
+                } else {
+                  setErrorDesactivar('No se pudo desactivar la cuenta. Inténtalo de nuevo más tarde.');
+                }
+              }}
+              className="w-full mt-3 bg-[#666] hover:bg-[#777] border border-[#888] text-[#f0f0f0] py-3 rounded-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg disabled:opacity-60"
+              disabled={desactivando}
+            >
+              <Trash2 className="w-4 h-4 text-[#ffd980]" />
+              <span className="fuente-elite text-[#ffd980] tracking-[0.2em]" style={{ fontSize: 13 }}>
+                {desactivando ? 'DESACTIVANDO...' : 'DESACTIVAR CUENTA'}
+              </span>
+            </button>
+            {errorDesactivar && (
+              <p className="fuente-courier text-[#d4b878] text-[11px] mt-2">{errorDesactivar}</p>
+            )}
 
             <div className="relative h-12 mt-4 flex items-center justify-between">
               <span className="fuente-courier text-[#8a7a60]/50" style={{ fontSize: 9 }}>DOC: FBI-EXPEDIENTE-1976</span>

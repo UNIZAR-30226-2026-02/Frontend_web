@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { ManilaFolder, SectionHeader, RedStamp, FBISeal } from "../components/ScreenFrame"; 
 import { Award, ArrowLeft } from "lucide-react";
+import { useSound } from "../hooks/useSound";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -42,6 +43,9 @@ export function Pantalla15FinPartida() {
   }, [id_partida]);
 
   // Variables calculadas
+  const { playAplauso, playFiasco } = useSound();
+  const sonidoReproducidoRef = useRef(false);
+
   const equipo_ganador = datosFinales?.equipo_ganador || 'Rojo'; 
   const aciertos_rojo = datosFinales?.aciertos_rojo || 0;
   const aciertos_azul = datosFinales?.aciertos_azul || 0;
@@ -50,6 +54,17 @@ export function Pantalla15FinPartida() {
   const esRojoGanador = equipo_ganador.toLowerCase() === 'rojo';
   const soyRojo = miEquipo && miEquipo.toLowerCase() === 'rojo';
   const heGanado = miEquipo && miEquipo.toLowerCase() === equipo_ganador.toLowerCase();
+
+  useEffect(() => {
+    if (!cargando && datosFinales && miEquipo && !sonidoReproducidoRef.current) {
+      if (heGanado) {
+        playAplauso();
+      } else {
+        playFiasco();
+      }
+      sonidoReproducidoRef.current = true;
+    }
+  }, [cargando, datosFinales, miEquipo, heGanado, playAplauso, playFiasco]);
 
   // NUEVO: El color de la bandera AHORA SIEMPRE ES EL DE TU EQUIPO
   const bgBandera = soyRojo ? "bg-[#8b2020]/90" : "bg-[#80a0d0]/90"; 
