@@ -9,6 +9,12 @@ export const SoundContext = createContext();
 import bgMusicUrl from '../../assets/loop_musica.mp3';
 import clickSoundUrl from '../../assets/sonido_click.mp3';
 import typeSoundUrl from '../../assets/sonido_teclear.mp3';
+import disparoSoundUrl from '../../assets/sonido_disparo.mp3';
+import aplausoSoundUrl from '../../assets/sonido_aplauso.mp3';
+import fiascoSoundUrl from '../../assets/sonido_fiasco.mp3';
+import whooshSoundUrl from '../../assets/sonido_whoosh.mp3';
+import aceptarSoundUrl from '../../assets/sonido_aceptar.mp3';
+import cancelarSoundUrl from '../../assets/sonido_cancelar.mp3';
 
 // Claves constantes para evitar errores de dedo en localStorage
 const STORAGE_MUSIC_VOLUME = 'sound_music_volume';
@@ -37,6 +43,12 @@ export function SoundProvider({ children }) {
   const bgAudioRef = useRef(null);
   const clickAudioRef = useRef(null);
   const typeAudioRef = useRef(null);
+  const disparoAudioRef = useRef(null);
+  const aplausoAudioRef = useRef(null);
+  const fiascoAudioRef = useRef(null);
+  const whooshAudioRef = useRef(null);
+  const aceptarAudioRef = useRef(null);
+  const cancelarAudioRef = useRef(null);
 
   /**
    * CICLO DE VIDA: Inicialización
@@ -65,9 +77,45 @@ export function SoundProvider({ children }) {
     typeAudio.load();
     typeAudioRef.current = typeAudio;
 
+    const disparoAudio = new Audio();
+    disparoAudio.volume = sfxVolume;
+    disparoAudio.src = disparoSoundUrl;
+    disparoAudio.load();
+    disparoAudioRef.current = disparoAudio;
+
+    const aplausoAudio = new Audio();
+    aplausoAudio.volume = sfxVolume;
+    aplausoAudio.src = aplausoSoundUrl;
+    aplausoAudio.load();
+    aplausoAudioRef.current = aplausoAudio;
+
+    const fiascoAudio = new Audio();
+    fiascoAudio.volume = sfxVolume;
+    fiascoAudio.src = fiascoSoundUrl;
+    fiascoAudio.load();
+    fiascoAudioRef.current = fiascoAudio;
+
+    const whooshAudio = new Audio();
+    whooshAudio.volume = sfxVolume;
+    whooshAudio.src = whooshSoundUrl;
+    whooshAudio.load();
+    whooshAudioRef.current = whooshAudio;
+
+    const aceptarAudio = new Audio();
+    aceptarAudio.volume = sfxVolume;
+    aceptarAudio.src = aceptarSoundUrl;
+    aceptarAudio.load();
+    aceptarAudioRef.current = aceptarAudio;
+
+    const cancelarAudio = new Audio();
+    cancelarAudio.volume = sfxVolume;
+    cancelarAudio.src = cancelarSoundUrl;
+    cancelarAudio.load();
+    cancelarAudioRef.current = cancelarAudio;
+
     // Cleanup: detiene todos los audios si el componente se desmonta
     return () => {
-      [bgAudio, clickAudio, typeAudio].forEach(a => {
+      [bgAudio, clickAudio, typeAudio, disparoAudio, aplausoAudio, fiascoAudio, whooshAudio, aceptarAudio, cancelarAudio].forEach(a => {
         a.pause();
         a.src = '';
       });
@@ -87,6 +135,12 @@ export function SoundProvider({ children }) {
   useEffect(() => {
     if (clickAudioRef.current) clickAudioRef.current.volume = sfxVolume;
     if (typeAudioRef.current) typeAudioRef.current.volume = sfxVolume;
+    if (disparoAudioRef.current) disparoAudioRef.current.volume = sfxVolume;
+    if (aplausoAudioRef.current) aplausoAudioRef.current.volume = sfxVolume;
+    if (fiascoAudioRef.current) fiascoAudioRef.current.volume = sfxVolume;
+    if (whooshAudioRef.current) whooshAudioRef.current.volume = sfxVolume;
+    if (aceptarAudioRef.current) aceptarAudioRef.current.volume = sfxVolume;
+    if (cancelarAudioRef.current) cancelarAudioRef.current.volume = sfxVolume;
     localStorage.setItem(STORAGE_SFX_VOLUME, sfxVolume);
   }, [sfxVolume]);
 
@@ -154,6 +208,12 @@ export function SoundProvider({ children }) {
   // Interfaces públicas para los sonidos
   const playClick = useCallback(() => playSound(clickAudioRef, playClickFallback), [playSound, playClickFallback]);
   const playType = useCallback(() => playSound(typeAudioRef, playTypeFallback), [playSound, playTypeFallback]);
+  const playDisparo = useCallback(() => playSound(disparoAudioRef), [playSound]);
+  const playAplauso = useCallback(() => playSound(aplausoAudioRef), [playSound]);
+  const playFiasco = useCallback(() => playSound(fiascoAudioRef), [playSound]);
+  const playWhoosh = useCallback(() => playSound(whooshAudioRef), [playSound]);
+  const playAceptar = useCallback(() => playSound(aceptarAudioRef), [playSound]);
+  const playCancelar = useCallback(() => playSound(cancelarAudioRef), [playSound]);
 
   const startBackgroundMusic = useCallback(() => {
     if (bgAudioRef.current) {
@@ -169,6 +229,12 @@ export function SoundProvider({ children }) {
     setSfxVolume,
     playClick,
     playType,
+    playDisparo,
+    playAplauso,
+    playFiasco,
+    playWhoosh,
+    playAceptar,
+    playCancelar,
     startBackgroundMusic,
   };
 

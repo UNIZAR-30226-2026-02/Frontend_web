@@ -101,7 +101,7 @@ export function Pantalla16Historial() {
   // Pantalla de carga mientras se obtienen los datos
   if (cargando) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[#1a1a1a]">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-transparent">
         <Loader2 className="w-10 h-10 animate-spin text-[#d4b878]" />
         <p className="font-['Courier_Prime',monospace] text-[#d4b878] animate-pulse">
           EXTRAYENDO ARCHIVOS DE LA CENTRAL...

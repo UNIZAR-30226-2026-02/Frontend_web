@@ -14,6 +14,7 @@ import React, { useState, useEffect, useRef, useCallback, useContext } from "rea
 import { useNavigate, useParams } from "react-router";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { useSound } from "../hooks/useSound";
 
 import {
   Clock, Send as SendIcon, Check, Vote, Skull,
@@ -49,7 +50,7 @@ import carta20 from "../../assets/Cartas/carta20.png";
 const WS_URL = import.meta.env.VITE_WS_URL;
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const isSimulacion = true; // Lo añadimos para simular la partida sin que las fotos vengan del backend, para el video. Cambiar a false luego
+const isSimulacion = false; // Lo añadimos para simular la partida sin que las fotos vengan del backend, para el video. Cambiar a false luego
 const simulatedCardImages = [
   carta1, carta2, carta3, carta4, carta5, carta6, carta7, carta8, carta9, carta10,
   carta11, carta12, carta13, carta14, carta15, carta16, carta17, carta18, carta19, carta20
@@ -501,7 +502,7 @@ function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, vo
 }
 
 // Función auxiliar que evalúa si se ha revelado una carta nueva y dispara el popup de retroalimentación.
-const evaluarFeedbackCartaRevelada = (cartasViejas, cartasNuevas, turnoAnterior, setFeedbackCarta) => {
+const evaluarFeedbackCartaRevelada = (cartasViejas, cartasNuevas, turnoAnterior, setFeedbackCarta, onCartaIncorrecta) => {
   if (cartasViejas.length === 0) return;
 
   // Busca las antiguas reveladas y las nuevas reveladas.
@@ -521,6 +522,10 @@ const evaluarFeedbackCartaRevelada = (cartasViejas, cartasNuevas, turnoAnterior,
       // o no.
       const esCorrecta = nuevaCarta.tipo?.toLowerCase() === turnoAnterior?.toLowerCase();
       
+      if (!esCorrecta) {
+        onCartaIncorrecta?.();
+      }
+
       setFeedbackCarta({ correcta: esCorrecta });
       
       // Ocultar el modal al segundo y medio.
@@ -534,6 +539,7 @@ export function PantallaPartida() {
   const navigate = useNavigate();
   const { id_partida: idPartida } = useParams();
   const { user } = useContext(UserContext);
+  const { playDisparo, playCancelar } = useSound();
 
   // Estado del juego
   const [rol, setRol] = useState(null);          // "lider" o "agente"
@@ -640,7 +646,7 @@ export function PantallaPartida() {
       
       // Función para evaluar qué tiene que mostrar en el modal de retroalimentación para el usuario.
       evaluarFeedbackCartaRevelada(cartasAnterioresRef.current, sortedCartas, turnoAnteriorRef.current, 
-                                                                                   setFeedbackCarta);
+                                                                                   setFeedbackCarta, playDisparo);
       
       const cartasConSimulacion = sortedCartas.map((carta, index) => ({
         ...carta,
@@ -871,14 +877,21 @@ export function PantallaPartida() {
    * Abandonar la partida (llamada REST DELETE).
    */
   const handleAbandonar = async () => {
-    if (!window.confirm("¿Está seguro de que quiere abandonar la partida?")) return;
+    if (!window.confirm("¿Está seguro de que quiere abandonar la partida?")) {
+      playCancelar();
+      return;
+    }
+
+    playCancelar();
     try {
       await fetch(`${API_BASE}/partidas/${idPartida}/participantes`, {
         method: "DELETE",
         credentials: "include"
       });
       navigate("/home");
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // ------------------------------------------------------------
