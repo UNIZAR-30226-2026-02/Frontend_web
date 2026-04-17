@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { 
   Trophy, Target, Flame, Eye, Crown, Edit3, 
-  Check, LogOut, ArrowLeft, X, Camera, AlertTriangle, Palette, TrendingUp, Loader2,
+  Check, LogOut, ArrowLeft, X, Camera, Trash2, Palette, TrendingUp, Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 
@@ -47,7 +47,7 @@ export function Pantalla11Perfil() {
   const navegar = useNavigate();
 
   // Extraemos la función de logout del contexto global.
-  const { logout, setUser } = useContext(UserContext);
+  const { logout, setUser, desactivarCuenta } = useContext(UserContext);
   
   // Estados del perfil
   const [perfil, setPerfil] = useState(null);
@@ -65,6 +65,8 @@ export function Pantalla11Perfil() {
   const [mostrarSelector, setMostrarSelector] = useState(false);
   const [temaMarco, setTemaMarco] = useState('');
   const [temaTablero, setTemaTablero] = useState('');
+  const [desactivando, setDesactivando] = useState(false);
+  const [errorDesactivar, setErrorDesactivar] = useState('');
 
   // Carga inicial
   useEffect(() => {
@@ -410,6 +412,38 @@ export function Pantalla11Perfil() {
               <LogOut className="w-4 h-4 text-[#e08080]" />
               <span className="fuente-elite text-[#e08080] tracking-[0.2em]" style={{ fontSize: 13 }}>CERRAR SESIÓN</span>
             </button>
+
+
+            {/* Desactivar cuenta*/}
+            <button
+              onClick={async () => {
+                const confirmacion = window.confirm(
+                  "¿Seguro que quieres desactivar tu cuenta? Esta acción cerrará tu sesión y borrará todos los datos de tus partidas. Dejarás de aparecer en las tablas de clasificación y listas de amigos, y perderás tu progreso. Esta acción es irreversible."
+                );
+                if (!confirmacion) return;
+
+                setDesactivando(true);
+                setErrorDesactivar('');
+                const exito = await desactivarCuenta();
+                setDesactivando(false);
+
+                if (exito) {
+                  navegar("/login");
+                } else {
+                  setErrorDesactivar('No se pudo desactivar la cuenta. Inténtalo de nuevo más tarde.');
+                }
+              }}
+              className="w-full mt-3 bg-[#666] hover:bg-[#777] border border-[#888] text-[#f0f0f0] py-3 rounded-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg disabled:opacity-60"
+              disabled={desactivando}
+            >
+              <Trash2 className="w-4 h-4 text-[#ffd980]" />
+              <span className="fuente-elite text-[#ffd980] tracking-[0.2em]" style={{ fontSize: 13 }}>
+                {desactivando ? 'DESACTIVANDO...' : 'DESACTIVAR CUENTA'}
+              </span>
+            </button>
+            {errorDesactivar && (
+              <p className="fuente-courier text-[#d4b878] text-[11px] mt-2">{errorDesactivar}</p>
+            )}
 
             <div className="relative h-12 mt-4 flex items-center justify-between">
               <span className="fuente-courier text-[#8a7a60]/50" style={{ fontSize: 9 }}>DOC: FBI-EXPEDIENTE-1976</span>
