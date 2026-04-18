@@ -86,7 +86,7 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
   // Si está revelada: muestra el color real (rojo/azul/asesino/civil)
   // Si es jefe y no revelada: muestra una previsualización del color (borde inferior)
   // Si no: estilo neutral
-  const imageUrl = carta.imagen_url || carta.imagenUrl;
+  const imageUrl = carta.palabra;
   const colorClass = isRevealed
     ? `card-revealed color-${carta.tipo}`
     : isJefe && carta.tipo
@@ -96,7 +96,6 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
   const disabled = !canSelect && !isRevealed;
   const clickTimeout = useRef(null);
   
-  // TODO: obtener tema visual del backend.
   // Color de prueba.
   const colorBordePrueba = "#d4af37"; // Dorado / Oro envejecido
 
@@ -550,8 +549,8 @@ export function PantallaPartida() {
   const { user } = useContext(UserContext);
   const { playDisparo, playCancelar } = useSound();
 
-  const [temaMarcoColor, setTemaMarcoColor] = useState(localStorage.getItem('tema_marco') || TEMAS_VISUALES[0].color);
-  const [temaTableroColor, setTemaTableroColor] = useState(localStorage.getItem('tema_tablero') || TEMAS_VISUALES[0].bgColor);
+  const [temaMarcoColor, setTemaMarcoColor] = useState(localStorage.getItem('tema_marco') || colorBordePrueba);
+  const [temaTableroColor, setTemaTableroColor] = useState(localStorage.getItem('tema_tablero') || colorFondoTableroPrueba);
   const temaMarco = { color: temaMarcoColor };
   const temaTablero = { bgColor: temaTableroColor };
 
@@ -689,7 +688,7 @@ export function PantallaPartida() {
       
       const cartasConSimulacion = sortedCartas.map((carta, index) => ({
         ...carta,
-        imagen_url: carta.imagen_url || carta.imagenUrl || (isSimulacion ? simulatedCardImages[index % simulatedCardImages.length] : carta.imagen_url),
+        imagen_url: carta.palabra || carta.palabra || (isSimulacion ? simulatedCardImages[index % simulatedCardImages.length] : carta.imagen_url),
         palabra: isSimulacion ? (carta.palabra || `Carta ${carta.id_carta_tablero}`) : carta.palabra,
       }));
       setCartas(cartasConSimulacion);
