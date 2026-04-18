@@ -96,8 +96,6 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
   const disabled = !canSelect && !isRevealed;
   const clickTimeout = useRef(null);
   
-  // Color de prueba.
-  const colorBordePrueba = "#d4af37"; // Dorado / Oro envejecido
 
   const handleCardClick = (e) => {
     e.stopPropagation();
@@ -613,7 +611,9 @@ export function PantallaPartida() {
   // TODO: integrar con backend
   // Dato de prueba para el fondo del tablero
   // Ejemplo: Un verde oscuro estilo tapete militar/póker
-  const colorFondoTableroPrueba = temaTablero.bgColor;
+  const colorFondoTableroPrueba = "#967c26";
+  // Color de prueba.
+  const colorBordePrueba = "#d4af37"; // Dorado / Oro envejecido
 
   // Estados para el feedback de carta revelada
   const [feedbackCarta, setFeedbackCarta] = useState(null);
