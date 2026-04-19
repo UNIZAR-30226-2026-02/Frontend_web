@@ -59,7 +59,7 @@ function colorSuave(hex = "#888") {
 function ModalConfirmar({ item, balasActuales, onConfirmar, onCancelar, confirmando }) {
   if (!item) return null;
 
-  const precio   = item.precioBalas ?? item.precio_balas ?? 0;
+  const precio   = item.precioBalas ?? item.precio_balas ?? item.precio_bala ?? 0;
   const nombre   = item.nombre ?? "—";
   const saldo    = balasActuales - precio;
   const sinFondos = saldo < 0;
@@ -173,7 +173,7 @@ function ModalConfirmar({ item, balasActuales, onConfirmar, onCancelar, confirma
 // TARJETA DE PAQUETE DE CARTAS
 
 function TarjetaPaquete({ tema, onComprar }) {
-  const precio   = tema.precioBalas ?? tema.precio_balas ?? 0;
+  const precio   = tema.precioBalas ?? tema.precio_balas ?? tema.precio_bala ?? 0;
   const esGratis = precio === 0;
   const comprado = tema.comprado === true;
 
@@ -232,7 +232,7 @@ function TarjetaPaquete({ tema, onComprar }) {
 function TarjetaPersonalizacion({ item, onComprar, onEquipar, equipando }) {
   const comprado = item.comprado === true;
   const equipado = item.equipado === true;
-  const precio   = item.precioBalas ?? item.precio_balas ?? 0;
+  const precio   = item.precioBalas ?? item.precio_balas ?? item.precio_bala ?? 0;
   const cv       = colorSuave(item.valor_visual);
 
   return (
@@ -248,13 +248,19 @@ function TarjetaPersonalizacion({ item, onComprar, onEquipar, equipando }) {
       >
         <div
           className="w-full h-full rounded-sm"
-          style={{ backgroundColor: item.valor_visual, opacity: 0.7 }}
+          style={{ backgroundColor: item.valor_visual }}
         />
       </div>
 
       <p className="font-['Special_Elite',cursive] text-[#e8dcc8] leading-tight" style={{ fontSize: 10 }}>
         {item.nombre.toUpperCase()}
       </p>
+
+      {item.descripcion && (
+        <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 8 }}>
+          {item.descripcion}
+        </p>
+      )}
 
       {comprado ? (
         /* Ya adquirido → mostrar botón equipar o badge equipado */
