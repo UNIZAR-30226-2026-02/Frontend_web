@@ -406,16 +406,13 @@ export function Pantalla11Perfil() {
                       onClick={() => handleEquiparTema(item)}
                       className={`relative p-2 rounded-sm border-2 transition-all ${
                         item.equipado ? "border-[#d4b878] bg-[#3a3228]" : "border-[#444] bg-[#1a1a1a]"
-                      }`}
+                      } ${!item.comprado ? "opacity-50 cursor-not-allowed" : ""}`}
                       disabled={!item.comprado}
                     >
                       <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: `#${item.valor_visual}`, opacity: 0.75 }} />
                       <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{item.nombre || item.valor_visual}</p>
                       {item.descripcion && <p className="fuente-courier text-[8px] text-[#888] truncate">{item.descripcion}</p>}
                       {item.equipado && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
-                      {!item.comprado && (
-                        <span className="absolute bottom-1 left-1 right-1 text-[9px] text-[#c28a68] text-center">NO COMPRADO</span>
-                      )}
                     </button>
                   ))}
                   {personalizaciones.filter((item) => item.tipo === 'carta').length === 0 && (
@@ -442,16 +439,13 @@ export function Pantalla11Perfil() {
                       onClick={() => handleEquiparTema(item)}
                       className={`relative p-2 rounded-sm border-2 transition-all ${
                         item.equipado ? "border-[#d4b878] bg-[#3a3228]" : "border-[#444] bg-[#1a1a1a]"
-                      }`}
+                      } ${!item.comprado ? "opacity-50 cursor-not-allowed" : ""}`}
                       disabled={!item.comprado}
                     >
                       <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: `#${item.valor_visual}`, opacity: 0.75 }} />
                       <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{item.nombre || item.valor_visual}</p>
                       {item.descripcion && <p className="fuente-courier text-[8px] text-[#888] truncate">{item.descripcion}</p>}
                       {item.equipado && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
-                      {!item.comprado && (
-                        <span className="absolute bottom-1 left-1 right-1 text-[9px] text-[#c28a68] text-center">NO COMPRADO</span>
-                      )}
                     </button>
                   ))}
                   {personalizaciones.filter((item) => item.tipo === 'tablero').length === 0 && (
