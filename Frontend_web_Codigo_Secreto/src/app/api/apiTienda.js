@@ -27,7 +27,7 @@ export async function obtenerTemasActivos() {
 // Inventario de personalizaciones del jugador → GET /api/jugadores/personalizaciones
 // Retorna Array: { id_personalizacion, nombre, tipo, valor_visual, equipado, comprado }
 export async function obtenerPersonalizacionesJugador() {
-  const res = await fetch(`${BASE_URL}/jugadores/personalizaciones`, {
+  const res = await fetch(`${BASE_URL}/personalizaciones/activas`, {
     method: 'GET',
     credentials: 'include',
   });
@@ -74,7 +74,7 @@ export async function comprarPersonalizacion(id_personalizacion) {
 // Envía:   { id_personalizacion, equipado }
 
 export async function equiparPersonalizacion(id_personalizacion, equipado) {
-  const res = await fetch(`${BASE_URL}/personalizaciones/equipar`, {
+  const res = await fetch(`${BASE_URL}/jugadores/equipar`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
