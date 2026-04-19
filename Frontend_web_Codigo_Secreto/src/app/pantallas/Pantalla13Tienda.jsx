@@ -51,7 +51,8 @@ function emojiPaquete(nombre = "") {
 
 // Derivar color de fondo suave a partir del valor_visual hex
 function colorSuave(hex = "#888") {
-  return { bg: `${hex}33`, border: `${hex}88` };
+  const cleanHex = hex.startsWith('#') ? hex : `#${hex}`;
+  return { bg: `${cleanHex}33`, border: `${cleanHex}88` };
 }
 
 // MODAL DE CONFIRMACIÓN DE COMPRA
@@ -248,7 +249,7 @@ function TarjetaPersonalizacion({ item, onComprar, onEquipar, equipando }) {
       >
         <div
           className="w-full h-full rounded-sm"
-          style={{ backgroundColor: item.valor_visual }}
+          style={{ backgroundColor: `#${item.valor_visual}` }}
         />
       </div>
 

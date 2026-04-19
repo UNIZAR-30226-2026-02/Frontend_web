@@ -16,6 +16,7 @@ import { IconoBala } from "../components/iconoBala";
 
 // API
 import { obtenerPerfil, actualizarPerfil, obtenerPersonalizaciones, equiparPersonalizacion } from "../api/apiJugador";
+import { obtenerPersonalizacionesJugador } from "../api/apiTienda";
 
 // Estilos
 import "../components/Perfil.css";
@@ -104,7 +105,7 @@ export function Pantalla11Perfil() {
   const cargarPersonalizaciones = async () => {
     try {
       setCargandoPersonalizaciones(true);
-      const lista = await obtenerPersonalizaciones();
+      const lista = await obtenerPersonalizacionesJugador();
       const items = Array.isArray(lista) ? lista : [];
       setPersonalizaciones(items);
       actualizarLocalStorageTemaEquipado(items);
@@ -408,8 +409,9 @@ export function Pantalla11Perfil() {
                       }`}
                       disabled={!item.comprado}
                     >
-                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: item.valor_visual, opacity: 0.75 }} />
+                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: `#${item.valor_visual}`, opacity: 0.75 }} />
                       <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{item.nombre || item.valor_visual}</p>
+                      {item.descripcion && <p className="fuente-courier text-[8px] text-[#888] truncate">{item.descripcion}</p>}
                       {item.equipado && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
                       {!item.comprado && (
                         <span className="absolute bottom-1 left-1 right-1 text-[9px] text-[#c28a68] text-center">NO COMPRADO</span>
@@ -443,8 +445,9 @@ export function Pantalla11Perfil() {
                       }`}
                       disabled={!item.comprado}
                     >
-                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: item.valor_visual, opacity: 0.75 }} />
+                      <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: `#${item.valor_visual}`, opacity: 0.75 }} />
                       <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{item.nombre || item.valor_visual}</p>
+                      {item.descripcion && <p className="fuente-courier text-[8px] text-[#888] truncate">{item.descripcion}</p>}
                       {item.equipado && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
                       {!item.comprado && (
                         <span className="absolute bottom-1 left-1 right-1 text-[9px] text-[#c28a68] text-center">NO COMPRADO</span>
