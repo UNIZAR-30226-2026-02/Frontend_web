@@ -80,7 +80,7 @@ export function Pantalla06Manual() {
                   <div className="rules-list">
                     {[
                       { num: "01", text: "Dos equipos compiten por descubrir sus agentes secretos en un tablero de 4x5 palabras (20 cartas)." },
-                      { num: "02", text: "El Jefe de Espionaje da pistas de una sola palabra y un número indicando cuántas cartas se relacionan para que los agentes intenten descubir qué cartas pertenecen a su equipo." },
+                      { num: "02", text: "El Jefe de Espionaje da pistas de una sola palabra y un número indicando cuántas cartas se relacionan para que los agentes intenten descubrir qué cartas pertenecen a su equipo." },
                       { num: "03", text: "Los Agentes debaten en el chat y votan cartas. Al alcanzar la mayoría simple, la carta se revela." },
                       { num: "04", text: "¡Cuidado con el ASESINO! Revelar esa carta significa derrota inmediata." },
                       { num: "05", text: "El Jefe de Espionaje puede VER el chat pero NO puede escribir mensajes." },
