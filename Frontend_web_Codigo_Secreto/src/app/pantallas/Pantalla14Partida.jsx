@@ -137,9 +137,9 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
       {/* Parte superior: imagen o iconos de revelado, de forma cuadrada */}
       <div className="card-inner-top" style={{ position: "relative", overflow: "hidden",
           aspectRatio: "1 / 1", }}>
-        {/* Imagen de fondo (si existe y la carta no está revelada) */}
-        {imageUrl && !isRevealed ? (
-          <div className="card-image-wrapper" onClick={handleCardClick}>
+        {/* Imagen de fondo (siempre visible) */}
+        {imageUrl && (
+          <div className="card-image-wrapper" onClick={!isRevealed ? handleCardClick : undefined}>
             <img
               src={imageUrl}
               alt={carta.palabra || "Carta"}
@@ -147,35 +147,29 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
-                opacity: isSelected ? 0.7 : 1,
-                cursor: "zoom-in",
+                opacity: isSelected && !isRevealed ? 0.7 : 1,
+                cursor: !isRevealed ? "zoom-in" : "default",
               }}
             />
-            {/* {onPreview && (
-              <button
-                type="button"
-                className="card-preview-button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (clickTimeout.current) {
-                    clearTimeout(clickTimeout.current);
-                    clickTimeout.current = null;
-                  }
-                  onPreview(imageUrl);
-                }}
-                aria-label="Ver carta ampliada"
-              >
-                🔍
-              </button>
-            )}*/}
           </div>
-        ) : null}
+        )}
 
-        {/* Iconos/tokens cuando la carta está revelada */}
-        {isRevealed && carta.tipo === "asesino" && <Skull className="rev-icon-skull" />}
-        {isRevealed && carta.tipo === "rojo" && <div className="rev-token token-red" />}
-        {isRevealed && carta.tipo === "azul" && <div className="rev-token token-blue" />}
-        {isRevealed && carta.tipo === "civil" && <div className="rev-token token-neutral" />}
+        {/* Iconos/tokens cuando la carta está revelada - superpuestos sobre la imagen */}
+        {isRevealed && (
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 15,
+          }}>
+            {carta.tipo === "asesino" && <Skull className="rev-icon-skull" />}
+            {carta.tipo === "rojo" && <div className="rev-token token-red" />}
+            {carta.tipo === "azul" && <div className="rev-token token-blue" />}
+            {carta.tipo === "civil" && <div className="rev-token token-neutral" />}
+          </div>
+        )}
 
         {/* FINGERPRINT (Check)  */}
         {isSelected && !isRevealed && (
@@ -508,7 +502,7 @@ function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, vo
 }
 
 // Función auxiliar que evalúa si se ha revelado una carta nueva y dispara el popup de retroalimentación.
-const evaluarFeedbackCartaRevelada = (cartasViejas, cartasNuevas, turnoAnterior, setFeedbackCarta, onCartaIncorrecta) => {
+const evaluarFeedbackCartaRevelada = (cartasViejas, cartasNuevas, turnoAnterior, equipoUsuario, setFeedbackCarta, onCartaIncorrecta) => {
   if (cartasViejas.length === 0) return;
 
   // Busca las antiguas reveladas y las nuevas reveladas.
@@ -524,15 +518,45 @@ const evaluarFeedbackCartaRevelada = (cartasViejas, cartasNuevas, turnoAnterior,
     );
 
     if (nuevaCarta) {
-      // Comprueba si la nueva carta revelada pertenece al equipo del jugador que la ha seleccionado
-      // o no.
-      const esCorrecta = nuevaCarta.tipo?.toLowerCase() === turnoAnterior?.toLowerCase();
+      // Determinar el tipo de mensaje y color según el tipo de carta
+      const tipoCarta = nuevaCarta.tipo?.toLowerCase();
+      const equipoUsuarioNorm = equipoUsuario?.toLowerCase();
+      
+      let mensaje = "";
+      let esPositivo = false;
+      let color = "#cc3333"; // Rojo por defecto
+      
+      // Lógica para determinar el mensaje
+      if (tipoCarta === equipoUsuarioNorm) {
+        // Es un agente amigo del equipo del usuario
+        mensaje = "¡Has encontrado a un agente amigo!";
+        esPositivo = true;
+        color = "#50a050"; // Verde
+      } else if (tipoCarta === "civil") {
+        // Es un civil
+        mensaje = "Has encontrado a un civil";
+        esPositivo = false;
+        color = "#cccccc"; // Gris
+      } else if (tipoCarta === "asesino") {
+        // Es el asesino
+        mensaje = "¡Has encontrado al asesino!";
+        esPositivo = false;
+        color = "#000000"; // Negro
+      } else {
+        // Es un agente enemigo
+        mensaje = "Has encontrado a un agente enemigo";
+        esPositivo = false;
+        color = "#cc3333"; // Rojo
+      }
+      
+      // Comprobar si es correcta para la lógica de turno
+      const esCorrecta = tipoCarta === equipoUsuarioNorm;
       
       if (!esCorrecta) {
         onCartaIncorrecta?.();
       }
 
-      setFeedbackCarta({ correcta: esCorrecta });
+      setFeedbackCarta({ correcta: esCorrecta, mensaje, color, tipo: tipoCarta });
       
       // Ocultar el modal al segundo y medio.
       setTimeout(() => setFeedbackCarta(null), 1500);
@@ -683,7 +707,7 @@ export function PantallaPartida() {
       const sortedCartas = [...data.tablero.cartas].sort((a, b) => a.id_carta_tablero - b.id_carta_tablero);
       
       // Función para evaluar qué tiene que mostrar en el modal de retroalimentación para el usuario.
-      evaluarFeedbackCartaRevelada(cartasAnterioresRef.current, sortedCartas, turnoAnteriorRef.current, 
+      evaluarFeedbackCartaRevelada(cartasAnterioresRef.current, sortedCartas, turnoAnteriorRef.current, equipo,
                                                                                    setFeedbackCarta, playDisparo);
       
       const cartasConSimulacion = sortedCartas.map((carta, index) => ({
@@ -1122,12 +1146,10 @@ export function PantallaPartida() {
               {/* Detalle del resultado */}
               <div className="bg-[#2a2218] border border-[#5a4a30]/40 rounded-sm p-5 text-center shadow-inner">
                 <p
-                  className={`font-['Special_Elite',cursive] tracking-wide ${feedbackCarta.correcta ? 'text-[#50a050]' : 'text-[#cc3333]'}`}
-                  style={{ fontSize: 16 }}
+                  className="font-['Special_Elite',cursive] tracking-wide"
+                  style={{ fontSize: 16, color: feedbackCarta.color }}
                 >
-                  {feedbackCarta.correcta 
-                    ? "¡Carta correcta!" 
-                    : "Carta incorrecta. Cambio de turno."}
+                  {feedbackCarta.mensaje}
                 </p>
               </div>
               
