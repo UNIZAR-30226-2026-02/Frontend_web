@@ -67,14 +67,12 @@ export function Pantalla05NombreUsuarioNuevo() {
       navigate("/home");
 
     } catch (error) {
-      // Caso de error. Se identifica cuál ha sido el error.
       console.error("Fallo de conexión:", error);
 
       if (error.message === "TAG_DUPLICADO") {
         setErrorMensaje("Este nombre en clave ya está asignado a otro agente. Elige otro.");
       } else {
-        // Error genérico o de caída del servidor
-        setErrorMensaje("Error de comunicación con el servidor central.");
+        setErrorMensaje(error.message || "Error de comunicación con el servidor central");
       }
     } finally {
       setCargando(false);

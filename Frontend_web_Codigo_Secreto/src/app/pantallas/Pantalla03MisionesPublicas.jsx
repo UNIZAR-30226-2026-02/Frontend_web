@@ -101,7 +101,7 @@ export function Pantalla03MisionesPublicas() {
       navigate(`/lobby/${idPartida}`);
     } catch (err) {
       console.error(err);
-      alert("No se ha podido acceder a la misión. Es posible que esté llena.");
+      alert(err.message || "No se ha podido acceder a la misión");
     }
   };
 

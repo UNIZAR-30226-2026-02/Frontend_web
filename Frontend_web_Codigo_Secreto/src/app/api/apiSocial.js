@@ -3,6 +3,8 @@
  * referentes a amigos y leaderboard.
  */
 
+import { crearErrorDescriptivo } from './errorHandler';
+
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 // Lista de amigos → GET /api/amigos
@@ -11,8 +13,8 @@ export async function obtenerAmigos() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Error al obtener amigos');
-  return res.json(); // Array: { id_amigo, tag, foto_perfil, victorias, num_aciertos }
+  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudo cargar tu lista de amigos');
+  return res.json();
 }
 
 // Solicitudes de amistad pendientes → GET /api/amigos/solicitudes
@@ -21,7 +23,7 @@ export async function obtenerSolicitudes() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Error al obtener solicitudes');
+  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudieron cargar las solicitudes de amistad');
   return res.json();
 }
 
@@ -31,8 +33,8 @@ export async function buscarJugadores(tag) {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Error al buscar jugadores');
-  return res.json(); // Array: { id_google, tag, foto_perfil }
+  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se encontraron jugadores con ese nombre');
+  return res.json();
 }
 
 // Enviar solicitud de amistad → POST /api/amigos/solicitudes
@@ -44,17 +46,13 @@ export async function enviarSolicitudAmistad(tag_receptor) {
     body: JSON.stringify({ tag_receptor }),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Error al enviar solicitud');
+    throw await crearErrorDescriptivo(res, 'No se pudo enviar la solicitud de amistad');
   }
-  //return res.json();
-  return true; // El backend devuelve void.
+  return true;
 }
-
 
 // Aceptar o rechazar solicitud → PUT /api/amigos/solicitudes
 export async function responderSolicitud(id_solicitante, estado) {
-  // estado: "aceptada" | "rechazada"
   const res = await fetch(`${BASE_URL}/amigos/solicitudes`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -62,13 +60,10 @@ export async function responderSolicitud(id_solicitante, estado) {
     body: JSON.stringify({ id_solicitante, estado }),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Error al responder solicitud');
+    throw await crearErrorDescriptivo(res, `No se pudo ${estado === 'aceptada' ? 'aceptar' : 'rechazar'} la solicitud`);
   }
-  //return res.json();
-  return true; // El backend devuelve void.
+  return true;
 }
-
 
 // Leaderboard global (top 10) → GET /api/leaderboard/global
 export async function obtenerLeaderboardGlobal() {
@@ -76,8 +71,8 @@ export async function obtenerLeaderboardGlobal() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Error al obtener el leaderboard global');
-  return res.json(); // Array: { tag, foto_perfil, victorias, num_aciertos }
+  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudo cargar el leaderboard global');
+  return res.json();
 }
 
 // RF-25: Leaderboard de amigos → GET /api/leaderboard/amigos
@@ -86,6 +81,6 @@ export async function obtenerLeaderboardAmigos() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Error al obtener el leaderboard de amigos');
+  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudo cargar el leaderboard de tus amigos');
   return res.json();
 }

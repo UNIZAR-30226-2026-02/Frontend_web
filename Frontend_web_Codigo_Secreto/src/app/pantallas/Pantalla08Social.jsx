@@ -219,7 +219,7 @@ export function Pantalla08Social() {
         
       } catch (error) {
         console.error("Error al enviar la solicitud:", error);
-        alert(error.message || "No se pudo enviar la solicitud.");
+        alert(error.message || "No se pudo enviar la solicitud de amistad");
       }
     }
   };

@@ -3,6 +3,8 @@
  * mediante API REST, referentes a las partidas.
  */
 
+import { crearErrorDescriptivo } from './errorHandler';
+
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 // Obtener TODOS los temas activos del sistema (para el selector de la Pantalla12CrearPartida)
@@ -11,7 +13,7 @@ export async function obtenerTemasActivos() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Error al obtener temas');
+  if (!res.ok) throw await crearErrorDescriptivo(res, 'Error al obtener los temas disponibles');
   return res.json();
 }
 
@@ -23,7 +25,7 @@ export async function obtenerTemasJugador() {
   });
 
   if (!response.ok) {
-    throw new Error("Error al obtener los temas del jugador");
+    throw await crearErrorDescriptivo(response, "No se pudo obtener tus temas guardados");
   }
 
   return response.json();
@@ -37,7 +39,7 @@ export async function obtenerPartidasPublicas() {
   });
 
   if (!response.ok) {
-    throw new Error("Error al obtener las partidas públicas");
+    throw await crearErrorDescriptivo(response, "No se pudieron cargar las partidas públicas disponibles");
   }
 
   return response.json();
@@ -54,8 +56,7 @@ export async function crearPartida(datos) {
     body: JSON.stringify(datos),
   });
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message || 'Error al crear partida');
+    throw await crearErrorDescriptivo(res, 'No se pudo crear la partida');
   }
   return res.json(); // LobbyStatusDTO
 }
@@ -72,11 +73,9 @@ export async function unirsePartidaPublica(idPartida) {
   });
 
   if (!response.ok) {
-    throw new Error("No se pudo unir a la partida");
+    throw await crearErrorDescriptivo(response, "No se pudo unir a esta partida. Es posible que esté llena o ya haya comenzado");
   }
 
-  // Si el backend devuelve algo (como el estado del lobby), podrías hacer return response.json()
-  // Si devuelve un 200 OK vacío, con esto basta.
   return response.ok; 
 }
 
@@ -89,11 +88,10 @@ export async function unirsePartidaPrivada(codigo) {
     credentials: 'include'
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Código de partida inválido');
+    throw await crearErrorDescriptivo(res, 'Código de partida inválido o expirado');
   }
   const id = await res.json();
-  return { id_partida: id }; // backend retorna un Integer puro, lo encapsulamos.
+  return { id_partida: id };
 }
 // -----------------------------------------------------
 
@@ -107,18 +105,13 @@ export async function obtenerResultadosPartida(idPartida) {
   });
 
   if (!response.ok) {
-    throw new Error("Error al obtener los resultados de la partida");
+    throw await crearErrorDescriptivo(response, "No se pudieron cargar los resultados de la partida");
   }
 
-  // Devuelve { aciertos_rojo, aciertos_azul, equipo_ganador }
   return response.json();
 }
-// -----------------------------------------------------
-
-// TODO: revisar las funciones de aquí abajo
 
 // RF-21: Elegir equipo -> PUT /api/partidas/{id}/equipo
-// REQUIERE añadir este endpoint en el backend (ver instrucciones al final)
 export async function elegirEquipo(idPartida, equipo) {
   const res = await fetch(`${BASE_URL}/partidas/${idPartida}/equipo`, {
     method: 'PUT',
@@ -127,8 +120,7 @@ export async function elegirEquipo(idPartida, equipo) {
     body: JSON.stringify({ equipo }),
   });
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message || 'Error al elegir el equipo');
+    throw await crearErrorDescriptivo(res, 'No se pudo cambiar el equipo');
   }
-  return res.json(); // JugadorPartidaDTO actualizado
+  return res.json();
 }

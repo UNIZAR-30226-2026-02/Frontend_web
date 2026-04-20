@@ -168,9 +168,9 @@ export function Pantalla02Home() {
 
             {/* Nota Historial*/}
             <div className="doc-paper doc-historial" onClick={() => navigate("/historial")}>
-                <Archive size={28} className="mb-2 text-[#331d20]" />
-                <p className="title-special-small" style={{fontSize: '18px'}}>Historial</p>
-                <p className="subtitle-courier" style={{fontSize: '11px', color: '#331d20'}}>REGISTRO DE MISIONES ANTERIORES</p>
+                <Archive size={28} className="mb-2 text-[#ffffff]" />
+                <p className="title-special-small" style={{fontSize: '18px', color: '#ffffff'}}>Historial</p>
+                <p className="subtitle-courier" style={{fontSize: '11px', color: '#b7b7b7'}}>REGISTRO DE MISIONES ANTERIORES</p>
             </div>
           </div>
 

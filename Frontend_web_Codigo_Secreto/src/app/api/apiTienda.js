@@ -9,6 +9,8 @@
  *  PUT  /api/personalizaciones/equipar        → equipar una personalización
  */
 
+import { crearErrorDescriptivo } from './errorHandler';
+
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 
@@ -20,7 +22,7 @@ export async function obtenerTemasActivos() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Error al obtener el catálogo de temas');
+  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudo cargar el catálogo de temas');
   return res.json();
 }
 
@@ -31,7 +33,7 @@ export async function obtenerPersonalizacionesJugador() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Error al obtener las personalizaciones');
+  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudieron cargar las personalizaciones');
   return res.json();
 }
 
@@ -47,8 +49,7 @@ export async function comprarTema(id_tema) {
     body: JSON.stringify({ id_tema }),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || err.message || 'Error al comprar el paquete');
+    throw await crearErrorDescriptivo(res, 'No se pudo comprar el paquete de cartas');
   }
   return res.json();
 }
@@ -64,8 +65,7 @@ export async function comprarPersonalizacion(id_personalizacion) {
     body: JSON.stringify({ id_personalizacion }),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || err.message || 'Error al comprar la personalización');
+    throw await crearErrorDescriptivo(res, 'No se pudo comprar la personalización');
   }
   return res.json();
 }
@@ -81,8 +81,7 @@ export async function equiparPersonalizacion(id_personalizacion, equipado) {
     body: JSON.stringify({ id_personalizacion, equipado }),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || err.message || 'Error al equipar la personalización');
+    throw await crearErrorDescriptivo(res, 'No se pudo equipar la personalización');
   }
   return res.json();
 }

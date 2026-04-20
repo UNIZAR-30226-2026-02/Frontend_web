@@ -136,9 +136,9 @@ export function Pantalla11Perfil() {
       setEditandoTag(false);
     } catch (err) {
       if (err.message?.includes('DUPLICADO')) {
-        setErrorTag("Este nombre ya está en uso.");
+        setErrorTag("Este nombre de usuario ya está en uso. Elige otro.");
       } else {
-        setErrorTag("Error al conectar con la central.");
+        setErrorTag(err.message || "No se pudo actualizar el nombre de usuario");
       }
     } finally {
       setGuardandoTag(false);
