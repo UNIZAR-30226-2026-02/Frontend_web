@@ -136,7 +136,7 @@
 .end-game-subtitle {
     font-family: var(--font-courier);
     margin-top: 0.5rem;
-    font-size: 13px;
+    font-size: 15px;
     color: #80c090;
 }
 .lose-stamp .end-game-subtitle {
@@ -208,7 +208,7 @@
     font-family: var(--font-special-elite);
     color: #e08080;
     letter-spacing: 0.1em;
-    font-size: 11px;
+    font-size: 13px;
 }
 
 /* Contador de puntuación (equipos rojo/azul) */
@@ -246,7 +246,7 @@
 .score-separator {
     font-family: var(--font-courier);
     color: #666;
-    font-size: 12px;
+    font-size: 14px;
 }
 
 /* Insignia de turno actual */
@@ -278,7 +278,7 @@
     font-family: var(--font-special-elite);
     color: #ffffff;
     letter-spacing: 0.1em;
-    font-size: 11px;
+    font-size: 13px;
 }
 
 /* ============================================================
@@ -308,7 +308,7 @@
 .clue-label {
     font-family: var(--font-courier);
     color: var(--theme-gold-text);
-    font-size: 9px;
+    font-size: 13px;
     display: block;
 }
 
@@ -379,7 +379,7 @@
     font-family: var(--font-special-elite);
     color: #d4b878;
     letter-spacing: 0.1em;
-    font-size: 11px;
+    font-size: 13px;
 }
 
 /* ============================================================
@@ -617,7 +617,7 @@
 
 .card-word-text {
     font-family: var(--font-courier);
-    font-size: clamp(8px, 1.5vw, 11px);
+    font-size: clamp(11px, 1.8vw, 14px);
 }
 
 .image-preview-overlay {
@@ -657,7 +657,7 @@
     border-radius: 9999px;
     background: rgba(0, 0, 0, 0.55);
     color: #f8f4e3;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     line-height: 1;
     cursor: pointer;
     transition: background 150ms ease;
@@ -712,7 +712,7 @@
     font-family: var(--font-courier);
     color: #888888;
     display: block;
-    font-size: 9px;
+    font-size: 13px;
 }
 
 /* Contenedor de puntos de voto (flex wrap) */
@@ -766,7 +766,7 @@
 .vote-number {
     font-family: var(--font-courier);
     color: #555555;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 /* Badge de palabra seleccionada actualmente */
@@ -806,7 +806,7 @@
 .alert-text-xs {
     font-family: var(--font-courier);
     color: #d4b878;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 /* Botón de enviar voto */
@@ -876,7 +876,7 @@
 .chat-subtitle-courier {
     font-family: var(--font-courier);
     color: #666666;
-    font-size: 9px;
+    font-size: 12px;
 }
 
 /* Área de mensajes con scroll */
@@ -930,16 +930,16 @@
 .message-username {
     font-family: var(--font-courier);
     color: #d4b878;
-    font-size: 10px;
+    font-size: 12px;
 }
 .message-timestamp {
     font-family: var(--font-courier);
     color: #555555;
-    font-size: 8px;
+    font-size: 13px;
 }
 .message-content-text {
     font-family: var(--font-courier);
-    font-size: 11px;
+    font-size: 13px;
 }
 .bubble-system .message-content-text {
     color: #d4b878;
@@ -970,7 +970,7 @@
     color: #e8dcc8;
     min-width: 0;
     outline: 2px solid transparent;
-    font-size: 11px;
+    font-size: 13px;
 }
 .chat-text-input::placeholder {
     color: #555555;
@@ -1031,7 +1031,7 @@
     font-family: var(--font-courier);
     color: #888;
     margin-top: 0.25rem;
-    font-size: 9px;
+    font-size: 12px;
 }
 .selected-indicator {
     margin-top: 0.5rem;
@@ -1043,7 +1043,7 @@
 }
 .selected-text {
     font-family: var(--font-courier);
-    font-size: 8px;
+    font-size: 13px;
 }
 
 /* Caja de código (similar a input de home) */
@@ -1060,7 +1060,7 @@
     font-family: var(--font-courier);
     color: #8a7a60;
     display: block;
-    font-size: 9px;
+    font-size: 12px;
 }
 .code-value {
     font-family: var(--font-courier);
@@ -1120,7 +1120,7 @@
     font-family: var(--font-courier);
     color: #e8dcc8;
     margin-top: 0.25rem;
-    font-size: 11px;
+    font-size: 13px;
 }
 
 /* Botón principal de creación de misión */

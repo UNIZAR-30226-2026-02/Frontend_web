@@ -70,13 +70,13 @@ export async function desactivarCuentaUsuario() {
   const res = await fetch(`${BASE_URL}/auth/desactivar`, {
     method: "PUT",
     credentials: "include"
+  });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || 'Error al desactivar la cuenta en el servidor.');
   }
 
-  // TODO: revisar lo que devuelve el backend.
   return res.ok; 
 }
 
