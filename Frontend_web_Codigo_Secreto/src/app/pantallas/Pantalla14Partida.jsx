@@ -541,6 +541,11 @@ const evaluarFeedbackCartaRevelada = (cartasViejas, cartasNuevas, turnoAnterior,
 };
 
 // PANTALLA PRINCIPAL DE LA PARTIDA
+
+// Declarar los colores de prueba ANTES de usarlos en useState
+const colorFondoTableroPrueba = "#967c26";
+const colorBordePrueba = "#d4af37"; // Dorado / Oro envejecido
+
 export function PantallaPartida() {
   const navigate = useNavigate();
   const { id_partida: idPartida } = useParams();
@@ -608,12 +613,7 @@ export function PantallaPartida() {
   const stompRef = useRef(null);
   const chatInputRef = useRef(null);
 
-  // TODO: integrar con backend
-  // Dato de prueba para el fondo del tablero
-  // Ejemplo: Un verde oscuro estilo tapete militar/póker
-  const colorFondoTableroPrueba = "#967c26";
-  // Color de prueba.
-  const colorBordePrueba = "#d4af37"; // Dorado / Oro envejecido
+  // ...existing code...
 
   // Estados para el feedback de carta revelada
   const [feedbackCarta, setFeedbackCarta] = useState(null);
