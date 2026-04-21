@@ -3,8 +3,6 @@
  * referentes al perfil y la gestión de datos de usuarios y personalización del tablero.
  */
 
-import { crearErrorDescriptivo } from './errorHandler';
-
 const BASE_URL = import.meta.env.VITE_API_URL;
  
 
@@ -14,7 +12,10 @@ export async function obtenerPerfil() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudo cargar tu perfil');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudo cargar tu perfil');
+  }
   return res.json();
 }
 
@@ -35,7 +36,8 @@ export async function actualizarPerfil({ tag, foto_perfil }) {
     throw new Error('TAG_DUPLICADO');
   }
   if (!res.ok) {
-    throw await crearErrorDescriptivo(res, 'No se pudo actualizar tu perfil');
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudo actualizar tu perfil');
   }
   return res.json();
 }
@@ -46,7 +48,10 @@ export async function obtenerHistorial() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudo cargar tu historial de partidas');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudo cargar tu historial de partidas');
+  }
   return res.json();
 }
  
@@ -56,7 +61,10 @@ export async function obtenerLogros() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudieron cargar tus logros');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudieron cargar tus logros');
+  }
   return res.json();
 }
  
@@ -66,7 +74,10 @@ export async function obtenerPersonalizaciones() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudieron cargar tus personalizaciones');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudieron cargar tus personalizaciones');
+  }
   return res.json();
 }
  
@@ -79,6 +90,9 @@ export async function equiparPersonalizacion(id_personalizacion, equipado) {
     credentials: 'include',
     body: JSON.stringify({ id_personalizacion, equipado }),
   });
-  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudo equipar la personalización');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudo equipar la personalización');
+  }
   return res.json();
 }

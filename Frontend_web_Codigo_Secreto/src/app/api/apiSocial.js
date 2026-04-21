@@ -3,8 +3,6 @@
  * referentes a amigos y leaderboard.
  */
 
-import { crearErrorDescriptivo } from './errorHandler';
-
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 // Lista de amigos → GET /api/amigos
@@ -13,7 +11,10 @@ export async function obtenerAmigos() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudo cargar tu lista de amigos');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudo cargar tu lista de amigos');
+  }
   return res.json();
 }
 
@@ -23,7 +24,10 @@ export async function obtenerSolicitudes() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudieron cargar las solicitudes de amistad');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudieron cargar las solicitudes de amistad');
+  }
   return res.json();
 }
 
@@ -33,7 +37,10 @@ export async function buscarJugadores(tag) {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se encontraron jugadores con ese nombre');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se encontraron jugadores con ese nombre');
+  }
   return res.json();
 }
 
@@ -46,7 +53,8 @@ export async function enviarSolicitudAmistad(tag_receptor) {
     body: JSON.stringify({ tag_receptor }),
   });
   if (!res.ok) {
-    throw await crearErrorDescriptivo(res, 'No se pudo enviar la solicitud de amistad');
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudo enviar la solicitud de amistad');
   }
   return true;
 }
@@ -60,7 +68,8 @@ export async function responderSolicitud(id_solicitante, estado) {
     body: JSON.stringify({ id_solicitante, estado }),
   });
   if (!res.ok) {
-    throw await crearErrorDescriptivo(res, `No se pudo ${estado === 'aceptada' ? 'aceptar' : 'rechazar'} la solicitud`);
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `No se pudo ${estado === 'aceptada' ? 'aceptar' : 'rechazar'} la solicitud`);
   }
   return true;
 }
@@ -71,7 +80,10 @@ export async function obtenerLeaderboardGlobal() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudo cargar el leaderboard global');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudo cargar el leaderboard global');
+  }
   return res.json();
 }
 
@@ -81,6 +93,9 @@ export async function obtenerLeaderboardAmigos() {
     method: 'GET',
     credentials: 'include',
   });
-  if (!res.ok) throw await crearErrorDescriptivo(res, 'No se pudo cargar el leaderboard de tus amigos');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudo cargar el leaderboard de tus amigos');
+  }
   return res.json();
 }

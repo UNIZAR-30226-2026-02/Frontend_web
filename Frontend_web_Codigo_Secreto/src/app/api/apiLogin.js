@@ -45,7 +45,8 @@ export async function registroNuevoUsuario(idToken, tag) {
   }
 
   if (!res.ok) {
-    throw await crearErrorDescriptivo(res, 'No se pudo crear la cuenta. Intenta con otro nombre de usuario');
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudo crear la cuenta. Intenta con otro nombre de usuario');
   }
 
   return res.json();
@@ -59,7 +60,8 @@ export async function logoutUsuario() {
   });
 
   if (!res.ok) {
-    throw await crearErrorDescriptivo(res, 'Error al cerrar sesión');
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Error al cerrar sesión');
   }
 
   return res.ok; 
