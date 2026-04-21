@@ -161,7 +161,7 @@ export function Pantalla16Historial() {
                   <div key={s.label} className="bg-[#f5edd0]/70 border border-[#c4a060]/25 rounded-sm p-3 text-center">
                     <div className="flex justify-center mb-1">{s.icon}</div>
                     <p className="font-['Courier_Prime',monospace] text-[#3a2a10]" style={{ fontSize: 18 }}>{s.value}</p>
-                    <p className="font-['Courier_Prime',monospace] text-[#8a7a60]" style={{ fontSize: 8 }}>{s.label}</p>
+                    <p className="font-['Courier_Prime',monospace] text-[#8a7a60]" style={{ fontSize: 11 }}>{s.label}</p>
                   </div>
                 ))}
               </div>
@@ -181,13 +181,13 @@ export function Pantalla16Historial() {
                         <div className={`w-2 h-8 rounded-full flex-shrink-0 ${isWin ? "bg-[#2a5a2a]" : "bg-[#5a2a2a]"}`} />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-['Courier_Prime',monospace] text-[#3a2a10] truncate" style={{ fontSize: 12 }}>{h.name}</p>
+                            <p className="font-['Courier_Prime',monospace] text-[#3a2a10] truncate" style={{ fontSize: 14 }}>{h.name}</p>
                             <span className={`font-['Courier_Prime',monospace] px-1.5 py-0.5 rounded-sm ${
                               isWin ? "bg-[#2a5a2a]/15 text-[#2a5a2a]" : "bg-[#5a2a2a]/15 text-[#5a2a2a]"
                             }`} style={{ fontSize: 8 }}>{h.result}</span>
                           </div>
                           {/* Subtítulo con información de la partida */}
-                          <p className="font-['Courier_Prime',monospace] text-[#8a7a60] mt-0.5" style={{ fontSize: 9 }}>
+                          <p className="font-['Courier_Prime',monospace] text-[#8a7a60] mt-0.5" style={{ fontSize: 11 }}>
                             {h.date} — {h.role} — Equipo {h.team} — {h.statsExtra}
                           </p>
                         </div>

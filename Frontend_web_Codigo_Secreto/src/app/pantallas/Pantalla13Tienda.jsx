@@ -179,7 +179,7 @@ function TarjetaPaquete({ tema, onComprar }) {
   const comprado = tema.comprado === true;
 
   return (
-    <DarkCard className="p-4 flex flex-col items-center text-center gap-2 relative">
+    <DarkCard className="p-4 flex flex-col items-center text-center gap-2 relative h-full">
       {esGratis && (
         <span
           className="absolute top-2 left-2 font-['Courier_Prime',monospace] text-[#50a050] border border-[#50a050]/40 px-1.5 py-0.5 rounded-sm"
@@ -201,31 +201,33 @@ function TarjetaPaquete({ tema, onComprar }) {
         </p>
       )}
 
-      {comprado || esGratis ? (
-        <div className="flex items-center gap-1 text-[#50a060] mt-auto pt-1">
-          <Check className="w-3.5 h-3.5" />
-          <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 10 }}>
-            DISPONIBLE
-          </span>
-        </div>
-      ) : (
-        <>
-          <div className="flex items-center gap-1 mt-auto">
-            <IconoBala size={12} />
-            <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 13 }}>
-              {precio}
+      <div className="mt-auto w-full">
+        {comprado || esGratis ? (
+          <div className="flex items-center gap-1 text-[#50a060] pt-1">
+            <Check className="w-3.5 h-3.5" />
+            <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 10 }}>
+              DISPONIBLE
             </span>
           </div>
-          <button
-            onClick={() => onComprar(tema)}
-            className="w-full bg-[#5a4a20]/80 hover:bg-[#5a4a20] text-[#e8dcc8] py-1.5 rounded-sm transition-colors cursor-pointer"
-          >
-            <span className="font-['Special_Elite',cursive] tracking-tighter" style={{ fontSize: 15 }}>
-              ADQUIRIR
-            </span>
-          </button>
-        </>
-      )}
+        ) : (
+          <>
+            <div className="flex items-center gap-1">
+              <IconoBala size={12} />
+              <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 13 }}>
+                {precio}
+              </span>
+            </div>
+            <button
+              onClick={() => onComprar(tema)}
+              className="w-full bg-[#5a4a20]/80 hover:bg-[#5a4a20] text-[#e8dcc8] py-1.5 rounded-sm transition-colors cursor-pointer"
+            >
+              <span className="font-['Special_Elite',cursive] tracking-tighter" style={{ fontSize: 15 }}>
+                ADQUIRIR
+              </span>
+            </button>
+          </>
+        )}
+      </div>
     </DarkCard>
   );
 }
@@ -240,7 +242,7 @@ function TarjetaPersonalizacion({ item, onComprar, onEquipar, equipando }) {
 
   return (
     <DarkCard
-      className={`p-3 sm:p-4 text-center relative flex flex-col gap-2 transition-all ${
+      className={`p-3 sm:p-4 text-center relative flex flex-col gap-2 transition-all h-full ${
         equipado ? "ring-2 ring-[#d4b878] shadow-[0_0_14px_rgba(212,184,120,0.25)]" : ""
       }`}
     >
@@ -265,42 +267,44 @@ function TarjetaPersonalizacion({ item, onComprar, onEquipar, equipando }) {
         </p>
       )}
 
-      {comprado ? (
-        /* Ya adquirido → mostrar botón equipar o badge equipado */
-        equipado ? (
-          <div className="flex items-center justify-center gap-1 text-[#d4b878]">
-            <Check className="w-3 h-3" />
-            <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 12 }}>EQUIPADO</span>
-          </div>
+      <div className="mt-auto w-full">
+        {comprado ? (
+          /* Ya adquirido → mostrar botón equipar o badge equipado */
+          equipado ? (
+            <div className="flex items-center justify-center gap-1 text-[#d4b878]">
+              <Check className="w-3 h-3" />
+              <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 12 }}>EQUIPADO</span>
+            </div>
+          ) : (
+            <button
+              onClick={() => onEquipar(item)}
+              disabled={equipando}
+              className="w-full bg-[#2a3a5a]/80 hover:bg-[#2a3a5a] disabled:opacity-40 text-[#80a0d0] py-1 rounded-sm transition-colors cursor-pointer font-['Courier_Prime',monospace]"
+              style={{ fontSize: 15 }}
+            >
+              {equipando ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : "EQUIPAR"}
+            </button>
+          )
         ) : (
-          <button
-            onClick={() => onEquipar(item)}
-            disabled={equipando}
-            className="w-full bg-[#2a3a5a]/80 hover:bg-[#2a3a5a] disabled:opacity-40 text-[#80a0d0] py-1 rounded-sm transition-colors cursor-pointer font-['Courier_Prime',monospace]"
-            style={{ fontSize: 15 }}
-          >
-            {equipando ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : "EQUIPAR"}
-          </button>
-        )
-      ) : (
-        /* No adquirido → mostrar precio y botón comprar */
-        <>
-          <div className="flex items-center justify-center gap-1">
-            <IconoBala size={11} />
-            <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 12 }}>
-              {precio}
-            </span>
-          </div>
-          <button
-            onClick={() => onComprar(item)}
-            className="w-full bg-[#8b2020]/80 hover:bg-[#8b2020] text-white py-1 rounded-sm transition-colors cursor-pointer"
-          >
-            <span className="font-['Special_Elite',cursive] tracking-tighter" style={{ fontSize: 15 }}>
-              COMPRAR
-            </span>
-          </button>
-        </>
-      )}
+          /* No adquirido → mostrar precio y botón comprar */
+          <>
+            <div className="flex items-center justify-center gap-1">
+              <IconoBala size={11} />
+              <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 12 }}>
+                {precio}
+              </span>
+            </div>
+            <button
+              onClick={() => onComprar(item)}
+              className="w-full bg-[#8b2020]/80 hover:bg-[#8b2020] text-white py-1 rounded-sm transition-colors cursor-pointer"
+            >
+              <span className="font-['Special_Elite',cursive] tracking-tighter" style={{ fontSize: 15 }}>
+                COMPRAR
+              </span>
+            </button>
+          </>
+        )}
+      </div>
     </DarkCard>
   );
 }
@@ -503,7 +507,7 @@ export function Pantalla13Tienda() {
           className="flex items-center gap-2 text-[#8a7a60] hover:text-[#d4b878] transition-colors cursor-pointer mb-4 group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 20 }}>
+          <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 11}}>
             VOLVER AL ESCRITORIO
           </span>
         </button>
@@ -604,7 +608,7 @@ export function Pantalla13Tienda() {
               label="FONDOS DE TABLERO"
               borderColor="#8b5a8b"
             />
-            <p className="font-['Courier_Prime',monospace] text-[#000000] mb-3" style={{ fontSize: 20 }}>
+            <p className="font-['Courier_Prime',monospace] text-[#000000] mb-3" style={{ fontSize: 13}}>
               Personaliza el color de fondo del tablero de juego. Solo puedes tener uno equipado a la vez.
             </p>
 

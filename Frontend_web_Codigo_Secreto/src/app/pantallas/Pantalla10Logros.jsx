@@ -343,7 +343,7 @@ export function Pantalla10Logros() {
             <div className="flex items-start justify-between mb-5 flex-wrap gap-3 mt-2">
               <div>
                 <SectionHeader title="LOGROS Y MEDALLAS" />
-                <p className="font-courier text-[#6a5a40] mt-1" style={{ fontSize: 11 }}>
+                <p className="font-courier text-[#000000] mt-1" style={{ fontSize: 15 }}>
                   Reconocimientos por servicio excepcional al cuerpo de inteligencia
                 </p>
               </div>
@@ -443,7 +443,7 @@ function TarjetaResumen({ icono: Icono, valor, etiqueta, color }) {
       <p className="font-courier" style={{ fontSize: 22, color }}>
         {valor}
       </p>
-      <p className="font-courier text-[#888]" style={{ fontSize: 9 }}>
+      <p className="font-courier text-[#888]" style={{ fontSize: 11 }}>
         {etiqueta}
       </p>
     </DarkCard>
@@ -480,13 +480,13 @@ function ElementoLogro({ logro }) {
           <div className="flex items-center gap-2">
             <p
               className={`font-elite ${logro.completado ? "text-[#e8dcc8]" : "text-[#888]"} truncate`}
-              style={{ fontSize: 13 }}
+              style={{ fontSize: 15 }}
             >
               {logro.nombre}
             </p>
             <span style={{ fontSize: 14 }}>{config.insignia}</span>
           </div>
-          <p className="font-courier text-[#888] mt-0.5" style={{ fontSize: 10 }}>
+          <p className="font-courier text-[#888] mt-0.5" style={{ fontSize: 12 }}>
             {logro.descripcion}
           </p>
 
@@ -538,11 +538,11 @@ function ElementoMedalla({ medalla }) {
       </div>
       <p
         className={`font-elite ${obtenida ? "text-[#e8dcc8]" : "text-[#666]"} truncate`}
-        style={{ fontSize: 11 }}
+        style={{ fontSize: 13 }}
       >
         {medalla.nombre}
       </p>
-      <p className="font-courier text-[#888] mt-1" style={{ fontSize: 8 }}>
+      <p className="font-courier text-[#888] mt-1" style={{ fontSize: 11 }}>
         {medalla.descripcion}
       </p>
 
