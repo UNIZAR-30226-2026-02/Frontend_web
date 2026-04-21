@@ -57,9 +57,25 @@ const friendsLeaderboard = [
 
 // Función para calcular el tiempo transcurrido transcurrido desde que se envió esa solicitud.
 function calcularTiempoTranscurrido(fechaString) {
-  const fecha = new Date(fechaString);
+  
+  if (!fechaString) return "Hace un momento";
+
+  // Como llega una fecha de distinta zona horaria (UTC) hay que convertir el formato 
+  // a CEST para interpretarlo correctamente.
+  let fechaFormateada = fechaString.replace(' ', 'T');
+  if (!fechaFormateada.endsWith('Z')) {
+    fechaFormateada += 'Z'; // Forzamos a que JavaScript la interprete como UTC
+  }
+
+  const fecha = new Date(fechaFormateada);
+  
+  if (isNaN(fecha.getTime())) return "Hace un momento";
+
   const ahora = new Date();
   const diferenciaSegundos = Math.floor((ahora - fecha) / 1000);
+
+  // Por si la diferencia calcula algo negativo (ej. reloj desincronizado por milisegundos)
+  if (isNaN(diferenciaSegundos) || diferenciaSegundos < 0) return "Hace un momento";
 
   if (diferenciaSegundos < 60) return "Hace un momento";
   

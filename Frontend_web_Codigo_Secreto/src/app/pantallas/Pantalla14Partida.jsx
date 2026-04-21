@@ -26,36 +26,15 @@ import { ScreenFrame, ManilaFolder, DarkCard, RedStamp } from "../components/Scr
 import { UserContext } from "../components/UserContext";
 import "../components/Partidas.css";
 
-import carta1 from "../../assets/Cartas/carta1.png";
-import carta2 from "../../assets/Cartas/carta2.png";
-import carta3 from "../../assets/Cartas/carta3.png";
-import carta4 from "../../assets/Cartas/carta4.png";
-import carta5 from "../../assets/Cartas/carta5.png";
-import carta6 from "../../assets/Cartas/carta6.png";
-import carta7 from "../../assets/Cartas/carta7.png";
-import carta8 from "../../assets/Cartas/carta8.png";
-import carta9 from "../../assets/Cartas/carta9.png";
-import carta10 from "../../assets/Cartas/carta10.png";
-import carta11 from "../../assets/Cartas/carta11.png";
-import carta12 from "../../assets/Cartas/carta12.png";
-import carta13 from "../../assets/Cartas/carta13.png";
-import carta14 from "../../assets/Cartas/carta14.png";
-import carta15 from "../../assets/Cartas/carta15.png";
-import carta16 from "../../assets/Cartas/carta16.png";
-import carta17 from "../../assets/Cartas/carta17.png";
-import carta18 from "../../assets/Cartas/carta18.png";
-import carta19 from "../../assets/Cartas/carta19.png";
-import carta20 from "../../assets/Cartas/carta20.png";
-
 // Configuración de conexión WebSocket y API
 const WS_URL = import.meta.env.VITE_WS_URL;
 const API_BASE = import.meta.env.VITE_API_URL;
 
-const isSimulacion = false; // Lo añadimos para simular la partida sin que las fotos vengan del backend, para el video. Cambiar a false luego
+/*const isSimulacion = false; // Lo añadimos para simular la partida sin que las fotos vengan del backend, para el video. Cambiar a false luego
 const simulatedCardImages = [
   carta1, carta2, carta3, carta4, carta5, carta6, carta7, carta8, carta9, carta10,
   carta11, carta12, carta13, carta14, carta15, carta16, carta17, carta18, carta19, carta20
-];
+];*/
 
 const TEMAS_VISUALES = [
   { id: "gold", name: "Oro envejecido", color: "#d4af37", borderColor: "#b8941f", bgColor: "#2a2518" },
@@ -712,8 +691,8 @@ export function PantallaPartida() {
       
       const cartasConSimulacion = sortedCartas.map((carta, index) => ({
         ...carta,
-        imagen_url: carta.palabra || carta.palabra || (isSimulacion ? simulatedCardImages[index % simulatedCardImages.length] : carta.imagen_url),
-        palabra: isSimulacion ? (carta.palabra || `Carta ${carta.id_carta_tablero}`) : carta.palabra,
+        imagen_url: carta.palabra || carta.palabra /*|| (isSimulacion ? simulatedCardImages[index % simulatedCardImages.length] : carta.imagen_url)*/,
+        palabra: /*isSimulacion ? (carta.palabra || `Carta ${carta.id_carta_tablero}`) :*/ carta.palabra,
       }));
       setCartas(cartasConSimulacion);
     } 
@@ -747,7 +726,7 @@ export function PantallaPartida() {
 
     // Actualizar votos si vienen
     if (data.votos_turno_actual) setVotosActuales(data.votos_turno_actual);
-  }, [navigate, idPartida, isSimulacion, simulatedCardImages]); // Dependencias necesarias para la redirección a fin de partida.
+  }, [navigate, idPartida, /*isSimulacion, simulatedCardImages*/]); // Dependencias necesarias para la redirección a fin de partida.
 
   // ------------------------------------------------------------
   // 3. OBTENER ESTADO INICIAL DE LA PARTIDA (REST)
