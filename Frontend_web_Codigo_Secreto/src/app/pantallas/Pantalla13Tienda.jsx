@@ -183,7 +183,7 @@ function TarjetaPaquete({ tema, onComprar }) {
       {esGratis && (
         <span
           className="absolute top-2 left-2 font-['Courier_Prime',monospace] text-[#50a050] border border-[#50a050]/40 px-1.5 py-0.5 rounded-sm"
-          style={{ fontSize: 8 }}
+          style={{ fontSize: 15 }}
         >
           GRATIS
         </span>
@@ -191,12 +191,12 @@ function TarjetaPaquete({ tema, onComprar }) {
 
       <span className="text-3xl">{emojiPaquete(tema.nombre)}</span>
 
-      <p className="font-['Special_Elite',cursive] text-[#e8dcc8] leading-tight" style={{ fontSize: 11 }}>
+      <p className="font-['Special_Elite',cursive] text-[#e8dcc8] leading-tight" style={{ fontSize: 16 }}>
         {tema.nombre.toUpperCase()}
       </p>
 
       {tema.descripcion && (
-        <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 9 }}>
+        <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 12 }}>
           {tema.descripcion}
         </p>
       )}
@@ -204,7 +204,7 @@ function TarjetaPaquete({ tema, onComprar }) {
       {comprado || esGratis ? (
         <div className="flex items-center gap-1 text-[#50a060] mt-auto pt-1">
           <Check className="w-3.5 h-3.5" />
-          <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 9 }}>DISPONIBLE</span>
+          <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 12 }}>DISPONIBLE</span>
         </div>
       ) : (
         <>
@@ -218,7 +218,7 @@ function TarjetaPaquete({ tema, onComprar }) {
             onClick={() => onComprar(tema)}
             className="w-full bg-[#5a4a20]/80 hover:bg-[#5a4a20] text-[#e8dcc8] py-1.5 rounded-sm transition-colors cursor-pointer"
           >
-            <span className="font-['Special_Elite',cursive] tracking-tighter" style={{ fontSize: 10 }}>
+            <span className="font-['Special_Elite',cursive] tracking-tighter" style={{ fontSize: 12 }}>
               ADQUIRIR
             </span>
           </button>
@@ -253,12 +253,12 @@ function TarjetaPersonalizacion({ item, onComprar, onEquipar, equipando }) {
         />
       </div>
 
-      <p className="font-['Special_Elite',cursive] text-[#e8dcc8] leading-tight" style={{ fontSize: 10 }}>
+      <p className="font-['Special_Elite',cursive] text-[#e8dcc8] leading-tight" style={{ fontSize: 16 }}>
         {item.nombre.toUpperCase()}
       </p>
 
       {item.descripcion && (
-        <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 8 }}>
+        <p className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 12 }}>
           {item.descripcion}
         </p>
       )}
@@ -268,14 +268,14 @@ function TarjetaPersonalizacion({ item, onComprar, onEquipar, equipando }) {
         equipado ? (
           <div className="flex items-center justify-center gap-1 text-[#d4b878]">
             <Check className="w-3 h-3" />
-            <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 8 }}>EQUIPADO</span>
+            <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 12 }}>EQUIPADO</span>
           </div>
         ) : (
           <button
             onClick={() => onEquipar(item)}
             disabled={equipando}
             className="w-full bg-[#2a3a5a]/80 hover:bg-[#2a3a5a] disabled:opacity-40 text-[#80a0d0] py-1 rounded-sm transition-colors cursor-pointer font-['Courier_Prime',monospace]"
-            style={{ fontSize: 9 }}
+            style={{ fontSize: 12 }}
           >
             {equipando ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : "EQUIPAR"}
           </button>
@@ -293,7 +293,7 @@ function TarjetaPersonalizacion({ item, onComprar, onEquipar, equipando }) {
             onClick={() => onComprar(item)}
             className="w-full bg-[#8b2020]/80 hover:bg-[#8b2020] text-white py-1 rounded-sm transition-colors cursor-pointer"
           >
-            <span className="font-['Special_Elite',cursive] tracking-tighter" style={{ fontSize: 9 }}>
+            <span className="font-['Special_Elite',cursive] tracking-tighter" style={{ fontSize: 12 }}>
               COMPRAR
             </span>
           </button>
@@ -465,7 +465,7 @@ export function Pantalla13Tienda() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-[#c4a060] animate-spin" />
-          <p className="font-['Courier_Prime',monospace] text-[#c4a060]" style={{ fontSize: 12 }}>
+          <p className="font-['Courier_Prime',monospace] text-[#c4a060]" style={{ fontSize: 30 }}>
             ACCEDIENDO AL MERCADO NEGRO...
           </p>
         </div>
@@ -477,7 +477,9 @@ export function Pantalla13Tienda() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <AlertCircle className="w-8 h-8 text-[#8b2020]" />
-        <p className="font-['Courier_Prime',monospace] text-[#8b2020]">{error}</p>
+        <p className="font-['Courier_Prime',monospace] text-[#8b2020]" style={{ fontSize: 30 }}>
+          {error}
+        </p>
         <button
           onClick={cargarTodo}
           className="flex items-center gap-2 font-['Courier_Prime',monospace] text-[#8a7a60] hover:text-[#d4b878] cursor-pointer transition-colors"
@@ -499,7 +501,7 @@ export function Pantalla13Tienda() {
           className="flex items-center gap-2 text-[#8a7a60] hover:text-[#d4b878] transition-colors cursor-pointer mb-4 group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 11 }}>
+          <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 20 }}>
             VOLVER AL ESCRITORIO
           </span>
         </button>
@@ -533,7 +535,7 @@ export function Pantalla13Tienda() {
             <div className="flex items-start justify-between mb-5 flex-wrap gap-3 mt-2">
               <div>
                 <SectionHeader title="MERCADO NEGRO" />
-                <p className="font-['Courier_Prime',monospace] text-[#6a5a40] mt-1" style={{ fontSize: 11 }}>
+                <p className="font-['Courier_Prime',monospace] text-[#6a5a40] mt-1" style={{ fontSize: 15}}>
                   Suministros tácticos y equipamiento clasificado
                 </p>
               </div>
@@ -546,7 +548,7 @@ export function Pantalla13Tienda() {
               label="PAQUETES DE CARTAS"
               borderColor="#8b2020"
             />
-            <p className="font-['Courier_Prime',monospace] text-[#8a7a60] mb-3" style={{ fontSize: 10 }}>
+            <p className="font-['Courier_Prime',monospace] text-[#000000] mb-3" style={{ fontSize: 20 }}>
               El paquete Básico es gratuito. Los demás permiten unirte a partidas públicas con ese tema.
             </p>
 
@@ -572,7 +574,7 @@ export function Pantalla13Tienda() {
               label="MARCOS DE CARTAS"
               borderColor="#d4af37"
             />
-            <p className="font-['Courier_Prime',monospace] text-[#8a7a60] mb-3" style={{ fontSize: 10 }}>
+            <p className="font-['Courier_Prime',monospace] text-[#000000] mb-3" style={{ fontSize: 20 }}>
               Personaliza el borde de cada carta del tablero. Solo puedes tener uno equipado a la vez.
             </p>
 
@@ -600,7 +602,7 @@ export function Pantalla13Tienda() {
               label="FONDOS DE TABLERO"
               borderColor="#8b5a8b"
             />
-            <p className="font-['Courier_Prime',monospace] text-[#8a7a60] mb-3" style={{ fontSize: 10 }}>
+            <p className="font-['Courier_Prime',monospace] text-[#000000] mb-3" style={{ fontSize: 20 }}>
               Personaliza el color de fondo del tablero de juego. Solo puedes tener uno equipado a la vez.
             </p>
 
