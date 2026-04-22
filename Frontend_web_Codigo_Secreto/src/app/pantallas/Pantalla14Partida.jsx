@@ -73,7 +73,7 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
     : "card-idle";
   const disabled = !canSelect && !isRevealed;
   const clickTimeout = useRef(null);
-  
+  const tipoLower = carta.tipo?.toLowerCase();
 
   const handleCardClick = (e) => {
     e.stopPropagation();
