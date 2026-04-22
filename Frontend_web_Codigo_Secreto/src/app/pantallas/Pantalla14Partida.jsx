@@ -778,6 +778,8 @@ export function PantallaPartida() {
         // le envía el estado del tablero personalizado (mostrando la identidad de las 
         // cartas o no en función de si es jefe o agente).
         client.subscribe(`/topic/partidas/${idPartida}/estado`, (msg) => {
+          const data = JSON.parse(msg.body);
+          
           // Comprobación de finalización de partida
           if (data.estado === 'finalizada') {
             navigate(`/fin-partida/${idPartida}`);
