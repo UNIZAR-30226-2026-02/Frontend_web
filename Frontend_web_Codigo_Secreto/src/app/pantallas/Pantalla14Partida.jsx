@@ -177,7 +177,7 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
             bottom: 0,
             left: 0,
             right: 0,
-            height: "4px",
+            height: "6px",
             background: carta.tipo === "rojo" ? "#cc3333"
               : carta.tipo === "azul" ? "#3366cc"
               : carta.tipo === "asesino" ? "#000"
@@ -290,6 +290,13 @@ function ChatPanel({ mensajes, onEnviar, esJefe, chatInputRef }) {
 function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista, esMiTurno }) {
   const [palabra, setPalabra] = useState("");
   const [numero, setNumero] = useState(2);
+  // Limpiar el formulario cuando se pueda enviar una nueva pista
+  useEffect(() => {
+    if (!pistaEnviada) {
+      setPalabra("");
+      setNumero(2);
+    }
+  }, [pistaEnviada]);
 
   const handleSend = () => {
     if (!palabra.trim()) return;
