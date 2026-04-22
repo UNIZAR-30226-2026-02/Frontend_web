@@ -305,7 +305,7 @@ export function Pantalla07Lobby() {
             <div className="bg-[#c4a060]/10 border border-[#c4a060]/30 rounded-sm px-4 py-2 mb-5">
               <p className="font-['Courier_Prime',monospace] text-[#403937]" style={{ fontSize: 11 }}>
                 Haz clic en la cabecera del equipo para unirte. Tu equipo actual:{" "}
-                <strong style={{ color: miEquipo === "rojo" ? "#e08080" : miEquipo === "azul" ? "#80a0d0" : "#d4b878" }}>
+                <strong style={{ color: miEquipo === "rojo" ? "#f30101" : miEquipo === "azul" ? "#003079" : "#d4b878" }}>
                   {miEquipo ? `EQUIPO ${miEquipo.toUpperCase()}` : "Sin asignar"}
                 </strong>
               </p>
@@ -321,7 +321,7 @@ export function Pantalla07Lobby() {
               >
                 <div className="text-center mb-3 pb-2 border-b border-[#8b2020]/30">
                   <div className="w-4 h-4 bg-[#cc3333] rounded-full mx-auto mb-1.5 shadow-[0_0_8px_rgba(200,50,50,0.4)]" />
-                  <h3 className="font-['Special_Elite',cursive] text-[#ff0000] tracking-[0.15em]" style={{ fontSize: 16 }}>
+                  <h3 className="font-['Special_Elite',cursive] text-[#e08080] tracking-[0.15em]" style={{ fontSize: 16 }}>
                     EQUIPO ROJO
                   </h3>
                   <span className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 9 }}>
@@ -354,7 +354,7 @@ export function Pantalla07Lobby() {
               >
                 <div className="text-center mb-3 pb-2 border-b border-[#2a3a5a]/30">
                   <div className="w-4 h-4 bg-[#3366cc] rounded-full mx-auto mb-1.5 shadow-[0_0_8px_rgba(50,100,200,0.4)]" />
-                  <h3 className="font-['Special_Elite',cursive] text-[#001958] tracking-[0.15em]" style={{ fontSize: 16 }}>
+                  <h3 className="font-['Special_Elite',cursive] text-[#80a0d0] tracking-[0.15em]" style={{ fontSize: 16 }}>
                     EQUIPO AZUL
                   </h3>
                   <span className="font-['Courier_Prime',monospace] text-[#888]" style={{ fontSize: 9 }}>

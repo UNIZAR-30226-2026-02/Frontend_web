@@ -99,7 +99,7 @@ function ModalConfirmar({ item, balasActuales, onConfirmar, onCancelar, confirma
               ARTÍCULO SELECCIONADO:
             </p>
             <p className="font-['Special_Elite',cursive] text-[#e8dcc8] mt-1" style={{ fontSize: 15 }}>
-              {nombre.split('_')[0].toUpperCase()}
+              {nombre}
             </p>
             {item.descripcion && (
               <p className="font-['Courier_Prime',monospace] text-[#888] mt-1" style={{ fontSize: 10 }}>
@@ -258,7 +258,7 @@ function TarjetaPersonalizacion({ item, onComprar, onEquipar, equipando }) {
       </div>
 
       <p className="font-['Special_Elite',cursive] text-[#e8dcc8] leading-tight" style={{ fontSize: 13 }}>
-        {item.nombre.split('_')[0].toUpperCase()}
+        {item.nombre.toUpperCase()}
       </p>
 
       {item.descripcion && (
@@ -360,21 +360,19 @@ export function Pantalla13Tienda() {
 
   // Carga inicial
   const cargarTodo = useCallback(async () => {
-  setCargando(true);
-  setError(null);
-  try {
-    const [perfil, catalogoTemas, catalogoPers] = await Promise.all([
-      obtenerPerfil(),
-      obtenerTemasActivos(),
-      obtenerPersonalizacionesJugador(),
-    ]);
+    setCargando(true);
+    setError(null);
+    try {
+      const [perfil, catalogoTemas, catalogoPers] = await Promise.all([
+        obtenerPerfil(),
+        obtenerTemasActivos(),
+        obtenerPersonalizacionesJugador(),
+      ]);
 
-    setBalas(perfil.balas ?? 0);
-    loginUsuario(perfil);
-    setTemas(Array.isArray(catalogoTemas) ? catalogoTemas : []);
-
-    //  marcar como equipadas las personalizaciones que coincidan con el perfil
-    const persConEquipamiento = (Array.isArray(catalogoPers) ? catalogoPers : []).map(p => {
+      setBalas(perfil.balas ?? 0);
+      loginUsuario(perfil);
+      setTemas(Array.isArray(catalogoTemas) ? catalogoTemas : []); 
+      const persConEquipamiento = (Array.isArray(catalogoPers) ? catalogoPers : []).map(p => {
       // Si ya viene con equipado = true, lo respetamos
       if (p.equipado) return p;
 
@@ -391,13 +389,13 @@ export function Pantalla13Tienda() {
       return p;
     });
 
-    setPersonalizaciones(persConEquipamiento);
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setCargando(false);
-  }
-  }, [loginUsuario]); // eslint-disable-line
+      setPersonalizaciones(persConEquipamiento);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCargando(false);
+    }
+  }, []); // eslint-disable-line
 
   useEffect(() => { cargarTodo(); }, [cargarTodo]);
 
@@ -445,7 +443,7 @@ export function Pantalla13Tienda() {
       const nuevasBalas = res.balas ?? balas;
       setBalas(nuevasBalas);
 
-      mostrarToast("ok", `¡${itemPendiente.nombre.split('_')[0].toUpperCase()} adquirido! Te quedan ${nuevasBalas.toLocaleString()} balas.`);
+      mostrarToast("ok", `¡${itemPendiente.nombre} adquirido! Te quedan ${nuevasBalas.toLocaleString()} balas.`);
       cerrarModal();
     } catch (err) {
       mostrarToast("error", err.message || "Error al realizar la compra.");
