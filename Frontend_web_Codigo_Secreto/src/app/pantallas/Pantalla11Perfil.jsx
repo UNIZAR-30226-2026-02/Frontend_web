@@ -66,7 +66,8 @@ export function Pantalla11Perfil() {
   const [mostrarSelector, setMostrarSelector] = useState(false);
   const [personalizaciones, setPersonalizaciones] = useState([]);
   const [cargandoPersonalizaciones, setCargandoPersonalizaciones] = useState(true);
-  const [errorPersonalizaciones, setErrorPersonalizaciones] = useState('');
+  const [errorMarco, setErrorMarco] = useState('');
+  const [errorTablero, setErrorTablero] = useState('');
   const [desactivando, setDesactivando] = useState(false);
   const [errorDesactivar, setErrorDesactivar] = useState('');
 
@@ -163,8 +164,14 @@ export function Pantalla11Perfil() {
 
   const handleEquiparTema = async (item) => {
     try {
-      setErrorPersonalizaciones('');
       if (item.equipado) return;
+      // Limpiar error específico del tipo
+      if (item.tipo === 'carta') {
+        setErrorMarco('');
+      } else {
+        setErrorTablero('');
+      }
+      
       await equiparPersonalizacion(item.id_personalizacion, true);
       setPersonalizaciones((prev) => prev.map((p) => ({
         ...p,
@@ -172,7 +179,12 @@ export function Pantalla11Perfil() {
       })));
       localStorage.setItem(item.tipo === 'carta' ? 'tema_marco' : 'tema_tablero', item.valor_visual);
     } catch (err) {
-      setErrorPersonalizaciones('No se pudo equipar el tema. Inténtalo de nuevo.');
+      const mensaje = 'No se pudo equipar la personalización. Inténtalo de nuevo.';
+      if (item.tipo === 'carta') {
+        setErrorMarco(mensaje);
+      } else {
+        setErrorTablero(mensaje);
+      }
       console.error(err);
     }
   };
@@ -396,8 +408,8 @@ export function Pantalla11Perfil() {
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Cargando temas...</span>
                 </div>
-              ) : errorPersonalizaciones ? (
-                <p className="fuente-courier text-[#d4b878] text-[11px]">{errorPersonalizaciones}</p>
+              ) : errorMarco ? (
+                <p className="fuente-courier text-[#d4b878] text-[11px]">{errorMarco}</p>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {personalizaciones.filter((item) => item.tipo === 'carta').map((item) => (
@@ -429,8 +441,8 @@ export function Pantalla11Perfil() {
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Cargando temas...</span>
                 </div>
-              ) : errorPersonalizaciones ? (
-                <p className="fuente-courier text-[#d4b878] text-[11px]">{errorPersonalizaciones}</p>
+              ) : errorTablero ? (
+                <p className="fuente-courier text-[#d4b878] text-[11px]">{errorTablero}</p>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {personalizaciones.filter((item) => item.tipo === 'tablero').map((item) => (
