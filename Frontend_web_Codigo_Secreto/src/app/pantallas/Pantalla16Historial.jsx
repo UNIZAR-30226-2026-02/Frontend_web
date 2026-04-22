@@ -67,6 +67,7 @@ export function Pantalla16Historial() {
           return {
             id: id,
             // Usamos el tag_creador para el nombre de la misión
+            // TODO: obtener tag creador 
             name: `Misión de ${nombreTema}`,
             // Formateamos la fecha (viene como LocalDateTime, ej: "2026-04-06T10:30:00")
             date: fechaFormateada,
