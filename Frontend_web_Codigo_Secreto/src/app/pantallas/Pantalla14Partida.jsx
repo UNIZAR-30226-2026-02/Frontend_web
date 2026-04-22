@@ -67,11 +67,10 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
   // Si no: estilo neutral
   const imageUrl = carta.palabra;
   const colorClass = isRevealed
-    ? `card-revealed color-${carta.tipo}`
+    ? `card-revealed color-${carta.tipo}` 
     : isJefe && carta.tipo
     ? `card-jefe-preview color-${carta.tipo}`
     : "card-idle";
-
   const disabled = !canSelect && !isRevealed;
   const clickTimeout = useRef(null);
   
@@ -609,7 +608,8 @@ export function PantallaPartida() {
   const stompRef = useRef(null);
   const chatInputRef = useRef(null);
 
-  // ...existing code...
+  const equipoRef = useRef(equipo);
+  useEffect(() => { equipoRef.current = equipo; }, [equipo]);
 
   // Estados para el feedback de carta revelada
   const [feedbackCarta, setFeedbackCarta] = useState(null);
@@ -679,7 +679,7 @@ export function PantallaPartida() {
       const sortedCartas = [...data.tablero.cartas].sort((a, b) => a.id_carta_tablero - b.id_carta_tablero);
       
       // Función para evaluar qué tiene que mostrar en el modal de retroalimentación para el usuario.
-      evaluarFeedbackCartaRevelada(cartasAnterioresRef.current, sortedCartas, turnoAnteriorRef.current, equipo,
+      evaluarFeedbackCartaRevelada(cartasAnterioresRef.current, sortedCartas, turnoAnteriorRef.current, equipoRef.current,
                                                                                    setFeedbackCarta, playDisparo);
       
       const cartasConSimulacion = sortedCartas.map((carta, index) => ({
