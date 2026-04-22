@@ -133,7 +133,7 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
           </div>
         )}
 
-        {/* Iconos/tokens cuando la carta está revelada - superpuestos sobre la imagen */}
+        {/* Iconos/tokens cuando la carta está revelada - superpuestos sobre la imagen 
         {isRevealed && (
           <div style={{
             position: "absolute",
@@ -148,7 +148,7 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
             {carta.tipo === "azul" && <div className="rev-token token-blue" />}
             {carta.tipo === "civil" && <div className="rev-token token-neutral" />}
           </div>
-        )}
+        )} */}
 
         {/* FINGERPRINT (Check)  */}
         {isSelected && !isRevealed && (
@@ -490,61 +490,46 @@ function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, vo
 // Función auxiliar que evalúa si se ha revelado una carta nueva y dispara el popup de retroalimentación.
 const evaluarFeedbackCartaRevelada = (cartasViejas, cartasNuevas, turnoAnterior, equipoUsuario, setFeedbackCarta, onCartaIncorrecta) => {
   if (cartasViejas.length === 0) return;
-
-  // Busca las antiguas reveladas y las nuevas reveladas.
+  
+  console.log("equipoUsuario (recibido):", equipoUsuario);
+  
   const reveladasViejas = cartasViejas.filter(c => c.estado === "revelada").length;
   const reveladasNuevas = cartasNuevas.filter(c => c.estado === "revelada").length;
 
-  // Mira si hay exactamente 1 carta más revelada ahora que antes.
   if (reveladasNuevas === reveladasViejas + 1) {
-    // Buscamos cuál es la carta nueva revelada
     const nuevaCarta = cartasNuevas.find(cn => 
       cn.estado === "revelada" && 
       !cartasViejas.find(cv => cv.id_carta_tablero === cn.id_carta_tablero && cv.estado === "revelada")
     );
 
     if (nuevaCarta) {
-      // Determinar el tipo de mensaje y color según el tipo de carta
+      console.log("Nueva carta revelada:", nuevaCarta);
       const tipoCarta = nuevaCarta.tipo?.toLowerCase();
       const equipoUsuarioNorm = equipoUsuario?.toLowerCase();
+      console.log(`Comparando: tipoCarta=${tipoCarta}, equipoUsuario=${equipoUsuarioNorm}`);
       
       let mensaje = "";
-      let esPositivo = false;
-      let color = "#cc3333"; // Rojo por defecto
+      let color = "#cc3333";
       
-      // Lógica para determinar el mensaje
-      if (tipoCarta === equipoUsuarioNorm) {
-        // Es un agente amigo del equipo del usuario
+      if (tipoCarta && equipoUsuarioNorm && tipoCarta === equipoUsuarioNorm) {
         mensaje = "¡Has encontrado a un agente amigo!";
-        esPositivo = true;
-        color = "#50a050"; // Verde
+        color = "#50a050";
+        // Acierto: NO llamamos a onCartaIncorrecta
       } else if (tipoCarta === "civil") {
-        // Es un civil
         mensaje = "Has encontrado a un civil";
-        esPositivo = false;
-        color = "#cccccc"; // Gris
+        color = "#cccccc";
+        onCartaIncorrecta?.();
       } else if (tipoCarta === "asesino") {
-        // Es el asesino
         mensaje = "¡Has encontrado al asesino!";
-        esPositivo = false;
-        color = "#000000"; // Negro
+        color = "#000000";
+        onCartaIncorrecta?.();
       } else {
-        // Es un agente enemigo
         mensaje = "Has encontrado a un agente enemigo";
-        esPositivo = false;
-        color = "#cc3333"; // Rojo
-      }
-      
-      // Comprobar si es correcta para la lógica de turno
-      const esCorrecta = tipoCarta === equipoUsuarioNorm;
-      
-      if (!esCorrecta) {
+        color = "#cc3333";
         onCartaIncorrecta?.();
       }
-
-      setFeedbackCarta({ correcta: esCorrecta, mensaje, color, tipo: tipoCarta });
       
-      // Ocultar el modal al segundo y medio.
+      setFeedbackCarta({ mensaje, color, tipo: tipoCarta });
       setTimeout(() => setFeedbackCarta(null), 1500);
     }
   }
