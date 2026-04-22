@@ -66,7 +66,8 @@ export function Pantalla11Perfil() {
   const [mostrarSelector, setMostrarSelector] = useState(false);
   const [personalizaciones, setPersonalizaciones] = useState([]);
   const [cargandoPersonalizaciones, setCargandoPersonalizaciones] = useState(true);
-  const [errorPersonalizaciones, setErrorPersonalizaciones] = useState('');
+  const [errorMarco, setErrorMarco] = useState('');
+  const [errorTablero, setErrorTablero] = useState('');
   const [desactivando, setDesactivando] = useState(false);
   const [errorDesactivar, setErrorDesactivar] = useState('');
 
@@ -91,26 +92,34 @@ export function Pantalla11Perfil() {
     };
 
     const actualizarLocalStorageTemaEquipado = (items) => {
-    const marcoEquipado = items.find((item) => item.tipo === 'carta' && item.equipado);
-    const tableroEquipado = items.find((item) => item.tipo === 'tablero' && item.equipado);
-
-    if (marcoEquipado?.valor_visual) {
-      localStorage.setItem('tema_marco', marcoEquipado.valor_visual);
-    }
-    if (tableroEquipado?.valor_visual) {
-      localStorage.setItem('tema_tablero', tableroEquipado.valor_visual);
-    }
-  };
+      // Usar directamente los valores del perfil
+      if (perfil?.marco_carta_equipado) {
+        localStorage.setItem('tema_marco', perfil.marco_carta_equipado);
+      }
+      if (perfil?.fondo_tablero_equipado) {
+        localStorage.setItem('tema_tablero', perfil.fondo_tablero_equipado);
+      }
+    };
 
   const cargarPersonalizaciones = async () => {
     try {
       setCargandoPersonalizaciones(true);
       const lista = await obtenerPersonalizacionesJugador();
       const items = Array.isArray(lista) ? lista : [];
-      setPersonalizaciones(items);
-      actualizarLocalStorageTemaEquipado(items);
+      
+      // Marcar como equipados según los valores del perfil
+      const itemsActualizados = items.map(item => ({
+        ...item,
+        equipado: 
+          (item.tipo === 'carta' && item.valor_visual === perfil?.marco_carta_equipado) ||
+          (item.tipo === 'tablero' && item.valor_visual === perfil?.fondo_tablero_equipado)
+      }));
+      
+      setPersonalizaciones(itemsActualizados);
+      actualizarLocalStorageTemaEquipado(itemsActualizados);
     } catch (err) {
-      setErrorPersonalizaciones("No se pudieron cargar los temas disponibles.");
+      setErrorMarco("No se pudieron cargar los temas disponibles.");
+      setErrorTablero("No se pudieron cargar los temas disponibles.");
       console.error(err);
     } finally {
       setCargandoPersonalizaciones(false);
@@ -163,16 +172,39 @@ export function Pantalla11Perfil() {
 
   const handleEquiparTema = async (item) => {
     try {
-      setErrorPersonalizaciones('');
       if (item.equipado) return;
+      // Limpiar error específico del tipo
+      if (item.tipo === 'carta') {
+        setErrorMarco('');
+      } else {
+        setErrorTablero('');
+      }
+      
       await equiparPersonalizacion(item.id_personalizacion, true);
+      
+      // Actualizar el perfil localmente reflejando el nuevo estado
+      setPerfil(prev => ({
+        ...prev,
+        marco_carta_equipado: item.tipo === 'carta' ? item.valor_visual : prev.marco_carta_equipado,
+        fondo_tablero_equipado: item.tipo === 'tablero' ? item.valor_visual : prev.fondo_tablero_equipado,
+      }));
+      
+      // Actualizar personalizaciones basado en los nuevos valores del perfil
       setPersonalizaciones((prev) => prev.map((p) => ({
         ...p,
-        equipado: p.tipo === item.tipo ? p.id_personalizacion === item.id_personalizacion : p.equipado,
+        equipado:
+          (p.tipo === 'carta' && p.valor_visual === item.valor_visual) ||
+          (p.tipo === 'tablero' && p.valor_visual === item.valor_visual)
       })));
+      
       localStorage.setItem(item.tipo === 'carta' ? 'tema_marco' : 'tema_tablero', item.valor_visual);
     } catch (err) {
-      setErrorPersonalizaciones('No se pudo equipar el tema. Inténtalo de nuevo.');
+      const mensaje = 'No se pudo equipar la personalización. Inténtalo de nuevo.';
+      if (item.tipo === 'carta') {
+        setErrorMarco(mensaje);
+      } else {
+        setErrorTablero(mensaje);
+      }
       console.error(err);
     }
   };
@@ -396,8 +428,8 @@ export function Pantalla11Perfil() {
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Cargando temas...</span>
                 </div>
-              ) : errorPersonalizaciones ? (
-                <p className="fuente-courier text-[#d4b878] text-[11px]">{errorPersonalizaciones}</p>
+              ) : errorMarco ? (
+                <p className="fuente-courier text-[#d4b878] text-[11px]">{errorMarco}</p>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {personalizaciones.filter((item) => item.tipo === 'carta').map((item) => (
@@ -429,8 +461,8 @@ export function Pantalla11Perfil() {
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Cargando temas...</span>
                 </div>
-              ) : errorPersonalizaciones ? (
-                <p className="fuente-courier text-[#d4b878] text-[11px]">{errorPersonalizaciones}</p>
+              ) : errorTablero ? (
+                <p className="fuente-courier text-[#d4b878] text-[11px]">{errorTablero}</p>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {personalizaciones.filter((item) => item.tipo === 'tablero').map((item) => (
