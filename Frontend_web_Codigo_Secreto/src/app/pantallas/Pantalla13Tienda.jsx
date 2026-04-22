@@ -99,7 +99,7 @@ function ModalConfirmar({ item, balasActuales, onConfirmar, onCancelar, confirma
               ARTÍCULO SELECCIONADO:
             </p>
             <p className="font-['Special_Elite',cursive] text-[#e8dcc8] mt-1" style={{ fontSize: 15 }}>
-              {nombre}
+              {nombre.split('_')[0].toUpperCase()}
             </p>
             {item.descripcion && (
               <p className="font-['Courier_Prime',monospace] text-[#888] mt-1" style={{ fontSize: 10 }}>
@@ -258,7 +258,7 @@ function TarjetaPersonalizacion({ item, onComprar, onEquipar, equipando }) {
       </div>
 
       <p className="font-['Special_Elite',cursive] text-[#e8dcc8] leading-tight" style={{ fontSize: 13 }}>
-        {item.nombre.toUpperCase()}
+        {item.nombre.split('_')[0].toUpperCase()}
       </p>
 
       {item.descripcion && (
@@ -426,7 +426,7 @@ export function Pantalla13Tienda() {
       const nuevasBalas = res.balas ?? balas;
       setBalas(nuevasBalas);
 
-      mostrarToast("ok", `¡${itemPendiente.nombre} adquirido! Te quedan ${nuevasBalas.toLocaleString()} balas.`);
+      mostrarToast("ok", `¡${itemPendiente.nombre.split('_')[0].toUpperCase()} adquirido! Te quedan ${nuevasBalas.toLocaleString()} balas.`);
       cerrarModal();
     } catch (err) {
       mostrarToast("error", err.message || "Error al realizar la compra.");

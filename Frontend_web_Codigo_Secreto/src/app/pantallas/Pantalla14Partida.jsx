@@ -778,7 +778,7 @@ export function PantallaPartida() {
         // IMPORTANTE: cada usuario se suscribe a su propio canal para que el backend
         // le envía el estado del tablero personalizado (mostrando la identidad de las 
         // cartas o no en función de si es jefe o agente).
-        /*client.subscribe(`/topic/partidas/${idPartida}/estado`, (msg) => {
+        client.subscribe(`/topic/partidas/${idPartida}/estado`, (msg) => {
           const data = JSON.parse(msg.body);
           
           // Comprobación de finalización de partida
@@ -786,7 +786,7 @@ export function PantallaPartida() {
             navigate(`/fin-partida/${idPartida}`);
             return; // Detenemos la ejecución, ya no importa el resto del tablero
           }
-        });*/
+        });
 
         client.subscribe(`/user/queue/partidas/${idPartida}/estado`, (msg) => {
           const payload = msg.body;
