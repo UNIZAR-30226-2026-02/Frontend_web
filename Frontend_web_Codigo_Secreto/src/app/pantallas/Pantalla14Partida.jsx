@@ -779,12 +779,30 @@ export function PantallaPartida() {
         // le envía el estado del tablero personalizado (mostrando la identidad de las 
         // cartas o no en función de si es jefe o agente).
         client.subscribe(`/topic/partidas/${idPartida}/estado`, (msg) => {
-          const data = JSON.parse(msg.body);
+          /*const data = JSON.parse(msg.body);
           
           // Comprobación de finalización de partida
           if (data.estado === 'finalizada') {
             navigate(`/fin-partida/${idPartida}`);
             return; // Detenemos la ejecución, ya no importa el resto del tablero
+          }*/
+
+          const payload = msg.body;
+          
+          // Si es exactamente "finalizada" (case-insensitive), redirigir
+          if (payload.toLowerCase() === 'finalizada') {
+            navigate(`/fin-partida/${idPartida}`);
+            return;
+          }
+          
+          try {
+            const data = JSON.parse(payload);
+            if (data.estado === 'finalizada') {
+              navigate(`/fin-partida/${idPartida}`);
+              return;
+            }
+          } catch (error) {
+            console.error("Error al parsear el estado:", error);
           }
         });
 
