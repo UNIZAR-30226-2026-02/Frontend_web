@@ -329,7 +329,7 @@ function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista, esMiTurno }) {
         <h3 style={{ fontFamily: "var(--font-special-elite)", color: "var(--theme-gold)", letterSpacing: "0.1em", fontSize: "14px", marginBottom: "0.75rem" }}>
           ✓ PISTA ENVIADA
         </h3>
-        <div className="clue-display-box">
+        <div className="clue-display-box" style={{ padding: "0.75rem 1rem" }}>
           <div>
             <span className="clue-label">PISTA:</span>
             <p className="clue-word-value highlight">{pista.palabra_pista}</p>
