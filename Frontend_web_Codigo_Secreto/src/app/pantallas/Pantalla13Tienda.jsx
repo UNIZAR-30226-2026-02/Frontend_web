@@ -373,7 +373,7 @@ export function Pantalla13Tienda() {
     loginUsuario(perfil);
     setTemas(Array.isArray(catalogoTemas) ? catalogoTemas : []);
 
-    // 🔧 Refuerzo: marcar como equipadas las personalizaciones que coincidan con el perfil
+    //  marcar como equipadas las personalizaciones que coincidan con el perfil
     const persConEquipamiento = (Array.isArray(catalogoPers) ? catalogoPers : []).map(p => {
       // Si ya viene con equipado = true, lo respetamos
       if (p.equipado) return p;
