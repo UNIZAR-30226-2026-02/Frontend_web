@@ -176,7 +176,29 @@ export function Pantalla11Perfil() {
   
   const handleEquiparTema = async (item) => {
     try {
-      if (item.equipado) return;
+      if (item.equipado) {
+      await equiparPersonalizacion(item.id_personalizacion, false);
+      
+      // Actualizar perfil: eliminar el valor equipado según el tipo
+      setPerfil(prev => ({
+        ...prev,
+        marco_carta_equipado: item.tipo === 'carta' ? null : prev.marco_carta_equipado,
+        fondo_tablero_equipado: item.tipo === 'tablero' ? null : prev.fondo_tablero_equipado,
+      }));
+      
+      // Actualizar personalizaciones: poner equipado=false para este ítem
+      setPersonalizaciones(prev =>
+        prev.map(p =>
+          p.id_personalizacion === item.id_personalizacion
+            ? { ...p, equipado: false }
+            : p
+        )
+      );
+      
+      // Eliminar del localStorage
+      localStorage.removeItem(item.tipo === 'carta' ? 'tema_marco' : 'tema_tablero');
+      return;
+    }
       if (item.tipo === 'carta') {
         setErrorMarco('');
       } else {
