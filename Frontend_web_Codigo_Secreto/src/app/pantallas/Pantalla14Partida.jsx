@@ -778,7 +778,7 @@ export function PantallaPartida() {
         // IMPORTANTE: cada usuario se suscribe a su propio canal para que el backend
         // le envía el estado del tablero personalizado (mostrando la identidad de las 
         // cartas o no en función de si es jefe o agente).
-        client.subscribe(`/topic/partidas/${idPartida}/estado`, (msg) => {
+        /*client.subscribe(`/topic/partidas/${idPartida}/estado`, (msg) => {
           const data = JSON.parse(msg.body);
           
           // Comprobación de finalización de partida
@@ -786,22 +786,35 @@ export function PantallaPartida() {
             navigate(`/fin-partida/${idPartida}`);
             return; // Detenemos la ejecución, ya no importa el resto del tablero
           }
-        });
+        });*/
 
         client.subscribe(`/user/queue/partidas/${idPartida}/estado`, (msg) => {
-          const data = JSON.parse(msg.body);
-          aplicarEstadoTablero(data);
-          // Corrección 5 (Bug 5): reset condicional.
-          // Si hay votos registrados es una actualización parcial (otros agentes votando):
-          //   → NO resetear, el agente que ya votó no debe poder volver a votar.
-          // Si no hay votos es una nueva ronda dentro del mismo turno (backend limpió votos):
-          //   → SÍ resetear para permitir votar la siguiente carta.
-          // Cambio de equipo/fase: gestionado por el useEffect de faseTurno/equipo.
-          const hayVotos = (data.votos_turno_actual?.length || 0) > 0;
-          if (!hayVotos) {
-            setMiVotoEnviado(false);
-            setCartaSeleccionada(null);
+          // Supongamos que recibes el mensaje del WebSocket en la variable 'message'
+          const payload = msg.body; // Texto crudo, igual que en Java
+
+          // Comprobamos si es el texto "finalizada" (ignorando mayúsculas/minúsculas)
+          if (payload.toLowerCase() === 'finalizada') {
+              navigate(`/fin-partida/${idPartida}`);
+              return;
           }
+
+          try {
+            const data = JSON.parse(msg.body);
+            aplicarEstadoTablero(data);
+            // Corrección 5 (Bug 5): reset condicional.
+            // Si hay votos registrados es una actualización parcial (otros agentes votando):
+            //   → NO resetear, el agente que ya votó no debe poder volver a votar.
+            // Si no hay votos es una nueva ronda dentro del mismo turno (backend limpió votos):
+            //   → SÍ resetear para permitir votar la siguiente carta.
+            // Cambio de equipo/fase: gestionado por el useEffect de faseTurno/equipo.
+            const hayVotos = (data.votos_turno_actual?.length || 0) > 0;
+            if (!hayVotos) {
+              setMiVotoEnviado(false);
+              setCartaSeleccionada(null);
+            }
+          } catch (error) {
+              console.error("Error al parsear el estado:", error);
+          } 
         });
 
         // Temporizador del turno
