@@ -104,6 +104,8 @@ export function Pantalla11Perfil() {
   const cargarPersonalizaciones = async () => {
     try {
       setCargandoPersonalizaciones(true);
+      // Cargar perfil aquí para asegurar que tenemos los datos actuales
+      const perfilActual = await obtenerPerfil();
       const lista = await obtenerPersonalizacionesJugador();
       const items = Array.isArray(lista) ? lista : [];
       
@@ -111,8 +113,8 @@ export function Pantalla11Perfil() {
       const itemsActualizados = items.map(item => ({
         ...item,
         equipado: 
-          (item.tipo === 'carta' && item.valor_visual === perfil?.marco_carta_equipado) ||
-          (item.tipo === 'tablero' && item.valor_visual === perfil?.fondo_tablero_equipado)
+          (item.tipo === 'carta' && item.valor_visual === perfilActual?.marco_carta_equipado) ||
+          (item.tipo === 'tablero' && item.valor_visual === perfilActual?.fondo_tablero_equipado)
       }));
       
       setPersonalizaciones(itemsActualizados);
@@ -189,12 +191,11 @@ export function Pantalla11Perfil() {
         fondo_tablero_equipado: item.tipo === 'tablero' ? item.valor_visual : prev.fondo_tablero_equipado,
       }));
       
-      // Actualizar personalizaciones basado en los nuevos valores del perfil
+      // Actualizar personalizaciones: solo este item se marca como equipado del mismo tipo
       setPersonalizaciones((prev) => prev.map((p) => ({
         ...p,
         equipado:
-          (p.tipo === 'carta' && p.valor_visual === item.valor_visual) ||
-          (p.tipo === 'tablero' && p.valor_visual === item.valor_visual)
+          p.tipo === item.tipo && p.id_personalizacion === item.id_personalizacion
       })));
       
       localStorage.setItem(item.tipo === 'carta' ? 'tema_marco' : 'tema_tablero', item.valor_visual);

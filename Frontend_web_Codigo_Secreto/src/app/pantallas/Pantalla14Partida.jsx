@@ -555,28 +555,33 @@ export function PantallaPartida() {
   const { user } = useContext(UserContext);
   const { playDisparo, playCancelar } = useSound();
 
-  const [temaMarcoColor, setTemaMarcoColor] = useState(localStorage.getItem('tema_marco') || colorBordePrueba);
-  const [temaTableroColor, setTemaTableroColor] = useState(localStorage.getItem('tema_tablero') || colorFondoTableroPrueba);
+  const [temaMarcoColor, setTemaMarcoColor] = useState(localStorage.getItem('marco_carta_equipado') || colorBordePrueba);
+  const [temaTableroColor, setTemaTableroColor] = useState(localStorage.getItem('fondo_tablero_equipado') || colorFondoTableroPrueba);
   const temaMarco = { color: temaMarcoColor };
   const temaTablero = { bgColor: temaTableroColor };
 
   useEffect(() => {
     const cargarTemasEquipados = async () => {
-      try {
-        const perfil = await obtenerPerfil();
-        
-        if (perfil?.marco_carta_equipado) {
-          setTemaMarcoColor(perfil.marco_carta_equipado);
-          localStorage.setItem('tema_marco', perfil.marco_carta_equipado);
-        }
-        if (perfil?.fondo_tablero_equipado) {
-          setTemaTableroColor(perfil.fondo_tablero_equipado);
-          localStorage.setItem('tema_tablero', perfil.fondo_tablero_equipado);
-        }
-      } catch (err) {
-        console.error("Error cargando temas equipados:", err);
-      }
-    };
+  try {
+    const perfil = await obtenerPerfil();
+    
+    if (perfil?.marco_carta_equipado) {
+      let marco = perfil.marco_carta_equipado;
+      // Añadir '#' si no existe
+      if (marco && !marco.startsWith('#')) marco = `#${marco}`;
+      setTemaMarcoColor(marco);
+      localStorage.setItem('tema_marco', marco);
+    }
+    if (perfil?.fondo_tablero_equipado) {
+      let fondo = perfil.fondo_tablero_equipado;
+      if (fondo && !fondo.startsWith('#')) fondo = `#${fondo}`;
+      setTemaTableroColor(fondo);
+      localStorage.setItem('tema_tablero', fondo);
+    }
+  } catch (err) {
+    console.error("Error cargando temas equipados:", err);
+  }
+};
 
     cargarTemasEquipados();
   }, []);
@@ -1054,33 +1059,25 @@ export function PantallaPartida() {
       {/* Layout principal: tablero + paneles laterales */}
       <div className="agent-main-layout">
         <div className="board-and-voting-area">
-          <ManilaFolder folderColor={colorFondoTableroPrueba}>
-            <div className="board-grid-5cols"
-              style={{
-                  //backgroundColor: colorFondoTableroPrueba, // El color personalizable
-                  //borderRadius: "8px",                      // Esquinas redondeadas
-                  //border: "10px solid rgba(0,0,0,0.2)",      // Borde sutil oscuro
-                  //boxShadow: "0 4px 12px rgba(0,0,0,0.5)", // Sombra para darle profundidad
-                  // Control de tamaño para que el tablero quepa bien en la pantalla.
-                  maxWidth: "750px",
-                  margin: "0 auto",   // Centra el tablero en la pantalla
-                }}>
-              {cartas.map((carta, index) => (
-                <GameCard
-                  key={carta.id_carta_tablero}
-                  carta={carta}
-                  position={index + 1}
-                  isSelected={cartaSeleccionada?.id === carta.id_carta_tablero}
-                  isRevealed={carta.estado === "revelada"}
-                  canSelect={puedoVotar && carta.estado !== "revelada"}
-                  onSelect={(selection) => setCartaSeleccionada(selection)}
-                  onPreview={(url) => setPreviewImage(url)}
-                  isJefe={esJefe}
-                  cardBorderColor={temaMarco.color}
-                />
-              ))}
-            </div>
-          </ManilaFolder>
+          // En el render del ManilaFolder, usar el estado en lugar de la constante
+        <ManilaFolder folderColor={temaTableroColor}>
+          <div className="board-grid-5cols" style={{ maxWidth: "750px", margin: "0 auto" }}>
+            {cartas.map((carta, index) => (
+              <GameCard
+                key={carta.id_carta_tablero}
+                carta={carta}
+                position={index + 1}
+                isSelected={cartaSeleccionada?.id === carta.id_carta_tablero}
+                isRevealed={carta.estado === "revelada"}
+                canSelect={puedoVotar && carta.estado !== "revelada"}
+                onSelect={(selection) => setCartaSeleccionada(selection)}
+                onPreview={(url) => setPreviewImage(url)}
+                isJefe={esJefe}
+                cardBorderColor={temaMarco.color}   // ya incluye '#' porque se guardó con prefijo
+              />
+            ))}
+          </div>
+        </ManilaFolder>
         </div>
 
         <div className="side-panels-column">
