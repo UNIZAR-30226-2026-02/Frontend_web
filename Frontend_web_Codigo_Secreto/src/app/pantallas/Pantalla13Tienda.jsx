@@ -34,6 +34,8 @@ import {
   equiparPersonalizacion,
 } from "../api/apiTienda";
 
+import {limpiarNombreTema} from "../components/funciones";
+
 // HELPERS VISUALES
 
 const EMOJI_PAQUETE = {
@@ -61,7 +63,7 @@ function ModalConfirmar({ item, balasActuales, onConfirmar, onCancelar, confirma
   if (!item) return null;
 
   const precio   = item.precioBalas ?? item.precio_balas ?? item.precio_bala ?? 0;
-  const nombre   = item.nombre ?? "—";
+  const nombre   = limpiarNombreTema(item.nombre) ?? "—";
   const saldo    = balasActuales - precio;
   const sinFondos = saldo < 0;
 
@@ -258,7 +260,7 @@ function TarjetaPersonalizacion({ item, onComprar, onEquipar, equipando }) {
       </div>
 
       <p className="font-['Special_Elite',cursive] text-[#e8dcc8] leading-tight" style={{ fontSize: 13 }}>
-        {item.nombre.toUpperCase()}
+        {limpiarNombreTema(item.nombre).toUpperCase()}
       </p>
 
       {item.descripcion && (
@@ -470,7 +472,7 @@ export function Pantalla13Tienda() {
                 : p.equipado,
         }))
       );
-      mostrarToast("ok", `${item.nombre} equipado correctamente.`);
+      mostrarToast("ok", `${limpiarNombreTema(item.nombre)} equipado correctamente.`);
     } catch (err) {
       mostrarToast("error", err.message || "Error al equipar.");
     } finally {

@@ -7,6 +7,8 @@ import { useNavigate } from "react-router";
 
 import { UserContext } from "../components/UserContext";
 
+import {limpiarNombreTema} from "../components/funciones";
+
 // Componentes del sistema
 import { 
   ScreenFrame, ManilaFolder, DarkCard, RedStamp, 
@@ -443,7 +445,7 @@ export function Pantalla11Perfil() {
                       disabled={!item.comprado}
                     >
                       <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: `#${item.valor_visual}`, opacity: 0.75 }} />
-                      <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{item.nombre || item.valor_visual}</p>
+                      <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{limpiarNombreTema(item.nombre) || item.valor_visual}</p>
                       {item.descripcion && <p className="fuente-courier text-[8px] text-[#888] truncate">{item.descripcion}</p>}
                       {item.equipado && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
                     </button>
@@ -476,7 +478,7 @@ export function Pantalla11Perfil() {
                       disabled={!item.comprado}
                     >
                       <div className="w-full h-8 rounded-xs mb-1" style={{ backgroundColor: `#${item.valor_visual}`, opacity: 0.75 }} />
-                      <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{item.nombre || item.valor_visual}</p>
+                      <p className="fuente-courier text-[9px] text-[#e8dcc8] truncate">{limpiarNombreTema(item.nombre) || item.valor_visual}</p>
                       {item.descripcion && <p className="fuente-courier text-[8px] text-[#888] truncate">{item.descripcion}</p>}
                       {item.equipado && <Check className="absolute top-1 right-1 w-3 h-3 text-[#d4b878]" />}
                     </button>
