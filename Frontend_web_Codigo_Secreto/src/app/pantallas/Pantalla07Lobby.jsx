@@ -313,7 +313,7 @@ export function Pantalla07Lobby() {
 
             {/* Equipos */}
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-4 lg:gap-6 mb-6">
-
+              
               {/* Equipo Rojo */}
               <DarkCard
                 className={`p-4 sm:p-5 cursor-pointer transition-all ${miEquipo === "rojo" ? "ring-2 ring-[#cc3333]" : ""}`}
@@ -331,14 +331,15 @@ export function Pantalla07Lobby() {
                     <div><span className="font-['Courier_Prime',monospace] text-[#50a050]" style={{ fontSize: 9 }}>✓ TU EQUIPO</span></div>
                   )}
                 </div>
-                <div className="space-y-2">
-                  {slotsRojo.slice(0, 4).map((p, i) => (
-                    <PlayerSlot key={i} player={p} teamColor="rojo" />
+                {/* Contenedor con scroll */}
+                <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+                  {equipoRojo.map((player, i) => (
+                    <PlayerSlot key={i} player={player} teamColor="rojo" />
                   ))}
                 </div>
               </DarkCard>
 
-              {/* VS */}
+              {/* VS*/}
               <div className="flex lg:flex-col items-center justify-center gap-2 py-2 lg:py-0">
                 <div className="hidden lg:block w-px h-12 bg-[#8a7a60]/30" />
                 <div className="w-12 h-12 rounded-full bg-[#f5edd8] border-2 border-[#a08050]/40 flex items-center justify-center shadow-md flex-shrink-0">
@@ -364,9 +365,9 @@ export function Pantalla07Lobby() {
                     <div><span className="font-['Courier_Prime',monospace] text-[#50a050]" style={{ fontSize: 9 }}>✓ TU EQUIPO</span></div>
                   )}
                 </div>
-                <div className="space-y-2">
-                  {slotsAzul.slice(0, 4).map((p, i) => (
-                    <PlayerSlot key={i} player={p} teamColor="azul" />
+                <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+                  {equipoAzul.map((player, i) => (
+                    <PlayerSlot key={i} player={player} teamColor="azul" />
                   ))}
                 </div>
               </DarkCard>
