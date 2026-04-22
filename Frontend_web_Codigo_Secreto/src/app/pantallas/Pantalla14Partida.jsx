@@ -138,11 +138,11 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
               inset: 0,
               backgroundColor:
                 tipoLower === "rojo"
-                  ? "rgba(204, 51, 51, 0.6)"
+                  ? "rgba(204, 51, 51, 0.3)"
                   : tipoLower === "azul"
-                  ? "rgba(51, 102, 204, 0.6)"
+                  ? "rgba(51, 102, 204, 0.3)"
                   : tipoLower === "civil"
-                  ? "rgba(119, 119, 119, 0.6)"
+                  ? "rgba(119, 119, 119, 0.3)"
                   : tipoLower === "asesino"
                   ? "rgba(0, 0, 0, 0.7)"
                   : "transparent",
