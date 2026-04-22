@@ -15,7 +15,7 @@ import { useNavigate, useParams } from "react-router";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useSound } from "../hooks/useSound";
-import { obtenerPersonalizaciones } from "../api/apiJugador";
+import { obtenerPerfil, obtenerPersonalizaciones } from "../api/apiJugador";
 
 import {
   Clock, Send as SendIcon, Check, Vote, Skull,
@@ -563,22 +563,18 @@ export function PantallaPartida() {
   useEffect(() => {
     const cargarTemasEquipados = async () => {
       try {
-        const personalizaciones = await obtenerPersonalizaciones();
-        if (!Array.isArray(personalizaciones)) return;
-
-        const marcoEquipado = personalizaciones.find((item) => item.tipo === 'carta' && item.equipado);
-        const tableroEquipado = personalizaciones.find((item) => item.tipo === 'tablero' && item.equipado);
-
-        if (marcoEquipado?.valor_visual) {
-          setTemaMarcoColor(marcoEquipado.valor_visual);
-          localStorage.setItem('tema_marco', marcoEquipado.valor_visual);
+        const perfil = await obtenerPerfil();
+        
+        if (perfil?.marco_carta_equipado) {
+          setTemaMarcoColor(perfil.marco_carta_equipado);
+          localStorage.setItem('tema_marco', perfil.marco_carta_equipado);
         }
-        if (tableroEquipado?.valor_visual) {
-          setTemaTableroColor(tableroEquipado.valor_visual);
-          localStorage.setItem('tema_tablero', tableroEquipado.valor_visual);
+        if (perfil?.fondo_tablero_equipado) {
+          setTemaTableroColor(perfil.fondo_tablero_equipado);
+          localStorage.setItem('tema_tablero', perfil.fondo_tablero_equipado);
         }
       } catch (err) {
-        console.error("Error cargando personalizaciones de tablero:", err);
+        console.error("Error cargando temas equipados:", err);
       }
     };
 
