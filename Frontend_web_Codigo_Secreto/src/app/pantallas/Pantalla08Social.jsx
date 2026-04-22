@@ -614,19 +614,6 @@ export function Pantalla08Social() {
             </div>
           )}
 
-          {/* Campo para escribir tag exacto (opcional) */}
-          <div className="relative mt-2">
-            <input
-              type="text"
-              value={nombreAmigo}
-              onChange={(e) => setNombreAmigo(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAgnadir()}
-              placeholder="O escribe el nombre exacto..."
-              className="w-full bg-[#f5edd8] border-2 border-[#a08050]/50 rounded-sm px-4 py-2.5 font-['Courier_Prime',monospace] text-[#3a2a10] outline-none"
-              style={{ fontSize: 13 }}
-            />
-          </div>
-
           <div className="flex gap-3 mt-4">
             <button onClick={cerrarModalAgregar} className="flex-1 bg-[#3a2a2a] text-[#a09070] py-2.5 rounded-sm cursor-pointer">CANCELAR</button>
             <button 
