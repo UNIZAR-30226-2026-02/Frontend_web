@@ -82,9 +82,9 @@ export async function obtenerPersonalizaciones() {
 }
  
 
-// Equipar / desequipar personalización → PUT /api/personalizaciones/equipar
+// Equipar / desequipar personalización → PUT /api/jugadores/equipar
 export async function equiparPersonalizacion(id_personalizacion, equipado) {
-  const res = await fetch(`${BASE_URL}/personalizaciones/equipar`, {
+  const res = await fetch(`${BASE_URL}/jugadores/equipar`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
