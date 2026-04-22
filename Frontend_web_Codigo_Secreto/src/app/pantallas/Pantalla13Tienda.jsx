@@ -360,25 +360,44 @@ export function Pantalla13Tienda() {
 
   // Carga inicial
   const cargarTodo = useCallback(async () => {
-    setCargando(true);
-    setError(null);
-    try {
-      const [perfil, catalogoTemas, catalogoPers] = await Promise.all([
-        obtenerPerfil(),
-        obtenerTemasActivos(),
-        obtenerPersonalizacionesJugador(),
-      ]);
+  setCargando(true);
+  setError(null);
+  try {
+    const [perfil, catalogoTemas, catalogoPers] = await Promise.all([
+      obtenerPerfil(),
+      obtenerTemasActivos(),
+      obtenerPersonalizacionesJugador(),
+    ]);
 
-      setBalas(perfil.balas ?? 0);
-      loginUsuario(perfil);
-      setTemas(Array.isArray(catalogoTemas) ? catalogoTemas : []);
-      setPersonalizaciones(Array.isArray(catalogoPers) ? catalogoPers : []);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setCargando(false);
-    }
-  }, []); // eslint-disable-line
+    setBalas(perfil.balas ?? 0);
+    loginUsuario(perfil);
+    setTemas(Array.isArray(catalogoTemas) ? catalogoTemas : []);
+
+    // 🔧 Refuerzo: marcar como equipadas las personalizaciones que coincidan con el perfil
+    const persConEquipamiento = (Array.isArray(catalogoPers) ? catalogoPers : []).map(p => {
+      // Si ya viene con equipado = true, lo respetamos
+      if (p.equipado) return p;
+
+      const valor = p.valor_visual?.replace('#', '').toLowerCase();
+      const marcoPerfil = perfil.marco_carta_equipado?.replace('#', '').toLowerCase();
+      const fondoPerfil = perfil.fondo_tablero_equipado?.replace('#', '').toLowerCase();
+
+      if (p.tipo === 'carta' && valor === marcoPerfil) {
+        return { ...p, equipado: true };
+      }
+      if (p.tipo === 'tablero' && valor === fondoPerfil) {
+        return { ...p, equipado: true };
+      }
+      return p;
+    });
+
+    setPersonalizaciones(persConEquipamiento);
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setCargando(false);
+  }
+  }, [loginUsuario]); // eslint-disable-line
 
   useEffect(() => { cargarTodo(); }, [cargarTodo]);
 
