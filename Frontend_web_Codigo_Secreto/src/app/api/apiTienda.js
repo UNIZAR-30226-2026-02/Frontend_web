@@ -79,6 +79,8 @@ export async function comprarPersonalizacion(id_personalizacion) {
 // Equipar / desequipar personalización → PUT /api/personalizaciones/equipar
 // Envía:   { id_personalizacion, equipado }
 
+// Equipar / desequipar personalización → PUT /api/jugadores/equipar
+// Envía:   { id_personalizacion, equipado }
 export async function equiparPersonalizacion(id_personalizacion, equipado) {
   const res = await fetch(`${BASE_URL}/jugadores/equipar`, {
     method: 'PUT',
@@ -90,5 +92,7 @@ export async function equiparPersonalizacion(id_personalizacion, equipado) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || 'No se pudo equipar la personalización');
   }
-  return res.json();
+  // Manejar respuesta vacía (body vacío pero status 200)
+  const text = await res.text();
+  return text ? JSON.parse(text) : {};
 }
