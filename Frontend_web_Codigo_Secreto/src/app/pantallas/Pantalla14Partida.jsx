@@ -1072,7 +1072,6 @@ export function PantallaPartida() {
       {/* Layout principal: tablero + paneles laterales */}
       <div className="agent-main-layout">
         <div className="board-and-voting-area">
-          // En el render del ManilaFolder, usar el estado en lugar de la constante
         <ManilaFolder folderColor={temaTableroColor}>
           <div className="board-grid-5cols" style={{ maxWidth: "750px", margin: "0 auto" }}>
             {cartas.map((carta, index) => (

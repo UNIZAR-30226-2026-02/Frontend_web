@@ -171,11 +171,10 @@ export function Pantalla11Perfil() {
       console.error("Error al guardar la fotografía:", err);
     }
   };
-
+  
   const handleEquiparTema = async (item) => {
     try {
       if (item.equipado) return;
-      // Limpiar error específico del tipo
       if (item.tipo === 'carta') {
         setErrorMarco('');
       } else {
@@ -184,19 +183,20 @@ export function Pantalla11Perfil() {
       
       await equiparPersonalizacion(item.id_personalizacion, true);
       
-      // Actualizar el perfil localmente reflejando el nuevo estado
+      // Actualizar perfil (marco o tablero según corresponda)
       setPerfil(prev => ({
         ...prev,
         marco_carta_equipado: item.tipo === 'carta' ? item.valor_visual : prev.marco_carta_equipado,
         fondo_tablero_equipado: item.tipo === 'tablero' ? item.valor_visual : prev.fondo_tablero_equipado,
       }));
       
-      // Actualizar personalizaciones: solo este item se marca como equipado del mismo tipo
-      setPersonalizaciones((prev) => prev.map((p) => ({
-        ...p,
-        equipado:
-          p.tipo === item.tipo && p.id_personalizacion === item.id_personalizacion
-      })));
+      // Actualizar personalizaciones: solo se modifica el estado equipado dentro del mismo tipo
+      setPersonalizaciones((prev) => prev.map((p) => {
+        if (p.tipo === item.tipo) {
+          return { ...p, equipado: p.id_personalizacion === item.id_personalizacion };
+        }
+        return p; // otros tipos se quedan como están
+      }));
       
       localStorage.setItem(item.tipo === 'carta' ? 'tema_marco' : 'tema_tablero', item.valor_visual);
     } catch (err) {
