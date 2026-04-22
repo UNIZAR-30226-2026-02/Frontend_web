@@ -10,7 +10,7 @@ import { useSound } from "../hooks/useSound";
 
 // Importamos la API y el Hook de WebSockets
 import { obtenerAmigos, obtenerLeaderboardAmigos, obtenerLeaderboardGlobal, obtenerSolicitudes,
-                            responderSolicitud, enviarSolicitudAmistad } from "../api/apiSocial";
+                            responderSolicitud, enviarSolicitudAmistad, buscarJugadores } from "../api/apiSocial";
 import { useSocialWebSockets } from "../hooks/hooksSocial"; 
 
 // Datos de prueba (Comentados porque se conecta con el backend)
@@ -143,6 +143,12 @@ export function Pantalla08Social() {
   // Estados para las barras de búsqueda
   const [busquedaAmigos, setBusquedaAmigos] = useState("");
   const [busquedaSolicitudes, setBusquedaSolicitudes] = useState("");
+
+  // Nuevos estados para búsqueda al añadir
+  const [terminoBusqueda, setTerminoBusqueda] = useState("");
+  const [resultadosBusqueda, setResultadosBusqueda] = useState([]);
+  const [buscando, setBuscando] = useState(false);
+  const [errorBusqueda, setErrorBusqueda] = useState("");
   
   const tokenActual = sessionStorage.getItem('jwt_token');
 
@@ -222,21 +228,17 @@ export function Pantalla08Social() {
   // FUNCIÓN PARA GESTIONAR ENVÍO DE SOLICITUDES.
   const handleAgnadir = async () => {
     const tag = nombreAmigo.trim();
-    if (tag) {
-      try {
-        // Llamada a 'apiSocial.js'.
-        await enviarSolicitudAmistad(tag);
-        
-        console.log(`Solicitud enviada con éxito a: ${tag}`);
-        
-        // Si la petición es exitosa, limpiamos el input y cerramos el modal
-        setNombreAmigo("");
-        setMostrarAgnadir(false);
-        
-      } catch (error) {
-        console.error("Error al enviar la solicitud:", error);
-        alert(error.message || "No se pudo enviar la solicitud de amistad");
-      }
+    if (!tag) return;
+    try {
+      await enviarSolicitudAmistad(tag);
+      console.log(`Solicitud enviada con éxito a: ${tag}`);
+      setNombreAmigo("");
+      setTerminoBusqueda("");
+      setResultadosBusqueda([]);
+      setMostrarAgnadir(false);
+    } catch (error) {
+      console.error("Error al enviar la solicitud:", error);
+      alert(error.message || "No se pudo enviar la solicitud de amistad");
     }
   };
 
@@ -245,16 +247,63 @@ export function Pantalla08Social() {
     const estado = action === 'accept' ? 'aceptada' : 'pendiente';
     
     try {
-      // Invocar función de 'apiSocial' para notificar el estado de la solicitud al backend.
+      // Invocamos función de 'apiSocial' para notificar el estado de la solicitud al backend.
       await responderSolicitud(id_solicitante, estado);
       
-      // Quitamos la solicitud del estado local para dar feedback visual inmediato
       setRequests(prev => prev.filter(r => r.id_solicitante !== id_solicitante));
       if (action === 'accept') {
         playAceptar();
       }
     } catch (error) {
       console.error(`Error al intentar ${estado} la solicitud:`, error);
+    }
+  };
+
+  // Función para buscar jugadores (llama al endpoint)
+  const buscarJugadoresPorTag = useCallback(async (tag) => {
+    if (!tag.trim()) {
+      setResultadosBusqueda([]);
+      return;
+    }
+    setBuscando(true);
+    setErrorBusqueda("");
+    try {
+      const resultados = await buscarJugadores(tag); 
+      setResultadosBusqueda(resultados);
+    } catch (err) {
+      setErrorBusqueda(err.message);
+      setResultadosBusqueda([]);
+    } finally {
+      setBuscando(false);
+    }
+  }, []);
+
+  // Debounce para la búsqueda mientras se escribe
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (terminoBusqueda.trim()) {
+        buscarJugadoresPorTag(terminoBusqueda);
+      } else {
+        setResultadosBusqueda([]);
+      }
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [terminoBusqueda, buscarJugadoresPorTag]);
+
+  // Al seleccionar un resultado, se envía la solicitud automáticamente
+  const handleSeleccionarResultado = async (tagSeleccionado) => {
+    setNombreAmigo(tagSeleccionado);
+    // Enviar solicitud directamente
+    try {
+      await enviarSolicitudAmistad(tagSeleccionado);
+      console.log(`Solicitud enviada con éxito a: ${tagSeleccionado}`);
+      setNombreAmigo("");
+      setTerminoBusqueda("");
+      setResultadosBusqueda([]);
+      setMostrarAgnadir(false);
+    } catch (error) {
+      console.error("Error al enviar la solicitud:", error);
+      alert(error.message || "No se pudo enviar la solicitud de amistad");
     }
   };
 
@@ -519,38 +568,79 @@ export function Pantalla08Social() {
       </div>
 
       {/* Modal Añadir Amigo */}
-      {mostrarAgnadir && (
-        <>
-          <div className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" onClick={cerrarModalAgregar} />
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-md">
-            <div className="bg-[#2a2218] border-2 border-[#a08050] rounded-sm shadow-[6px_8px_24px_rgba(0,0,0,0.7)] p-5 sm:p-6">
-              <button onClick={cerrarModalAgregar} className="absolute top-3 right-3 text-[#8a7a60] hover:text-[#d4b878] cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-              <h3 className="font-['Special_Elite',cursive] text-[#e8dcc8] tracking-[0.1em] mb-1" style={{ fontSize: 16 }}>AÑADIR AGENTE</h3>
-              <p className="font-['Courier_Prime',monospace] text-[#8a7a60] mb-4" style={{ fontSize: 10 }}>Introduce el nombre clave</p>
-              <input
-                type="text"
-                value={nombreAmigo}
-                onChange={(e) => setNombreAmigo(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAgnadir()}
-                placeholder="Nombre_Agente_007"
-                className="w-full bg-[#f5edd8] border-2 border-[#a08050]/50 rounded-sm px-4 py-2.5 font-['Courier_Prime',monospace] text-[#3a2a10] outline-none mb-4"
-                style={{ fontSize: 13 }}
-                autoFocus
-              />
-              <div className="flex gap-3">
-                <button onClick={cerrarModalAgregar} className="flex-1 bg-[#3a2a2a] text-[#a09070] py-2.5 rounded-sm cursor-pointer">CANCELAR</button>
-                <button 
-                  onClick={handleAgnadir} 
-                  disabled={!nombreAmigo.trim()}
-                  className="flex-1 bg-[#2a5a2a] disabled:bg-[#2a2a2a] text-white py-2.5 rounded-sm cursor-pointer"
-                >ENVIAR SOLICITUD</button>
-              </div>
+       {mostrarAgnadir && (
+    <>
+      <div className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" onClick={cerrarModalAgregar} />
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-md">
+        <div className="bg-[#2a2218] border-2 border-[#a08050] rounded-sm shadow-[6px_8px_24px_rgba(0,0,0,0.7)] p-5 sm:p-6">
+          <button onClick={cerrarModalAgregar} className="absolute top-3 right-3 text-[#8a7a60] hover:text-[#d4b878] cursor-pointer">
+            <X className="w-5 h-5" />
+          </button>
+          <h3 className="font-['Special_Elite',cursive] text-[#e8dcc8] tracking-[0.1em] mb-1" style={{ fontSize: 16 }}>AÑADIR AGENTE</h3>
+          <p className="font-['Courier_Prime',monospace] text-[#8a7a60] mb-4" style={{ fontSize: 10 }}>Busca por nombre (mínimo 2 caracteres) o introduce el tag exacto</p>
+          
+          {/* Campo de búsqueda */}
+          <input
+            type="text"
+            value={terminoBusqueda}
+            onChange={(e) => setTerminoBusqueda(e.target.value)}
+            placeholder="Escribe parte del nombre..."
+            className="w-full bg-[#f5edd8] border-2 border-[#a08050]/50 rounded-sm px-4 py-2.5 font-['Courier_Prime',monospace] text-[#3a2a10] outline-none mb-3"
+            style={{ fontSize: 13 }}
+            autoFocus
+          />
+
+          {/* Resultados de búsqueda */}
+          {buscando && (
+            <div className="flex justify-center py-2">
+              <Loader2 className="w-5 h-5 text-[#c4a060] animate-spin" />
             </div>
+          )}
+          {errorBusqueda && (
+            <p className="text-[#cc3333] text-xs mb-2">{errorBusqueda}</p>
+          )}
+          {resultadosBusqueda.length > 0 && (
+            <div className="max-h-48 overflow-y-auto border border-[#a08050]/30 rounded-sm mb-3 bg-[#1e1810]">
+              {resultadosBusqueda.map((jugador) => (
+                <button
+                  key={jugador.tag}
+                  onClick={() => handleSeleccionarResultado(jugador.tag)}
+                  className="w-full text-left px-3 py-2 hover:bg-[#c4a060]/20 border-b border-[#a08050]/20 last:border-0 transition-colors"
+                >
+                  <div className="font-['Courier_Prime',monospace] text-[#e8dcc8]">{jugador.tag}</div>
+                  <div className="font-['Courier_Prime',monospace] text-[#888] text-xs">{jugador.victorias} victorias</div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Campo para escribir tag exacto (opcional) */}
+          <div className="relative mt-2">
+            <input
+              type="text"
+              value={nombreAmigo}
+              onChange={(e) => setNombreAmigo(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAgnadir()}
+              placeholder="O escribe el nombre exacto..."
+              className="w-full bg-[#f5edd8] border-2 border-[#a08050]/50 rounded-sm px-4 py-2.5 font-['Courier_Prime',monospace] text-[#3a2a10] outline-none"
+              style={{ fontSize: 13 }}
+            />
           </div>
-        </>
-      )}
+
+          <div className="flex gap-3 mt-4">
+            <button onClick={cerrarModalAgregar} className="flex-1 bg-[#3a2a2a] text-[#a09070] py-2.5 rounded-sm cursor-pointer">CANCELAR</button>
+            <button 
+              onClick={handleAgnadir} 
+              disabled={!nombreAmigo.trim()}
+              className="flex-1 bg-[#2a5a2a] disabled:bg-[#2a2a2a] text-white py-2.5 rounded-sm cursor-pointer"
+            >
+              ENVIAR SOLICITUD
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  )}
     </ScreenFrame>
   );
 }
