@@ -131,6 +131,26 @@ function GameCard({ carta, position, isSelected, isRevealed, canSelect, onSelect
             />
           </div>
         )}
+        {isRevealed && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              backgroundColor:
+                tipoLower === "rojo"
+                  ? "rgba(204, 51, 51, 0.8)"
+                  : tipoLower === "azul"
+                  ? "rgba(51, 102, 204, 0.8)"
+                  : tipoLower === "civil"
+                  ? "rgba(119, 119, 119, 0.8)"
+                  : tipoLower === "asesino"
+                  ? "rgba(0, 0, 0, 0.9)"
+                  : "transparent",
+              pointerEvents: "none",
+              zIndex: 5,
+            }}
+          />
+        )}
 
         {/* Iconos/tokens cuando la carta está revelada - superpuestos sobre la imagen 
         {isRevealed && (
