@@ -23,6 +23,9 @@ export function Pantalla02Home() {
   useEffect(() => {
     const cargarYVerificarPartida = async () => {
       try {
+        // Pequeño retardo para que el backend tenga tiempo de actualizar el estado
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
         const perfil = await obtenerPerfil();
         const idPartida = perfil?.partida_activa_id || null;
         setPartidaActivaId(idPartida);
