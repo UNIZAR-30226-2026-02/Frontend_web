@@ -18,10 +18,26 @@ export function Pantalla15FinPartida() {
 
   // Llamadas a la API
   useEffect(() => {
-    const fetchResultados = async () => {
+
+    let intentos = 0;
+    const maxIntentos = 5;
+    const esperaInicial = 500; // ms
+
+    const fetchResultados = async (reintentar = true) => {
       try {
         // 1. Obtener estadísticas finales de la partida
         const resFin = await fetch(`${API_BASE}/partida/${id_partida}/fin`, { credentials: "include" });
+        
+        // Por si aún no se ha finalizado la transacción en la base de datos, se espera a que 
+        // cargue.
+        if (resFin.status === 409 && reintentar && intentos < maxIntentos) {
+          // La partida aún no ha finalizado → esperamos y reintentamos
+          intentos++;
+          console.log(`Intento ${intentos} de ${maxIntentos}: partida no finalizada, esperando...`);
+          await new Promise(resolve => setTimeout(resolve, esperaInicial * intentos)); // backoff exponencial
+          return fetchResultados(true);
+        }
+        
         if (!resFin.ok) throw new Error("No se ha podido recuperar el informe de la misión.");
         const dataFin = await resFin.json();
         setDatosFinales(dataFin);
