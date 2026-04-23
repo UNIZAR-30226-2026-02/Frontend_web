@@ -16,6 +16,7 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useSound } from "../hooks/useSound";
 import { obtenerPerfil, obtenerPersonalizaciones } from "../api/apiJugador";
+import { abandonarPartida } from "../api/apiPartidas";
 
 import {
   Clock, Send as SendIcon, Check, Vote, Skull,
@@ -994,10 +995,8 @@ export function PantallaPartida() {
 
     playCancelar();
     try {
-      await fetch(`${API_BASE}/partidas/${idPartida}/participantes`, {
-        method: "DELETE",
-        credentials: "include"
-      });
+      // Se llama a la función de 'apiPartidas.js'.
+      await abandonarPartida(idPartida);
 
       // Se borra el orden de cartas de este local storage porque ya ha terminado 
       // la partida para el usuario que ha abandonado.

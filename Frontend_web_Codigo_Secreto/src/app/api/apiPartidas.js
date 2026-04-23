@@ -103,6 +103,19 @@ export async function unirsePartidaPrivada(codigo) {
 
 // -------------- FIN DE PARTIDA --------------
 
+// Abandonar una partida --> DELETE /api/partidas/{id_partida}/participantes
+export async function abandonarPartida(idPartida) {
+  const res = await fetch(`${BASE_URL}/partidas/${idPartida}/participantes`, {
+    method: 'DELETE',
+    credentials: 'include'
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudo abandonar la partida');
+  }
+  return res.ok;
+}
+
 // Obtener los resultados finales de una partida -> GET /api/partida/{id_partida}/fin
 export async function obtenerResultadosPartida(idPartida) {
   const response = await fetch(`${BASE_URL}/partida/${idPartida}/fin`, {

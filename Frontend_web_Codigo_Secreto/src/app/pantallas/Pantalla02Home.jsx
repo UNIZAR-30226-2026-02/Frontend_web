@@ -2,10 +2,11 @@
  * Pantalla de inicio (Home).
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import "../components/Escritorio.css"; 
-import { unirsePartidaPrivada } from "../api/apiPartidas";
+import { unirsePartidaPrivada, abandonarPartida } from "../api/apiPartidas";
+import { obtenerPerfil } from "../api/apiJugador";
 
 import { ManilaFolder, RedStamp, FBISeal } from "../components/ScreenFrame";
 import { Crosshair, ShoppingBag, MessageSquare, Trophy, Archive, ArrowRight, LogIn, Lock, Globe, Search} from "lucide-react";
@@ -14,6 +15,45 @@ export function Pantalla02Home() {
   const navigate = useNavigate();
   const [joinOpen, setJoinOpen] = useState(false);
   const [privateCode, setPrivateCode] = useState("");
+
+  // Variables para gestionar la redirección a una partida activa, si existe.
+  const [partidaActivaId, setPartidaActivaId] = useState(null);
+  const dialogShownRef = useRef(false);
+
+  useEffect(() => {
+    const cargarYVerificarPartida = async () => {
+      try {
+        const perfil = await obtenerPerfil();
+        const idPartida = perfil?.partida_activa_id || null;
+        setPartidaActivaId(idPartida);
+        
+        // Si hay partida activa y aún no se ha mostrado el diálogo, lo mostramos una sola vez
+        if (idPartida && !dialogShownRef.current) {
+          dialogShownRef.current = true;
+          const confirmar = window.confirm(
+            "Tiene una partida en curso. ¿Desea volver a ella? (Aceptar = Sí, Cancelar = Abortar misión)"
+          );
+          if (confirmar) {
+            // Reanudar partida
+            navigate(`/partida/${idPartida}`);
+          } else {
+            // Abortar misión
+            await abandonarPartida(idPartida);
+            // Limpiar localStorage del orden de cartas
+            localStorage.removeItem(`card_order_${idPartida}`);
+            // Actualizar perfil para limpiar 'partida_activa_id'.
+            const nuevoPerfil = await obtenerPerfil();
+            setPartidaActivaId(nuevoPerfil?.partida_activa_id || null);
+          }
+        }
+      } catch (err) {
+        console.error("Error al cargar perfil o verificar partida activa:", err);
+        alert("No se pudo abandonar la partida. Inténtalo de nuevo.");
+      }
+    };
+  
+    cargarYVerificarPartida();
+  }, [navigate]);
 
   const handleJoinMission = async () => {
     if (!privateCode.trim()) return;
