@@ -76,11 +76,15 @@ export function Pantalla07Lobby() {
 
   const stompRef = useRef(null);
 
+  // Estado y ref para el modal de finalización
+  const [showModalFinalizada, setShowModalFinalizada] = useState(false);
+  const modalTimeoutRef = useRef(null);
+
   // Soy el creador?
   const soyCreador = lobbyData?.tag_creador === user?.tag;
   const partida = lobbyData;
 
-  //AplicO datos del lobby 
+  // Aplico datos del lobby 
   const aplicarLobby = useCallback((data) => {
     setLobbyData(data);
 
@@ -94,9 +98,15 @@ export function Pantalla07Lobby() {
       navigate(`/partida/${data.id_partida}`);
     }
 
-    // Si la partida fue finalizada (creador abandonó), volver al home
+    // Si la partida fue finalizada (creador abandonó), mostrar modal y luego redirigir
     if (data.estado === "finalizada") {
-      navigate("/home");
+      // Limpiar timeout previo por si acaso
+      if (modalTimeoutRef.current) clearTimeout(modalTimeoutRef.current);
+      setShowModalFinalizada(true);
+      modalTimeoutRef.current = setTimeout(() => {
+        setShowModalFinalizada(false);
+        navigate("/home");
+      }, 1500);
     }
   }, [user?.tag, navigate]);
 
@@ -157,19 +167,33 @@ export function Pantalla07Lobby() {
     client.activate();
     stompRef.current = client;
 
-    // Esto es lo que se ejecuta cuando se cierra la pantalla actual (se vuelve al home o se accede
-    // al perfil).
+    // Esto es lo que se ejecuta cuando se cierra la pantalla actual (se vuelve al home, se accede al perfil o al manual).
     return () => {
-    // Solo avisar al backend si la partida NO ha arrancado
-      if (!partidaIniciadaRef.current && stompRef.current?.connected) {
+      // No debe hacerse publicación automática de abandonarLobby para no salir al navegar al manual.
+      /*if (!partidaIniciadaRef.current && stompRef.current?.connected) {
           stompRef.current.publish({
               destination: `/app/partida/${id_partida}/abandonarLobby`,
               body: JSON.stringify({})
           });
-      }
+      }*/
       client.deactivate();
+      // Limpiar timeout del modal al desmontar
+      if (modalTimeoutRef.current) clearTimeout(modalTimeoutRef.current);
     };
   }, [id_partida, aplicarLobby]);
+
+  // Función para abandonar el lobby voluntariamente
+  const handleAbandonarLobby = () => {
+    const confirmar = window.confirm("¿Está seguro de que desea abandonar el lobby?");
+    if (!confirmar) return;
+    if (stompRef.current?.connected && !partidaIniciadaRef.current) {
+      stompRef.current.publish({
+        destination: `/app/partida/${id_partida}/abandonarLobby`,
+        body: JSON.stringify({})
+      });
+    }
+    navigate("/home");
+  };
 
   // Acciones
 
@@ -233,7 +257,6 @@ export function Pantalla07Lobby() {
   const slotsRojo = [...equipoRojo, ...Array(Math.max(0, 4 - equipoRojo.length)).fill(null)];
   const slotsAzul = [...equipoAzul, ...Array(Math.max(0, 4 - equipoAzul.length)).fill(null)];
 
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -256,13 +279,13 @@ export function Pantalla07Lobby() {
   return (
     <ScreenFrame title="ASIGNACIÓN DE EQUIPOS">
       <div className="max-w-4xl mx-auto pt-8 sm:pt-4">
+        {/* Botón ABANDONAR LOBBY con confirmación */}
         <button
-          onClick={() => navigate("/home")}
+          onClick={handleAbandonarLobby}
           className="flex items-center gap-2 text-[#8a7a60] hover:text-[#d4b878] transition-colors cursor-pointer mb-4 group"
         >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 11 }}>
-            VOLVER AL ESCRITORIO
+          <span className="font-['Courier_Prime',monospace]" style={{ fontSize: 13 }}>
+            ABANDONAR LOBBY
           </span>
         </button>
 
@@ -491,6 +514,27 @@ export function Pantalla07Lobby() {
           </div>
         </ManilaFolder>
       </div>
+
+      {/* Modal de feedback cuando el creador abandonó */}
+      {showModalFinalizada && (
+        <>
+          {/* Fondo desenfocado */}
+          <div className="fixed inset-0 bg-black/50 z-50 backdrop-blur-[2px]" />
+          {/* Caja del modal con animación de entrada */}
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] w-[90%] max-w-sm animate-in fade-in zoom-in duration-200">
+            <div className="bg-[#1e1810] border-2 border-[#5a4a30] rounded-sm shadow-[6px_8px_32px_rgba(0,0,0,0.8)] p-6">
+              <div className="bg-[#2a2218] border border-[#5a4a30]/40 rounded-sm p-5 text-center shadow-inner">
+                <p
+                  className="font-['Special_Elite',cursive] tracking-wide"
+                  style={{ fontSize: 16, color: "#e08080" }}
+                >
+                  El creador abandonó el lobby. Redirigiendo al Home...
+                </p>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </ScreenFrame>
   );
 }

@@ -267,12 +267,12 @@ export function Pantalla11Perfil() {
         
         {/* Botón de retorno */}
         <button 
-          onClick={() => navegar("/home")} 
+          onClick={() => navegar(-1)} 
           className="flex items-center gap-2 text-[#8a7a60] hover:text-[#d4b878] transition-colors cursor-pointer mb-4 group fuente-courier"
           style={{ fontSize: 11 }}
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span>VOLVER AL ESCRITORIO</span>
+          <span>VOLVER</span>
         </button>
 
         <ManilaFolder>
