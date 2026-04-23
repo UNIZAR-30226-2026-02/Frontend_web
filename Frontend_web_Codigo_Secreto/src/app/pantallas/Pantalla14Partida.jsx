@@ -639,6 +639,13 @@ export function PantallaPartida() {
   const cartasAnterioresRef = useRef([]);
   const turnoAnteriorRef = useRef(null);
 
+  // Clave única para esta partida (utilizada para recargar el mismo orden de cartas
+  // aunque se recargue la página o se reconecte).
+  const storageKey = `card_order_${idPartida}`;    
+  // Constante para guardar en memoria el orden de las cartas la primera vez que se carga 
+  // la pantalla para después poder ponerlas en ese mismo orden.
+  const initialCardOrderRef = useRef(null);
+
   // Sincronizamos las refs cada vez que las variables oficiales cambien.
   useEffect(() => { 
     cartasAnterioresRef.current = cartas; 
@@ -688,6 +695,7 @@ export function PantallaPartida() {
 
     // Comprobación de finalización de partida
     if (data.estado === 'finalizada') {
+      localStorage.removeItem(storageKey);
       navigate(`/fin-partida/${idPartida}`);
       return; // Detenemos la ejecución, ya no importa el resto del tablero
     }
@@ -696,15 +704,40 @@ export function PantallaPartida() {
     if (data.tablero?.cartas){
       // Importante: el backend da las cartas desordenadas (en función de su fecha de actualización)
       // y hay que ordenarlas para que siempre se muestren en el tablero en el mismo orden.
-      const sortedCartas = [...data.tablero.cartas].sort((a, b) => a.id_carta_tablero - b.id_carta_tablero);
+      const cartasRaw = data.tablero.cartas;
+
+      // Intentar recuperar el orden de cartas guardado en sessionStorage
+      if (initialCardOrderRef.current === null) {
+        const savedOrder = localStorage.getItem(storageKey);
+        if (savedOrder) {
+          initialCardOrderRef.current = JSON.parse(savedOrder);
+          console.log("Orden restaurado de localStorage:", initialCardOrderRef.current);
+        }
+      }
+
+      // Si aún no tenemos orden (primera vez), guardar el orden actual
+      if (initialCardOrderRef.current === null && cartasRaw.length > 0) {
+        initialCardOrderRef.current = cartasRaw.map(c => c.id_carta_tablero);
+        localStorage.setItem(storageKey, JSON.stringify(initialCardOrderRef.current));
+        console.log("Orden inicial guardado en localStorage:", initialCardOrderRef.current);
+      }
+
+      // Reordenar las cartas según el orden guardado
+      let cartasOrdenadas = cartasRaw;
+      if (initialCardOrderRef.current) {
+        const cartaMap = new Map(cartasRaw.map(c => [c.id_carta_tablero, c]));
+        cartasOrdenadas = initialCardOrderRef.current
+          .map(id => cartaMap.get(id))
+          .filter(c => c !== undefined);   // Seguridad por si falta alguna carta
+      }
       
       // Función para evaluar qué tiene que mostrar en el modal de retroalimentación para el usuario.
-      evaluarFeedbackCartaRevelada(cartasAnterioresRef.current, sortedCartas, turnoAnteriorRef.current, equipoRef.current,
+      evaluarFeedbackCartaRevelada(cartasAnterioresRef.current, cartasOrdenadas, turnoAnteriorRef.current, equipoRef.current,
                                                                                    setFeedbackCarta, playDisparo);
       
-      const cartasConSimulacion = sortedCartas.map((carta, index) => ({
+      const cartasConSimulacion = cartasOrdenadas.map((carta, index) => ({
         ...carta,
-        imagen_url: carta.palabra || carta.palabra /*|| (isSimulacion ? simulatedCardImages[index % simulatedCardImages.length] : carta.imagen_url)*/,
+        imagen_url: carta.palabra /*|| (isSimulacion ? simulatedCardImages[index % simulatedCardImages.length] : carta.imagen_url)*/,
         palabra: /*isSimulacion ? (carta.palabra || `Carta ${carta.id_carta_tablero}`) :*/ carta.palabra,
       }));
       setCartas(cartasConSimulacion);
@@ -791,18 +824,12 @@ export function PantallaPartida() {
         // le envía el estado del tablero personalizado (mostrando la identidad de las 
         // cartas o no en función de si es jefe o agente).
         client.subscribe(`/topic/partidas/${idPartida}/estado`, (msg) => {
-          /*const data = JSON.parse(msg.body);
-          
-          // Comprobación de finalización de partida
-          if (data.estado === 'finalizada') {
-            navigate(`/fin-partida/${idPartida}`);
-            return; // Detenemos la ejecución, ya no importa el resto del tablero
-          }*/
 
           const payload = msg.body;
           
           // Si es exactamente "finalizada" (case-insensitive), redirigir
           if (payload.toLowerCase() === 'finalizada') {
+            localStorage.removeItem(storageKey);
             navigate(`/fin-partida/${idPartida}`);
             return;
           }
@@ -810,6 +837,7 @@ export function PantallaPartida() {
           try {
             const data = JSON.parse(payload);
             if (data.estado === 'finalizada') {
+              localStorage.removeItem(storageKey);
               navigate(`/fin-partida/${idPartida}`);
               return;
             }
@@ -823,6 +851,7 @@ export function PantallaPartida() {
           
           // Si es exactamente "finalizada" (case-insensitive), redirigir
           if (payload.toLowerCase() === 'finalizada') {
+            localStorage.removeItem(storageKey);
             navigate(`/fin-partida/${idPartida}`);
             return;
           }
@@ -830,6 +859,7 @@ export function PantallaPartida() {
           try {
             const data = JSON.parse(payload);
             if (data.estado === 'finalizada') {
+              localStorage.removeItem(storageKey);
               navigate(`/fin-partida/${idPartida}`);
               return;
             }
@@ -968,6 +998,10 @@ export function PantallaPartida() {
         method: "DELETE",
         credentials: "include"
       });
+
+      // Se borra el orden de cartas de este local storage porque ya ha terminado 
+      // la partida para el usuario que ha abandonado.
+      localStorage.removeItem(storageKey);
       navigate("/home");
     } catch (err) {
       console.error(err);
