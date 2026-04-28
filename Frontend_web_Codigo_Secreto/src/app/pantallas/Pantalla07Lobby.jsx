@@ -19,12 +19,38 @@ import { obtenerTemasJugador } from "../api/apiPartidas";
 const WS_URL = import.meta.env.VITE_WS_URL;
 const API_BASE = import.meta.env.VITE_API_URL;
 
+// Importamos de los assets de avatares (mismos que en perfil)
+import Magia from '../../assets/1_magia.jpeg';
+import Hist from '../../assets/2_historico.jpeg';
+import Subm from "../../assets/3_vidasubmarina.jpeg";
+import Cyber from "../../assets/4_cyberpunk.jpeg";
+import Natur from "../../assets/5_naturaleza.jpeg";
+
+// Mapa de ID de avatar a imagen importada
+const AVATAR_MAP = {
+  1: Magia,
+  2: Hist,
+  3: Subm,
+  4: Cyber,
+  5: Natur,
+};
+
+// Helper para obtener la imagen del avatar según el ID
+const getAvatarSrc = (fotoPerfilId) => {
+  if (!fotoPerfilId) return null;
+  const idNum = Number(fotoPerfilId);
+  return AVATAR_MAP[idNum] || null;
+};
+
+
 // Componente de slot de jugador
 function PlayerSlot({ player, teamColor }) {
   const isEmpty = !player || player.tag?.includes("Vacante");
   const colors = teamColor === "rojo"
     ? { bg: "#8b2020", text: "#e08080", border: "#a03030" }
     : { bg: "#2a3a5a", text: "#80a0d0", border: "#3a5a8a" };
+  
+  const avatarSrc = getAvatarSrc(player?.foto_perfil);
 
   return (
     <div className={`p-2.5 sm:p-3 rounded-sm border transition-all ${isEmpty
@@ -33,12 +59,21 @@ function PlayerSlot({ player, teamColor }) {
     >
       <div className="flex items-center gap-2 sm:gap-3">
         {!isEmpty && (
-          <div
-            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: `${colors.bg}30`, border: `1px solid ${colors.border}` }}
-          >
-            <User className="w-3.5 h-3.5" style={{ color: colors.text }} />
-          </div>
+          avatarSrc ? (
+            <img
+              src={avatarSrc}
+              alt="avatar"
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover flex-shrink-0"
+              style={{ border: `1px solid ${colors.border}` }}
+            />
+          ) : (
+            <div
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: `${colors.bg}30`, border: `1px solid ${colors.border}` }}
+            >
+              <User className="w-3.5 h-3.5" style={{ color: colors.text }} />
+            </div>
+          )
         )}
         <div className="min-w-0">
           <p
