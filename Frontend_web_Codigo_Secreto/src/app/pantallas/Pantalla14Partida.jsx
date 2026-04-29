@@ -771,8 +771,21 @@ export function PantallaPartida() {
       setCartaSeleccionada(null);   // Limpiar selección anterior del tablero
     }
 
-    // Actualizar votos si vienen
-    if (data.votos_turno_actual) setVotosActuales(data.votos_turno_actual);
+    // Actualizar votos. Estos votos son por carta, no por turno completo. Hay que comprobar
+    // si el usuario ya votó para esa carta concreta y dejarle votar si no es así, aunque 
+    // sea dentro del mismo turno. 
+    if (data.votos_turno_actual) {
+      setVotosActuales(data.votos_turno_actual);
+      // Mirar si en los votos ya está el de ese usuario. Si sí, no le deja volver a votar.
+      // Si no, le deja votar de nuevo.
+      const miTag = user?.tag;
+      if (miTag) {
+        setMiVotoEnviado(data.votos_turno_actual.some(v => v.tag === miTag));
+      }
+    } else {
+      // Si no hay array de votos (ronda nueva, pista recién enviada...), asumimos que no ha votado
+      setMiVotoEnviado(false);
+    }
   }, [navigate, idPartida, /*isSimulacion, simulatedCardImages*/]); // Dependencias necesarias para la redirección a fin de partida.
 
   // ------------------------------------------------------------
