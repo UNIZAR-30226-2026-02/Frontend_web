@@ -367,7 +367,7 @@ function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista, esMiTurno }) {
   return (
     <DarkCard style={{ padding: "1.25rem" }}>
       <h3 style={{ fontFamily: "var(--font-special-elite)", color: "var(--theme-gold)", letterSpacing: "0.1em", fontSize: "14px", marginBottom: "0.75rem" }}>
-        DAR PISTA (RF-15)
+        DAR PISTA
       </h3>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
         <div>
