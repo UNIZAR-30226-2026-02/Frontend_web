@@ -22,5 +22,10 @@ export default defineConfig({
   },
   // Archivos extra que Vite debe procesar
   assetsInclude: ['**/*.svg', '**/*.csv'],
+  test: {
+    environment: 'jsdom', // Fundamental para que React Testing Library funcione
+    globals: true,        // Para no tener que importar 'describe' o 'it' en cada archivo
+    setupFiles: './tests/setupTests.js', // Ruta al archivo de configuración
+  }
 })
 
