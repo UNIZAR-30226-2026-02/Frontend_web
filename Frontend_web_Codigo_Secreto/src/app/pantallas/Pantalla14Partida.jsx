@@ -320,6 +320,8 @@ function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista, esMiTurno }) {
 
   const handleSend = () => {
     if (!palabra.trim()) return;
+    // Comprobación de longitud de la pista.
+    if (palabra.trim().length > 20) return;
     onEnviarPista(palabra.trim().toUpperCase(), numero);
   };
 
@@ -377,6 +379,7 @@ function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista, esMiTurno }) {
           <input
             type="text"
             value={palabra}
+            maxLength={20}
             onChange={(e) => {
               const val = e.target.value.replace(/\s/g, "");
               setPalabra(val.toUpperCase());
