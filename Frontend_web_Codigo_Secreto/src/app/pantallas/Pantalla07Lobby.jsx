@@ -49,8 +49,8 @@ function PlayerSlot({ player, teamColor }) {
   const colors = teamColor === "rojo"
     ? { bg: "#8b2020", text: "#e08080", border: "#a03030" }
     : { bg: "#2a3a5a", text: "#80a0d0", border: "#3a5a8a" };
-  
-  const avatarSrc = getAvatarSrc(player?.foto_perfil);
+
+  const avatarSrc = getAvatarSrc(player?.foto_perfil ? Number(player.foto_perfil) : 1);
 
   return (
     <div className={`p-2.5 sm:p-3 rounded-sm border transition-all ${isEmpty
