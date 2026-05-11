@@ -8,6 +8,7 @@ import logo from '../../assets/logo.png';
 import { useContext } from 'react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { loginConGoogle } from "../api/apiLogin";
+import { obtenerEstadoPartida } from "../api/apiPartidas";
 import { UserContext } from "../components/UserContext";
 
 export function Pantalla01Login() {
@@ -50,9 +51,21 @@ export function Pantalla01Login() {
 
         // IMPORTANTE: para la reconexión.
         if (res.partida_activa_id) {
+
           // El jugador tiene una partida en curso y se le redirige a ella directamente.
           console.log("Partida en curso detectada. Reconectando...");
-          navigate(`/partida/${res.partida_activa_id}`);
+
+          // Obtener estado 
+          const estadoPartida = await obtenerEstadoPartida(res.partida_activa_id);
+
+          // En función del estado se redirige al lobby, partida o al home.
+          if(estadoPartida === "esperando"){
+            navigate(`/lobby/${res.partida_activa_id}`);
+          } else if(estadoPartida === "en_curso"){
+            navigate(`/partida/${res.partida_activa_id}`);
+          } else{
+            navigate("/home");
+          }
 
         } else {
           // El jugador no tiene ninguna partida en curso. Redirección normal al Home.

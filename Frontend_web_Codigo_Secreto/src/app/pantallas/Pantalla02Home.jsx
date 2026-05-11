@@ -5,7 +5,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import "../components/Escritorio.css"; 
-import { unirsePartidaPrivada, abandonarPartida } from "../api/apiPartidas";
+import { unirsePartidaPrivada, abandonarPartida, obtenerEstadoPartida } from "../api/apiPartidas";
 import { obtenerPerfil } from "../api/apiJugador";
 
 import { ManilaFolder, RedStamp, FBISeal } from "../components/ScreenFrame";
@@ -37,8 +37,18 @@ export function Pantalla02Home() {
             "Tiene una partida en curso. ¿Desea volver a ella? (Aceptar = Sí, Cancelar = Abortar misión)"
           );
           if (confirmar) {
-            // Reanudar partida
-            navigate(`/partida/${idPartida}`);
+            // Obtener el estado actual de la partida
+            const estadoPartida = await obtenerEstadoPartida(idPartida);
+            // En función del estado se redirige al lobby, partida o al home.
+            if (estadoPartida === "esperando") {
+              navigate(`/lobby/${idPartida}`);
+            } else if (estadoPartida === "en_curso") {
+              navigate(`/partida/${idPartida}`);
+            } else {
+              // Si es finalizada se va al home
+              console.warn("Estado inesperado de partida:", estadoPartida);
+              navigate("/home");
+            }
           } else {
             // Abortar misión
             await abandonarPartida(idPartida);

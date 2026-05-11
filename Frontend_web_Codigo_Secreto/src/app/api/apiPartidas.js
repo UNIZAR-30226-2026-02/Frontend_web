@@ -48,6 +48,25 @@ export async function obtenerPartidasPublicas() {
   return response.json();
 }
 
+// -------------- ESTADO DE LA PARTIDA --------------
+
+// Obtener el estado actual de una partida ("esperando", "en_curso" o "finalizada")
+// -> GET /api/partidas/{id_partida}/situacion
+export async function obtenerEstadoPartida(idPartida) {
+  const response = await fetch(`${BASE_URL}/partidas/${idPartida}/situacion`, {
+    method: 'GET',
+    credentials: 'include'
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || 'No se pudo obtener el estado de la partida');
+  }
+
+  const data = await response.json();
+  return data.estado; // Devuelve directamente el string del estado ("esperando", "en_curso" o "finalizada")
+}
+
 // -------------- CREACIÓN DE PARTIDA --------------
 
 // RF-12: Crear partida -> POST /api/partidas
