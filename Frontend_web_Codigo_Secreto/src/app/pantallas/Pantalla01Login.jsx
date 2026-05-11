@@ -49,7 +49,7 @@ export function Pantalla01Login() {
         loginUsuario(res.jugador);
 
         // IMPORTANTE: para la reconexión.
-        if (res.jugador.partida_activa_id) {
+        if (res.partida_activa_id) {
           // El jugador tiene una partida en curso y se le redirige a ella directamente.
           console.log("Partida en curso detectada. Reconectando...");
           navigate(`/partida/${res.jugador.partida_activa_id}`);
