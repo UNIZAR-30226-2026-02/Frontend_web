@@ -52,7 +52,7 @@ export function Pantalla01Login() {
         if (res.partida_activa_id) {
           // El jugador tiene una partida en curso y se le redirige a ella directamente.
           console.log("Partida en curso detectada. Reconectando...");
-          navigate(`/partida/${res.jugador.partida_activa_id}`);
+          navigate(`/partida/${res.partida_activa_id}`);
 
         } else {
           // El jugador no tiene ninguna partida en curso. Redirección normal al Home.
