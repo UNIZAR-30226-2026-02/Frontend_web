@@ -8,7 +8,6 @@ import woodTexture from '../../assets/wood.png';
 import { IconoBala } from "./iconoBala";
 import { UserContext } from "./UserContext";
 import { useContext } from "react";
-import { useSessionGuard } from "../hooks/useSessionGuard";
 
 // Importaciones de todos los avatares disponibles
 import Magia from '../../assets/1_magia.jpeg';
@@ -41,7 +40,6 @@ const MAPA_AVATARES = {
 };
 
 export function Layout() {
-  useSessionGuard();
   const location = useLocation();
   const navigate = useNavigate();
   const hideProfile = hideProfileRoutes.some(r => location.pathname === r || location.pathname.startsWith(`${r}/`));
