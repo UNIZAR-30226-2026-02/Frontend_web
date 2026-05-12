@@ -471,7 +471,7 @@ function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, vo
         <span className="voting-label-xs">
           {/* TODO: buscar del backend el número de jugadores en ese equipo, porque no tiene
           por qué coincidir con la mitad. */}
-          VOTOS ACTUALES: {votosActuales?.length || 0}/{Math.ceil((totalJugadores - 1) / 2) || "?"} 
+          VOTOS ACTUALES: {votosActuales?.length || 0}/{totalJugadores - 1 || "?"} 
         </span>
         <div className="vote-dots-container">
           {(votosActuales || []).map((v, i) => (
@@ -535,19 +535,19 @@ const evaluarFeedbackCartaRevelada = (cartasViejas, cartasNuevas, turnoAnterior,
       let color = "#cc3333";
       
       if (tipoCarta && equipoUsuarioNorm && tipoCarta === equipoUsuarioNorm) {
-        mensaje = "¡Has encontrado a un agente amigo!";
+        mensaje = "¡Ha sido revelado un agente amigo!";
         color = "#50a050";
         // Acierto: NO llamamos a onCartaIncorrecta
       } else if (tipoCarta === "civil") {
-        mensaje = "Has encontrado a un civil";
+        mensaje = "¡Ha sido revelado un civil!";
         color = "#cccccc";
         onCartaIncorrecta?.();
       } else if (tipoCarta === "asesino") {
-        mensaje = "¡Has encontrado al asesino!";
+        mensaje = "¡Ha sido revelado el asesino!";
         color = "#000000";
         onCartaIncorrecta?.();
       } else {
-        mensaje = "Has encontrado a un agente enemigo";
+        mensaje = "¡Ha sido revelado un agente enemigo!";
         color = "#cc3333";
         onCartaIncorrecta?.();
       }
@@ -616,6 +616,8 @@ export function PantallaPartida() {
   const [miVotoEnviado, setMiVotoEnviado] = useState(false);
   const [totalRojo, setTotalRojo] = useState(0);
   const [totalAzul, setTotalAzul] = useState(0);
+  const [totalJugadoresRojo, setTotalJugadoresRojo] = useState(0);
+  const [totalJugadoresAzul, setTotalJugadoresAzul] = useState(0);
   // Estados para la fase y el marcador
   const [faseTurno, setFaseTurno] = useState(null);
   const [cartasRojasRestantes, setCartasRojasRestantes] = useState(0);
@@ -757,6 +759,10 @@ export function PantallaPartida() {
     // Utilizar 'cartasRojasRestantes' y 'cartasAzulesRestantes' para mostrar el marcador de cada equipo.
     if (data.cartas_rojas_restantes !== undefined) setCartasRojasRestantes(data.cartas_rojas_restantes);
     if (data.cartas_azules_restantes !== undefined) setCartasAzulesRestantes(data.cartas_azules_restantes);
+
+    // Actualizar total de jugadores por equipo
+    if (data.total_jugadores_rojos !== undefined) setTotalJugadoresRojo(data.total_jugadores_rojos);
+    if (data.total_jugadores_azules !== undefined) setTotalJugadoresAzul(data.total_jugadores_azules);
 
     // Manejo de pista actual:
     // - Si el backend envía una pista, significa que estamos en medio de una votación.
@@ -1173,7 +1179,7 @@ export function PantallaPartida() {
               cartaSeleccionada={cartaSeleccionada}
               palabraSeleccionada={palabraSeleccionada}
               votosActuales={votosActuales}
-              totalJugadores={3} // Se puede obtener dinámicamente del backend
+              totalJugadores={turnoActual === 'rojo' ? totalJugadoresRojo : totalJugadoresAzul}
               onVotar={handleVotar}
               puedoVotar={puedoVotar}
             />
