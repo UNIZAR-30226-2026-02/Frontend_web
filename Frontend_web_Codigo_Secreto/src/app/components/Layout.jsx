@@ -8,7 +8,7 @@ import woodTexture from '../../assets/wood.png';
 import { IconoBala } from "./iconoBala";
 import { UserContext } from "./UserContext";
 import { useContext } from "react";
-import { useSessionGuard } from "./hooks/useSessionGuard";
+import { useSessionGuard } from "../hooks/useSessionGuard";
 
 // Importaciones de todos los avatares disponibles
 import Magia from '../../assets/1_magia.jpeg';
