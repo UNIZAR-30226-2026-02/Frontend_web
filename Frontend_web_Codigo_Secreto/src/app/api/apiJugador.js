@@ -9,19 +9,19 @@ const BASE_URL = import.meta.env.VITE_API_URL;
  
 
 // Obtener perfil del jugador autenticado → GET /api/jugadores
-export async function obtenerPerfil(navigate = null) {
+export async function obtenerPerfil(navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/jugadores`, {
     method: 'GET',
     credentials: 'include',
   });
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'No se pudo cargar tu perfil');
+    return handleErrorResponse(res, navigate, 'No se pudo cargar tu perfil', showToast);
   }
   return res.json();
 }
 
 // Actualizar tag y foto de perfil → PUT /api/jugadores
-export async function actualizarPerfil({ tag, foto_perfil }, navigate = null) {
+export async function actualizarPerfil({ tag, foto_perfil }, navigate = null, showToast = null) {
   const body = {};
   if (tag !== undefined) body.tag = tag;
   if (foto_perfil !== undefined) body.foto_perfil = foto_perfil;
@@ -34,50 +34,50 @@ export async function actualizarPerfil({ tag, foto_perfil }, navigate = null) {
   });
  
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'No se pudo actualizar tu perfil');
+    return handleErrorResponse(res, navigate, 'No se pudo actualizar tu perfil', showToast);
   }
   return res.json();
 }
 
 // Historial de partidas → GET /api/jugadores/historial
-export async function obtenerHistorial(navigate = null) {
+export async function obtenerHistorial(navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/jugadores/historial`, {
     method: 'GET',
     credentials: 'include',
   });
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'No se pudo cargar tu historial de partidas');
+    return handleErrorResponse(res, navigate, 'No se pudo cargar tu historial de partidas', showToast);
   }
   return res.json();
 }
  
 // RF-5: Logros del jugador → GET /api/jugadores/logros
-export async function obtenerLogros(navigate = null) {
+export async function obtenerLogros(navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/jugadores/logros`, {
     method: 'GET',
     credentials: 'include',
   });
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'No se pudieron cargar tus logros');
+    return handleErrorResponse(res, navigate, 'No se pudieron cargar tus logros', showToast);
   }
   return res.json();
 }
  
 // Personalizaciones del jugador → GET /api/jugadores/personalizaciones
-export async function obtenerPersonalizaciones(navigate = null) {
+export async function obtenerPersonalizaciones(navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/jugadores/personalizaciones`, {
     method: 'GET',
     credentials: 'include',
   });
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'No se pudieron cargar tus personalizaciones');
+    return handleErrorResponse(res, navigate, 'No se pudieron cargar tus personalizaciones', showToast);
   }
   return res.json();
 }
  
 
 // Equipar / desequipar personalización → PUT /api/jugadores/equipar
-export async function equiparPersonalizacion(id_personalizacion, equipado, navigate = null) {
+export async function equiparPersonalizacion(id_personalizacion, equipado, navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/jugadores/equipar`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -85,7 +85,7 @@ export async function equiparPersonalizacion(id_personalizacion, equipado, navig
     body: JSON.stringify({ id_personalizacion, equipado }),
   });
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'No se pudo equipar la personalización');
+    return handleErrorResponse(res, navigate, 'No se pudo equipar la personalización', showToast);
   }
   // Manejar respuesta vacía (body vacío pero status 200)
   const text = await res.text();

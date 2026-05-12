@@ -8,7 +8,7 @@ import { handleErrorResponse } from './errorHandler';
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 // RF-02: Login con Google -> POST /api/auth/login
-export async function loginConGoogle(idToken, navigate = null) {
+export async function loginConGoogle(idToken, navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/auth/login`, {
     method: "POST",
     headers: {
@@ -19,14 +19,14 @@ export async function loginConGoogle(idToken, navigate = null) {
   });
 
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'No se pudo autenticar. Intenta de nuevo');
+    return handleErrorResponse(res, navigate, 'No se pudo autenticar. Intenta de nuevo', showToast);
   }
 
   return res.json();
 }
 
 // RF-01: Registro de nuevo usuario -> POST /api/auth/registro
-export async function registroNuevoUsuario(idToken, tag, navigate = null) {
+export async function registroNuevoUsuario(idToken, tag, navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/auth/registro`, {
     method: "POST",
     headers: {
@@ -37,35 +37,35 @@ export async function registroNuevoUsuario(idToken, tag, navigate = null) {
   });
 
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'No se pudo crear la cuenta. Intenta con otro nombre de usuario');
+    return handleErrorResponse(res, navigate, 'No se pudo crear la cuenta. Intenta con otro nombre de usuario', showToast);
   }
 
   return res.json();
 }
 
 // RF-XX: Logout -> POST /api/auth/logout
-export async function logoutUsuario(navigate = null) {
+export async function logoutUsuario(navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/auth/logout`, {
     method: "POST",
     credentials: "include"
   });
 
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'Error al cerrar sesión');
+    return handleErrorResponse(res, navigate, 'Error al cerrar sesión', showToast);
   }
 
   return res.ok; 
 }
 
 // RF-XX: Desactivar cuenta -> PUT /api/auth/desactivar
-export async function desactivarCuentaUsuario(navigate = null) {
+export async function desactivarCuentaUsuario(navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/auth/desactivar`, {
     method: "PUT",
     credentials: "include"
   });
 
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'Error al desactivar la cuenta en el servidor.');
+    return handleErrorResponse(res, navigate, 'Error al desactivar la cuenta en el servidor.', showToast);
   }
 
   return res.ok; 

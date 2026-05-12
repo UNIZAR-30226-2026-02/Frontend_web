@@ -8,40 +8,40 @@ import { handleErrorResponse } from './errorHandler';
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 // Obtener TODOS los temas activos del sistema (para el selector de la Pantalla12CrearPartida)
-export async function obtenerTemasActivos(navigate = null) {
+export async function obtenerTemasActivos(navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/temas/activos`, {
     method: 'GET',
     credentials: 'include',
   });
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'Error al obtener los temas disponibles');
+    return handleErrorResponse(res, navigate, 'Error al obtener los temas disponibles', showToast);
   }
   return res.json();
 }
 
 // Obtener los temas propios del jugador logueado. -> GET /api/jugadores/temas
-export async function obtenerTemasJugador(navigate = null) {
+export async function obtenerTemasJugador(navigate = null, showToast = null) {
   const response = await fetch(`${BASE_URL}/jugadores/temas`, {
     method: 'GET',  
     credentials: 'include' // Necesario para enviar la cookie que contiene el JWT.
   });
 
   if (!response.ok) {
-    return handleErrorResponse(response, navigate, "No se pudo obtener tus temas guardados");
+    return handleErrorResponse(response, navigate, "No se pudo obtener tus temas guardados", showToast);
   }
 
   return response.json();
 }
 
 // Obtener TODAS las partidas públicas en estado 'esperando'. -> GET /api/partidas/publicas
-export async function obtenerPartidasPublicas(navigate = null) {
+export async function obtenerPartidasPublicas(navigate = null, showToast = null) {
   const response = await fetch(`${BASE_URL}/partidas/publicas`, {
     method: 'GET',  
     credentials: 'include' // Necesario para enviar la cookie que contiene el JWT.
   });
 
   if (!response.ok) {
-    return handleErrorResponse(response, navigate, "No se pudieron cargar las partidas públicas disponibles");
+    return handleErrorResponse(response, navigate, "No se pudieron cargar las partidas públicas disponibles", showToast);
   }
 
   return response.json();
@@ -51,14 +51,14 @@ export async function obtenerPartidasPublicas(navigate = null) {
 
 // Obtener el estado actual de una partida ("esperando", "en_curso" o "finalizada")
 // -> GET /api/partidas/{id_partida}/situacion
-export async function obtenerEstadoPartida(idPartida, navigate = null) {
+export async function obtenerEstadoPartida(idPartida, navigate = null, showToast = null) {
   const response = await fetch(`${BASE_URL}/partidas/${idPartida}/situacion`, {
     method: 'GET',
     credentials: 'include'
   });
 
   if (!response.ok) {
-    return handleErrorResponse(response, navigate, 'No se pudo obtener el estado de la partida');
+    return handleErrorResponse(response, navigate, 'No se pudo obtener el estado de la partida', showToast);
   }
 
   const data = await response.json();
@@ -68,7 +68,7 @@ export async function obtenerEstadoPartida(idPartida, navigate = null) {
 // -------------- CREACIÓN DE PARTIDA --------------
 
 // RF-12: Crear partida -> POST /api/partidas
-export async function crearPartida(datos, navigate = null) {
+export async function crearPartida(datos, navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/partidas/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -76,7 +76,7 @@ export async function crearPartida(datos, navigate = null) {
     body: JSON.stringify(datos),
   });
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'No se pudo crear la partida');
+    return handleErrorResponse(res, navigate, 'No se pudo crear la partida', showToast);
   }
   return res.json(); // LobbyStatusDTO
 }
@@ -86,14 +86,14 @@ export async function crearPartida(datos, navigate = null) {
 // -------------- LISTA PARTIDAS PÚBLICAS --------------
 
 // Al pulsar el botón de UNIRSE, se envía esta información al backend.
-export async function unirsePartidaPublica(idPartida, navigate = null) {
+export async function unirsePartidaPublica(idPartida, navigate = null, showToast = null) {
   const response = await fetch(`${BASE_URL}/partidas/${idPartida}/unirse/publica`, {
     method: 'POST',
     credentials: 'include' // Necesario para enviar la cookie que contiene el JWT.
   });
 
   if (!response.ok) {
-    return handleErrorResponse(response, navigate, "No se pudo unir a esta partida. Es posible que esté llena o ya haya comenzado");
+    return handleErrorResponse(response, navigate, "No se pudo unir a esta partida. Es posible que esté llena o ya haya comenzado", showToast);
   }
 
   return response.ok; 
@@ -101,14 +101,14 @@ export async function unirsePartidaPublica(idPartida, navigate = null) {
 
 // POST /api/partidas/{codigo}/unirse/privada
 // Función para unirse a una partida privada a partir de su código único.
-export async function unirsePartidaPrivada(codigo, navigate = null) {
+export async function unirsePartidaPrivada(codigo, navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/partidas/${codigo}/unirse/privada`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include'
   });
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'Código de partida inválido o expirado');
+    return handleErrorResponse(res, navigate, 'Código de partida inválido o expirado', showToast);
   }
   const id = await res.json();
   return { id_partida: id };
@@ -118,33 +118,33 @@ export async function unirsePartidaPrivada(codigo, navigate = null) {
 // -------------- FIN DE PARTIDA --------------
 
 // Abandonar una partida --> DELETE /api/partidas/{id_partida}/participantes
-export async function abandonarPartida(idPartida, navigate = null) {
+export async function abandonarPartida(idPartida, navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/partidas/${idPartida}/participantes`, {
     method: 'DELETE',
     credentials: 'include'
   });
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'No se pudo abandonar la partida');
+    return handleErrorResponse(res, navigate, 'No se pudo abandonar la partida', showToast);
   }
   return res.ok;
 }
 
 // Obtener los resultados finales de una partida -> GET /api/partida/{id_partida}/fin
-export async function obtenerResultadosPartida(idPartida, navigate = null) {
+export async function obtenerResultadosPartida(idPartida, navigate = null, showToast = null) {
   const response = await fetch(`${BASE_URL}/partida/${idPartida}/fin`, {
     method: 'GET',
     credentials: 'include' // Para que el backend pueda saber quién hace la petición.
   });
 
   if (!response.ok) {
-    return handleErrorResponse(response, navigate, "No se pudieron cargar los resultados de la partida");
+    return handleErrorResponse(response, navigate, "No se pudieron cargar los resultados de la partida", showToast);
   }
 
   return response.json();
 }
 
 // RF-21: Elegir equipo -> PUT /api/partidas/{id}/equipo
-export async function elegirEquipo(idPartida, equipo, navigate = null) {
+export async function elegirEquipo(idPartida, equipo, navigate = null, showToast = null) {
   const res = await fetch(`${BASE_URL}/partidas/${idPartida}/equipo`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -152,7 +152,7 @@ export async function elegirEquipo(idPartida, equipo, navigate = null) {
     body: JSON.stringify({ equipo }),
   });
   if (!res.ok) {
-    return handleErrorResponse(res, navigate, 'No se pudo cambiar el equipo');
+    return handleErrorResponse(res, navigate, 'No se pudo cambiar el equipo', showToast);
   }
   return res.json();
 }

@@ -15,6 +15,7 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { UserContext } from "../components/UserContext";
 import { obtenerTemasJugador } from "../api/apiPartidas";
+import { useToast } from "../context/ToastContext";
 
 const WS_URL = import.meta.env.VITE_WS_URL;
 const API_BASE = import.meta.env.VITE_API_URL;
@@ -92,6 +93,7 @@ export function Pantalla07Lobby() {
   const navigate = useNavigate();
   const { id_partida } = useParams();
   const { user } = useContext(UserContext);
+  const { showToast } = useToast();
 
   const partidaIniciadaRef = useRef(false);
 
@@ -196,6 +198,7 @@ export function Pantalla07Lobby() {
       },
       onStompError: (frame) => {
         console.error("STOMP lobby error:", frame);
+        showToast("Error de conexión en la sala de espera", "error");
       }
     });
 
