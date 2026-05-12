@@ -16,7 +16,7 @@ import { Pantalla13Tienda } from "./pantallas/Pantalla13Tienda";
 import { PantallaPartida } from "./pantallas/Pantalla14Partida";
 import { Pantalla15FinPartida } from "./pantallas/Pantalla15FinPartida";
 import { Pantalla16Historial } from "./pantallas/Pantalla16Historial";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
 // Componente para proteger rutas que requieren autenticación
