@@ -11,13 +11,12 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback, useContext } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useSound } from "../hooks/useSound";
 import { obtenerPerfil, obtenerPersonalizaciones } from "../api/apiJugador";
 import { abandonarPartida } from "../api/apiPartidas";
-import { handleErrorResponse } from '../api/errorHandler';
 
 import {
   Clock, Send as SendIcon, Check, Vote, Skull,
@@ -472,7 +471,7 @@ function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, vo
         <span className="voting-label-xs">
           {/* TODO: buscar del backend el número de jugadores en ese equipo, porque no tiene
           por qué coincidir con la mitad. */}
-          VOTOS ACTUALES: {votosActuales?.length || 0}/{Math.ceil((totalJugadores - 1) / 2) || "?"} 
+          VOTOS ACTUALES: {votosActuales?.length || 0}/{totalJugadores - 1 || "?"} 
         </span>
         <div className="vote-dots-container">
           {(votosActuales || []).map((v, i) => (
@@ -640,7 +639,6 @@ export function PantallaPartida() {
 
   // Estados para el feedback de carta revelada
   const [feedbackCarta, setFeedbackCarta] = useState(null);
-  const [feedbackEmpate, setFeedbackEmpate] = useState(null);
 
   // Guardamos las cartas anteriores y el turno sin provocar re-renderizados, para poder
   // detectar si la carta revelada era de un equipo u otro.
@@ -673,7 +671,8 @@ export function PantallaPartida() {
           credentials: "include"
         });
         if (!res.ok) {
-          await handleErrorResponse(res, navigate, "No se ha podido obtener el rol");
+          const errBody = await res.text();
+          throw new Error("No se ha podido obtener el rol");
         }
         const data = await res.json();
         setRol(data.rol);
@@ -748,14 +747,6 @@ export function PantallaPartida() {
         palabra: /*isSimulacion ? (carta.palabra || `Carta ${carta.id_carta_tablero}`) :*/ carta.palabra,
       }));
       setCartas(cartasConSimulacion);
-
-      // Detectar empate: si el turno cambia sin que se revele ninguna carta nueva
-      const revealedCountNew = cartasOrdenadas.filter(c => c.estado === "revelada").length;
-      const revealedCountOld = cartasAnterioresRef.current.filter(c => c.estado === "revelada").length;
-      if (data.equipo_turno_actual !== turnoActual && revealedCountNew === revealedCountOld) {
-        setFeedbackEmpate({ mensaje: "¡Empate en las votaciones! El turno pasa al otro equipo.", color: "#ffa500" });
-        setTimeout(() => setFeedbackEmpate(null), 1500);
-      }
     } 
     // Actualizar turno actual
     if (data.equipo_turno_actual !== undefined) setTurnoActual(data.equipo_turno_actual);
@@ -770,8 +761,8 @@ export function PantallaPartida() {
     if (data.cartas_azules_restantes !== undefined) setCartasAzulesRestantes(data.cartas_azules_restantes);
 
     // Actualizar total de jugadores por equipo
-    if (data.total_agentes_rojos !== undefined) setTotalJugadoresRojo(data.total_agentes_rojos);
-    if (data.total_agentes_azules !== undefined) setTotalJugadoresAzul(data.total_agentes_azules);
+    if (data.total_jugadores_rojos !== undefined) setTotalJugadoresRojo(data.total_jugadores_rojos);
+    if (data.total_jugadores_azules !== undefined) setTotalJugadoresAzul(data.total_jugadores_azules);
 
     // Manejo de pista actual:
     // - Si el backend envía una pista, significa que estamos en medio de una votación.
@@ -815,14 +806,11 @@ export function PantallaPartida() {
         const res = await fetch(`${API_BASE}/partidas/${idPartida}/estado`, {
           credentials: "include"
         });
-        if (!res.ok) {
-          await handleErrorResponse(res, navigate, "Error cargando estado inicial");
-        }
+        if (!res.ok) return;
         const data = await res.json();
         aplicarEstadoTablero(data);
       } catch (err) {
         console.warn("Error cargando estado inicial", err);
-        setError(err.message);
       } finally {
         setCargando(false);
       }
@@ -1037,7 +1025,7 @@ export function PantallaPartida() {
       localStorage.removeItem(storageKey);
       navigate("/home");
     } catch (err) {
-      setError(err.message);
+      console.error(err);
     }
   };
 
@@ -1191,7 +1179,7 @@ export function PantallaPartida() {
               cartaSeleccionada={cartaSeleccionada}
               palabraSeleccionada={palabraSeleccionada}
               votosActuales={votosActuales}
-              totalJugadores={equipo === "rojo" ? totalJugadoresRojo : totalJugadoresAzul}
+              totalJugadores={turnoActual === 'rojo' ? totalJugadoresRojo : totalJugadoresAzul}
               onVotar={handleVotar}
               puedoVotar={puedoVotar}
             />
@@ -1226,31 +1214,6 @@ export function PantallaPartida() {
                   style={{ fontSize: 16, color: feedbackCarta.color }}
                 >
                   {feedbackCarta.mensaje}
-                </p>
-              </div>
-              
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Popup de Empate en Votaciones */}
-      {feedbackEmpate && (
-        <>
-          {/* Fondo desenfocado */}
-          <div className="fixed inset-0 bg-black/50 z-50 backdrop-blur-[2px]" />
-
-          {/* Caja del modal con animación de entrada */}
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] w-[90%] max-w-sm animate-in fade-in zoom-in duration-200">
-            <div className="bg-[#1e1810] border-2 border-[#5a4a30] rounded-sm shadow-[6px_8px_32px_rgba(0,0,0,0.8)] p-6">
-
-              {/* Detalle del empate */}
-              <div className="bg-[#2a2218] border border-[#5a4a30]/40 rounded-sm p-5 text-center shadow-inner">
-                <p
-                  className="font-['Special_Elite',cursive] tracking-wide"
-                  style={{ fontSize: 16, color: feedbackEmpate.color }}
-                >
-                  {feedbackEmpate.mensaje}
                 </p>
               </div>
               
