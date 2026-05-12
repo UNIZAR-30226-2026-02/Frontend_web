@@ -46,10 +46,34 @@ export async function extraerMensajeError(response, mensajeDefecto) {
     // 4. Fallback: mensajeDefecto pasado o el genérico del catálogo
     return mensajeDefecto || ERROR_CATALOG["DEFAULT"];
 
+/**
+ * Maneja una respuesta de error del backend, extrayendo el mensaje y redirigiendo si es necesario.
+ * @param {Response} response - Respuesta del fetch
+ * @param {function} navigate - Función de navegación de React Router
+ * @param {string} mensajeDefecto - Mensaje por defecto
+ * @returns {Promise<never>} Lanza un Error con el mensaje descriptivo
+ */
+export async function handleErrorResponse(response, navigate, mensajeDefecto) {
+  const mensaje = await extraerMensajeError(response, mensajeDefecto);
+  
+  // Intentamos obtener el código de error
+  let errorCode = 'UNKNOWN';
+  try {
+    const body = await response.clone().json();
+    errorCode = body.error_code || 'UNKNOWN';
   } catch (e) {
-    // Si no se puede parsear el JSON (ej: error 502 Bad Gateway que devuelve HTML)
-    return mensajeDefecto || ERROR_CATALOG["DEFAULT"];
+    // Ignorar
   }
+  
+  // Si es un error de sesión, redirigir al lobby
+  const sessionErrors = ['SESSION_INVALIDATED', 'GOOGLE_TOKEN_EXPIRED', 'INACTIVE_ACCOUNT'];
+  if (sessionErrors.includes(errorCode)) {
+    navigate('/lobby');
+    throw new Error(mensaje); // Aunque redirigimos, lanzamos para que se maneje si es necesario
+  }
+  
+  // Para otros errores, solo lanzar el error
+  throw new Error(mensaje);
 }
 
 /**

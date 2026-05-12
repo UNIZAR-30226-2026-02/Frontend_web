@@ -16,6 +16,22 @@ import { Pantalla13Tienda } from "./pantallas/Pantalla13Tienda";
 import { PantallaPartida } from "./pantallas/Pantalla14Partida";
 import { Pantalla15FinPartida } from "./pantallas/Pantalla15FinPartida";
 import { Pantalla16Historial } from "./pantallas/Pantalla16Historial";
+import { useNavigate } from "react-router";
+import { useEffect } from "react";
+
+// Componente para proteger rutas que requieren autenticación
+function AuthGuard({ children }) {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = sessionStorage.getItem("jwt_token");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  return children;
+}
 
 export const router = createBrowserRouter([
   {
@@ -24,19 +40,55 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: Pantalla00Carga },
       { path: "login", Component: Pantalla01Login },
-      { path: "home", Component: Pantalla02Home },
-      { path: "misiones-publicas", Component: Pantalla03MisionesPublicas },
+      { 
+        path: "home", 
+        element: <AuthGuard><Pantalla02Home /></AuthGuard> 
+      },
+      { 
+        path: "misiones-publicas", 
+        element: <AuthGuard><Pantalla03MisionesPublicas /></AuthGuard> 
+      },
       { path: "manual", Component: Pantalla06Manual },
-      { path: "lobby/:id_partida", Component: Pantalla07Lobby },
-      { path: "social", Component: Pantalla08Social },
-      { path: "nombre-usuario-nuevo", Component: Pantalla05NombreUsuarioNuevo },
-      { path: "logros", Component: Pantalla10Logros},
-      { path: "perfil", Component: Pantalla11Perfil },
-      { path: "crear-mision", Component: Pantalla12CrearPartida },
-      { path: "tienda", Component: Pantalla13Tienda },
-      { path: "partida/:id_partida", Component: PantallaPartida },
-      { path: "fin-partida/:id_partida", Component: Pantalla15FinPartida },
-      { path: "historial", Component: Pantalla16Historial },
+      { 
+        path: "lobby/:id_partida", 
+        element: <AuthGuard><Pantalla07Lobby /></AuthGuard> 
+      },
+      { 
+        path: "social", 
+        element: <AuthGuard><Pantalla08Social /></AuthGuard> 
+      },
+      { 
+        path: "nombre-usuario-nuevo", 
+        element: <AuthGuard><Pantalla05NombreUsuarioNuevo /></AuthGuard> 
+      },
+      { 
+        path: "logros", 
+        element: <AuthGuard><Pantalla10Logros /></AuthGuard> 
+      },
+      { 
+        path: "perfil", 
+        element: <AuthGuard><Pantalla11Perfil /></AuthGuard> 
+      },
+      { 
+        path: "crear-mision", 
+        element: <AuthGuard><Pantalla12CrearPartida /></AuthGuard> 
+      },
+      { 
+        path: "tienda", 
+        element: <AuthGuard><Pantalla13Tienda /></AuthGuard> 
+      },
+      { 
+        path: "partida/:id_partida", 
+        element: <AuthGuard><PantallaPartida /></AuthGuard> 
+      },
+      { 
+        path: "fin-partida/:id_partida", 
+        element: <AuthGuard><Pantalla15FinPartida /></AuthGuard> 
+      },
+      { 
+        path: "historial", 
+        element: <AuthGuard><Pantalla16Historial /></AuthGuard> 
+      },
     ],
   },
 ]);

@@ -17,6 +17,7 @@ import SockJS from "sockjs-client";
 import { useSound } from "../hooks/useSound";
 import { obtenerPerfil, obtenerPersonalizaciones } from "../api/apiJugador";
 import { abandonarPartida } from "../api/apiPartidas";
+import { handleErrorResponse } from '../api/errorHandler';
 
 import {
   Clock, Send as SendIcon, Check, Vote, Skull,
@@ -672,8 +673,7 @@ export function PantallaPartida() {
           credentials: "include"
         });
         if (!res.ok) {
-          const errBody = await res.text();
-          throw new Error("No se ha podido obtener el rol");
+          await handleErrorResponse(res, navigate, "No se ha podido obtener el rol");
         }
         const data = await res.json();
         setRol(data.rol);
@@ -815,11 +815,14 @@ export function PantallaPartida() {
         const res = await fetch(`${API_BASE}/partidas/${idPartida}/estado`, {
           credentials: "include"
         });
-        if (!res.ok) return;
+        if (!res.ok) {
+          await handleErrorResponse(res, navigate, "Error cargando estado inicial");
+        }
         const data = await res.json();
         aplicarEstadoTablero(data);
       } catch (err) {
         console.warn("Error cargando estado inicial", err);
+        setError(err.message);
       } finally {
         setCargando(false);
       }
@@ -1034,7 +1037,7 @@ export function PantallaPartida() {
       localStorage.removeItem(storageKey);
       navigate("/home");
     } catch (err) {
-      console.error(err);
+      setError(err.message);
     }
   };
 
