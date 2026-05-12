@@ -59,7 +59,7 @@ export const router = createBrowserRouter([
       },
       { 
         path: "nombre-usuario-nuevo", 
-        element: <AuthGuard><Pantalla05NombreUsuarioNuevo /></AuthGuard> 
+        element: <Pantalla05NombreUsuarioNuevo /> 
       },
       { 
         path: "logros", 
