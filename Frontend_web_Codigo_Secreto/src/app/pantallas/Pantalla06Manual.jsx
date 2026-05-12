@@ -7,7 +7,7 @@ import { ScreenFrame, ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader, 
 import { Volume2, Music, Info, BookOpen, ArrowLeft } from "lucide-react";
 // NUEVO: Importamos el hook useSound para acceder al contexto de sonido
 import { useSound } from "../hooks/useSound";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import '../components/Manual.css'; 
 
 export function Pantalla06Manual() {

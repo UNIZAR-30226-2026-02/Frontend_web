@@ -1,6 +1,6 @@
 /* Pantalla de historial de partidas: Muestra las últimas 30 partidas */
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Trophy, Skull, Clock, Users, Loader2 } from "lucide-react";
 import { ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader } from "../components/ScreenFrame";
 import { IconoBala } from "../components/iconoBala";

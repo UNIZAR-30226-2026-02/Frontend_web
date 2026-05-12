@@ -1,7 +1,7 @@
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader, SubsectionLabel } from "../components/ScreenFrame";
 import { Globe, Lock, Clock, Palette, Check, Copy, ArrowLeft, Users } from "lucide-react"; 
 import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 // Importamos las llamadas a la API y el contexto del usuario.
 import { UserContext } from "../components/UserContext";

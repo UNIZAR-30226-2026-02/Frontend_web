@@ -5,7 +5,7 @@
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader } from "../components/ScreenFrame";
 import { Search, UserPlus, Trophy, TrendingUp, Flame, ArrowLeft, X, Users, UserCheck, UserX, Clock, User, Loader2 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { useSound } from "../hooks/useSound";
 
 // Importamos la API y el Hook de WebSockets

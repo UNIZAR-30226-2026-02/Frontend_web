@@ -5,7 +5,7 @@
 import { ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader, TapeStrip } from "../components/ScreenFrame";
 import { Search, Users, Clock, ArrowLeft, Filter, Loader2 } from "lucide-react"; 
 import { useState, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { usePartidasPublicas } from "../hooks/hooksPartidas";
 import { obtenerPartidasPublicas, obtenerTemasJugador, unirsePartidaPublica } from "../api/apiPartidas";
 

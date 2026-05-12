@@ -2,7 +2,7 @@
  * MODIFICADO: Se ha añadido soporte para música de fondo y efectos de sonido globales.
  */
 
-import { Outlet, useLocation, useNavigate } from "react-router";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { BookOpen } from "lucide-react";
 import woodTexture from '../../assets/wood.png';
 import { IconoBala } from "./iconoBala";

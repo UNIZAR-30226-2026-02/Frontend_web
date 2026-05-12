@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useContext } from 'react';
 import { ScreenFrame, ManilaFolder, RedStamp, FBISeal, TapeStrip } from "../components/ScreenFrame";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate, useLocation } from "react-router-dom";
 import { registroNuevoUsuario } from "../api/apiLogin";
 import { UserContext } from "../components/UserContext";
 

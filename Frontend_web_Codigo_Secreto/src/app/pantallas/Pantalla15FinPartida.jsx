@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ManilaFolder, SectionHeader, RedStamp, FBISeal } from "../components/ScreenFrame"; 
 import { Award, ArrowLeft } from "lucide-react";
 import { useSound } from "../hooks/useSound";

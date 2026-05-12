@@ -3,7 +3,7 @@
  */
 
 import { ScreenFrame, ManilaFolder, RedStamp, FBISeal, TapeStrip } from "../components/ScreenFrame";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import logo from '../../assets/logo.png';
 import { useContext } from 'react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';

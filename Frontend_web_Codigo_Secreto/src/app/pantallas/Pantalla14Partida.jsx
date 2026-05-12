@@ -11,7 +11,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback, useContext } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router-dom";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useSound } from "../hooks/useSound";

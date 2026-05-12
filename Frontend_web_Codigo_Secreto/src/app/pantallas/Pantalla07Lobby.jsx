@@ -10,7 +10,7 @@
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp, FBISeal, SectionHeader } from "../components/ScreenFrame";
 import { Crown, User, Copy, ArrowLeft, Fingerprint, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef, useContext, useCallback } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router-dom";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { UserContext } from "../components/UserContext";

@@ -27,7 +27,7 @@ import {
   Trophy, Medal, Star, Shield, Crosshair, Eye,
   Flame, Target, Users, Lock, Crown, ArrowLeft, Gamepad2, ShoppingBag, Loader2
 } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import {
   ScreenFrame, ManilaFolder, DarkCard, RedStamp,
   FBISeal, SectionHeader, SubsectionLabel

@@ -13,7 +13,7 @@
  */
 
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import {
   Package, Palette, Check, ArrowLeft, Loader2,
   AlertCircle, RefreshCw, Wand2, X, ShoppingCart,

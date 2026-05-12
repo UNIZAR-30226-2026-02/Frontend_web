@@ -3,7 +3,7 @@ import {
   Trophy, Target, Flame, Eye, Crown, Edit3, 
   Check, LogOut, ArrowLeft, X, Camera, Trash2, Palette, TrendingUp, Loader2,
 } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 import { UserContext } from "../components/UserContext";
 

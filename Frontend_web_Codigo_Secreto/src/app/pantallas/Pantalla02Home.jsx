@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import "../components/Escritorio.css"; 
 import { unirsePartidaPrivada, abandonarPartida, obtenerEstadoPartida } from "../api/apiPartidas";
 import { obtenerPerfil } from "../api/apiJugador";
