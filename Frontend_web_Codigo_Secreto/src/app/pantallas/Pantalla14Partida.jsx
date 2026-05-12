@@ -25,6 +25,7 @@ import {
 
 import { ScreenFrame, ManilaFolder, DarkCard, RedStamp } from "../components/ScreenFrame";
 import { UserContext } from "../components/UserContext";
+import { useToast } from "../context/ToastContext";
 import "../components/Partidas.css";
 
 // Configuración de conexión WebSocket y API
@@ -569,6 +570,7 @@ export function PantallaPartida() {
   const { id_partida: idPartida } = useParams();
   const { user } = useContext(UserContext);
   const { playDisparo, playCancelar } = useSound();
+  const { showToast } = useToast();
 
   const [temaMarcoColor, setTemaMarcoColor] = useState(localStorage.getItem('marco_carta_equipado') || colorBordePrueba);
   const [temaTableroColor, setTemaTableroColor] = useState(localStorage.getItem('fondo_tablero_equipado') || colorFondoTableroPrueba);
@@ -939,6 +941,14 @@ export function PantallaPartida() {
           const data = JSON.parse(msg.body);
           setFinPartida(data);
         });*/
+      },
+      onStompError: (frame) => {
+        console.error("STOMP error en partida:", frame);
+        showToast("Error de comunicación en la partida", "error");
+      },
+      onWebSocketError: (event) => {
+        console.error("WS error en partida:", event);
+        showToast("Se ha perdido la conexión con el servidor de juego", "warning");
       }
     });
 
