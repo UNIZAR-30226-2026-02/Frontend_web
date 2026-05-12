@@ -9,34 +9,34 @@
  *  PUT  /api/personalizaciones/equipar        → equipar una personalización
  */
 
+import { handleErrorResponse } from './errorHandler';
+
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 
 // Catálogo de temas/packs → GET /api/temas/activos
 // Retorna Array: { id_tema, nombre, descripcion, precio_balas, comprado }
 
-export async function obtenerTemasActivos() {
+export async function obtenerTemasActivos(navigate = null) {
   const res = await fetch(`${BASE_URL}/temas/activos`, {
     method: 'GET',
     credentials: 'include',
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'No se pudo cargar el catálogo de temas');
+    return handleErrorResponse(res, navigate, 'No se pudo cargar el catálogo de temas');
   }
   return res.json();
 }
 
 // Inventario de personalizaciones del jugador → GET /api/jugadores/personalizaciones
 // Retorna Array: { id_personalizacion, nombre, tipo, valor_visual, equipado, comprado }
-export async function obtenerPersonalizacionesJugador() {
+export async function obtenerPersonalizacionesJugador(navigate = null) {
   const res = await fetch(`${BASE_URL}/personalizaciones/activas`, {
     method: 'GET',
     credentials: 'include',
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'No se pudieron cargar las personalizaciones');
+    return handleErrorResponse(res, navigate, 'No se pudieron cargar las personalizaciones');
   }
   return res.json();
 }
@@ -45,7 +45,7 @@ export async function obtenerPersonalizacionesJugador() {
 // Comprar paquete de cartas → POST /api/tienda/comprar/tema
 // Envía:   { id_tema }
 // Retorna: { balas }   ← saldo restante
-export async function comprarTema(id_tema) {
+export async function comprarTema(id_tema, navigate = null) {
   const res = await fetch(`${BASE_URL}/tienda/comprar/tema`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -53,8 +53,7 @@ export async function comprarTema(id_tema) {
     body: JSON.stringify({ id_tema }),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'No se pudo comprar el paquete de cartas');
+    return handleErrorResponse(res, navigate, 'No se pudo comprar el paquete de cartas');
   }
   return res.json();
 }
@@ -62,7 +61,7 @@ export async function comprarTema(id_tema) {
 // Comprar personalización → POST /api/tienda/comprar/personalizacion
 // Envía:   { id_personalizacion }
 // Retorna: { balas }   ← saldo restante
-export async function comprarPersonalizacion(id_personalizacion) {
+export async function comprarPersonalizacion(id_personalizacion, navigate = null) {
   const res = await fetch(`${BASE_URL}/tienda/comprar/personalizacion`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -70,8 +69,7 @@ export async function comprarPersonalizacion(id_personalizacion) {
     body: JSON.stringify({ id_personalizacion }),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'No se pudo comprar la personalización');
+    return handleErrorResponse(res, navigate, 'No se pudo comprar la personalización');
   }
   return res.json();
 }
@@ -81,7 +79,7 @@ export async function comprarPersonalizacion(id_personalizacion) {
 
 // Equipar / desequipar personalización → PUT /api/jugadores/equipar
 // Envía:   { id_personalizacion, equipado }
-export async function equiparPersonalizacion(id_personalizacion, equipado) {
+export async function equiparPersonalizacion(id_personalizacion, equipado, navigate = null) {
   const res = await fetch(`${BASE_URL}/jugadores/equipar`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -89,8 +87,7 @@ export async function equiparPersonalizacion(id_personalizacion, equipado) {
     body: JSON.stringify({ id_personalizacion, equipado }),
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'No se pudo equipar la personalización');
+    return handleErrorResponse(res, navigate, 'No se pudo equipar la personalización');
   }
   // Manejar respuesta vacía (body vacío pero status 200)
   const text = await res.text();

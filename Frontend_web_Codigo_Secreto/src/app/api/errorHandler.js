@@ -70,11 +70,11 @@ export async function handleErrorResponse(response, navigate, mensajeDefecto) {
     // Ignorar
   }
   
-  // Si es un error de sesión, redirigir al lobby
+  // Si es un error de sesión, redirigir al login si navigate está disponible
   const sessionErrors = ['SESSION_INVALIDATED', 'GOOGLE_TOKEN_EXPIRED', 'INACTIVE_ACCOUNT'];
   if (sessionErrors.includes(errorCode)) {
-    navigate('/lobby');
-    throw new Error(mensaje); // Aunque redirigimos, lanzamos para que se maneje si es necesario
+    if (navigate) navigate('/login'); 
+    throw new Error(mensaje);
   }
   
   // Para otros errores, solo lanzar el error
