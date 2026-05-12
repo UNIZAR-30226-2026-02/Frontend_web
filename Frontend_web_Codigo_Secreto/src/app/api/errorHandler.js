@@ -45,6 +45,11 @@ export async function extraerMensajeError(response, mensajeDefecto) {
     
     // 4. Fallback: mensajeDefecto pasado o el genérico del catálogo
     return mensajeDefecto || ERROR_CATALOG["DEFAULT"];
+  } catch (err) {
+    // Si falla al parsear, devolver el mensaje por defecto
+    return mensajeDefecto || "Error desconocido";
+  }
+}
 
 /**
  * Maneja una respuesta de error del backend, extrayendo el mensaje y redirigiendo si es necesario.
