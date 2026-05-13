@@ -17,7 +17,6 @@ import Cyber from "../../assets/4_cyberpunk.jpeg";
 import Natur from "../../assets/5_naturaleza.jpeg";
 
 // Importaciones para el sistema de sonido
-import { SoundProvider } from '../context/SoundContext';
 import { BackgroundMusic } from '../context/MusicaFondo';
 import { GlobalSoundEffects } from '../context/GlobalSoundEffects';
 // Importación para las notificaciones globales del usuario.
@@ -68,13 +67,9 @@ export function Layout() {
   const fotoDePerfilSrc = MAPA_AVATARES[idFoto] || Magia;
 
   return (
-    // Envolvemos toda la aplicación con SoundProvider para que los componentes hijos
-    // puedan acceder al contexto de sonido (volumen, funciones de reproducción).
-    <SoundProvider>
-
-      {/* Envolvemos toda la aplicación con NotificacionesProvider para que los componentes hijos
-          puedan acceder al contexto de notificaciones */}
-      <NotificacionesProvider>
+    // Envolvemos toda la aplicación con NotificacionesProvider para que los componentes hijos
+    // puedan acceder al contexto de notificaciones
+    <NotificacionesProvider>
 
       {/* Componente que gestiona la música de fondo (inicio automático tras primera interacción) */}
       <BackgroundMusic />
@@ -129,7 +124,7 @@ export function Layout() {
                 {/* Balas de prueba 
                 <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 13 }}>500</span>
                 */}
-                {/* Balas dinámicas del usuario */}            
+                {/* Balas dinámicas del usuario */}
                 <span className="font-['Courier_Prime',monospace] text-[#d4b878]" style={{ fontSize: 13 }}>
                   {balas}
                 </span>
@@ -158,7 +153,6 @@ export function Layout() {
           <Outlet />
         </main>
       </div>
-      </NotificacionesProvider>
-    </SoundProvider>
+    </NotificacionesProvider>
   );
 }
