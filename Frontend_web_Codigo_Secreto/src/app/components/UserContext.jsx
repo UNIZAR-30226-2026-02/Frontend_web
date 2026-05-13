@@ -31,8 +31,47 @@ export function UserProvider({ children }) {
   // Referencia para mantener la conexión WebSocket activa
   const stompClientRef = useRef(null);
 
+  // Función que agrupa la lógica para limpiar completamente el rastro del usuario
+  // cuando cierra sesión o cuando se ejecuta checkSession sin que haya una cookie válida,
+  // para evitar usar tokens caducados.
+  const handleDesconexion = () => {
+    setUser(null);
+    sessionStorage.removeItem('jwt_token'); 
+  };
+
+  // Función para preguntar al backend: "¿Tengo una cookie de sesión válida?" y recuperar
+  // todos los datos del jugador logueado, si lo hay.
+  const checkSession = async () => {
+    try {
+      // Petición GET para obtener la información del usuario logueado (o no).
+      const response = await fetch(`${API_BASE_URL}/jugadores`, {
+        method: 'GET',
+        credentials: "include" 
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data); // Guardamos el perfil del agente (incluyendo sus balas)
+      } else {
+        // Primero desconectamos localmente para limpiar el token
+        handleDesconexion();
+        // Luego manejamos el error (que puede redirigir si no estamos en login)
+        await handleErrorResponse(response, null, 'No se pudo validar la sesión', showToast);
+      }
+    } catch (error) {
+      console.error("Error validando sesión:", error);
+      handleDesconexion(); // Si el servidor cae, también limpiamos para evitar inconsistencias
+    } finally {
+      setIsLoading(false); // Terminamos de cargar, ya podemos mostrar la UI
+    }
+  };
+
   // Se ejecuta al refrescar la página (F5) o abrir la app
   useEffect(() => {
+    // Limpieza preventiva si entramos en el login
+    if (window.location.pathname === '/login' || window.location.pathname === '/') {
+      handleDesconexion();
+    }
     checkSession();
   }, []);
 
@@ -59,7 +98,6 @@ export function UserProvider({ children }) {
 
         // Nos suscribimos a la cola privada del usuario, para ser notificados de cambios en 
         // su perfil.
-        // TODO: comprobar que funciona con el endpoint utilizado en backend.
         client.subscribe("/user/queue/jugadores", (message) => {
           if (message.body) {
             // Actualización del objeto 'user'.
@@ -97,43 +135,6 @@ export function UserProvider({ children }) {
     };
     
   }, [user?.id_google]); // Se ejecuta este useEffect cuando cambia el id_google del usuario logueado.
-
-  // Función para preguntar al backend: "¿Tengo una cookie de sesión válida?" y recuperar
-  // todos los datos del jugador logueado, si lo hay.
-  const checkSession = async () => {
-    try {
-      // Se utiliza 'credentials: include' para pedirle al navegador la cookie 
-      // HttpOnly con el ID de usuario. Se envía al backend para que verifique si
-      // es válida y devuelva el perfil del agente.
-      
-      // Petición GET para obtener la información del usuario logueado (o no).
-      const response = await fetch(`${API_BASE_URL}/jugadores`, {
-        method: 'GET',
-        credentials: "include" 
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data); // Guardamos el perfil del agente (incluyendo sus balas)
-      } else {
-        await handleErrorResponse(response, null, 'No se pudo validar la sesión', showToast);
-        handleDesconexion(); // No hay sesión o caducó, limpiamos todo (React y sessionStorage)
-      }
-    } catch (error) {
-      console.error("Error validando sesión:", error);
-      handleDesconexion(); // Si el servidor cae, también limpiamos para evitar inconsistencias
-    } finally {
-      setIsLoading(false); // Terminamos de cargar, ya podemos mostrar la UI
-    }
-  };
-
-  // Función que agrupa la lógica para limpiar completamente el rastro del usuario
-  // cuando cierra sesión o cuando se ejecuta checkSession sin que haya una cookie válida,
-  // para evitar usar tokens caducados.
-  const handleDesconexion = () => {
-    setUser(null);
-    sessionStorage.removeItem('jwt_token'); 
-  };
 
   // Función que se llama desde Pantalla01Login tras loguear al usuario con éxito, 
   // guardando toda su información.

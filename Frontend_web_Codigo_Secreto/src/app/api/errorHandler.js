@@ -84,9 +84,15 @@ export async function handleErrorResponse(response, navigate = null, mensajeDefe
     }
     
     if (finalNavigate) {
-      finalNavigate('/login');
+      // Si ya estamos en login, no navegar (evita loops)
+      if (window.location.pathname !== '/login') {
+        finalNavigate('/login');
+      }
     } else {
-      window.location.href = '/login';
+      // Si ya estamos en login, no recargar (evita loops)
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
   }
   
