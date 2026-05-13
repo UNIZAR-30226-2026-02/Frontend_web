@@ -8,6 +8,7 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { logoutUsuario, desactivarCuentaUsuario } from "../api/apiLogin";
 import { useToast } from "../context/ToastContext";
+import { useSound } from "../hooks/useSound"; // Importamos el hook de sonido
 
 // URL base para API REST
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -22,6 +23,9 @@ export function UserProvider({ children }) {
   const [user, setUser] = useState(null); // Aquí guardamos: {id_google, tag, fotoPerfil, balas, partidas_jugadas, victorias, numAciertos, numFallos}
   const [isLoading, setIsLoading] = useState(true); // Para la pantalla de carga inicial
   const { showToast } = useToast();
+
+  // Obtenemos la función resetVolumes del contexto de sonido
+  const { resetVolumes } = useSound();
 
   // Referencia para mantener la conexión WebSocket activa
   const stompClientRef = useRef(null);
@@ -128,6 +132,11 @@ export function UserProvider({ children }) {
   // guardando toda su información.
   const loginUsuario = (datosJugador) => {
     setUser(datosJugador);
+    // Restablecemos los volúmenes de sonido a sus valores por defecto (0.5 y 0.7)
+    // en cada nuevo inicio de sesión.
+    if (resetVolumes) {
+      resetVolumes();
+    }
   };
 
   // Función para cerrar sesión (Limpiamos el estado en React)

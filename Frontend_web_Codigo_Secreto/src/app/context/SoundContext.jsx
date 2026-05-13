@@ -16,24 +16,14 @@ import whooshSoundUrl from '../../assets/sonido_whoosh.mp3';
 import aceptarSoundUrl from '../../assets/sonido_aceptar.mp3';
 import cancelarSoundUrl from '../../assets/sonido_cancelar.mp3';
 
-// Claves constantes para evitar errores de dedo en localStorage
-const STORAGE_MUSIC_VOLUME = 'sound_music_volume';
-const STORAGE_SFX_VOLUME = 'sound_sfx_volume';
-
 export function SoundProvider({ children }) {
   /**
-   * ESTADO Y PERSISTENCIA
-   * Inicializamos los volúmenes leyendo de localStorage. 
-   * Si no existen, usamos valores por defecto (0.5 y 0.7). SE PUEDEN CAMBIAR
+   * ESTADO
+   * Los volúmenes se inicializan siempre con los valores por defecto (0.5 y 0.7)
+   * No se persisten en localStorage.
    */
-  const [musicVolume, setMusicVolume] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_MUSIC_VOLUME);
-    return saved !== null ? parseFloat(saved) : 0.5;
-  });
-  const [sfxVolume, setSfxVolume] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_SFX_VOLUME);
-    return saved !== null ? parseFloat(saved) : 0.7;
-  });
+  const [musicVolume, setMusicVolume] = useState(0.5);
+  const [sfxVolume, setSfxVolume] = useState(0.7);
 
   /**
    * REFERENCIAS (Audio Elements)
@@ -123,13 +113,12 @@ export function SoundProvider({ children }) {
   }, []);
 
   /**
-   * SINCRONIZACIÓN DE VOLUMEN
+   * SINCRONIZACIÓN DE VOLUMEN (sin persistencia en localStorage)
    * Estos efectos aseguran que cuando el estado cambia, el volumen del 
-   * elemento de audio real y el localStorage se actualicen.
+   * elemento de audio real se actualice.
    */
   useEffect(() => {
     if (bgAudioRef.current) bgAudioRef.current.volume = musicVolume;
-    localStorage.setItem(STORAGE_MUSIC_VOLUME, musicVolume);
   }, [musicVolume]);
 
   useEffect(() => {
@@ -141,7 +130,6 @@ export function SoundProvider({ children }) {
     if (whooshAudioRef.current) whooshAudioRef.current.volume = sfxVolume;
     if (aceptarAudioRef.current) aceptarAudioRef.current.volume = sfxVolume;
     if (cancelarAudioRef.current) cancelarAudioRef.current.volume = sfxVolume;
-    localStorage.setItem(STORAGE_SFX_VOLUME, sfxVolume);
   }, [sfxVolume]);
 
   /**
@@ -164,7 +152,7 @@ export function SoundProvider({ children }) {
 
   /**
    * FALLBACKS SINTÉTICOS (Web Audio API)
-   * Si no hay archivos .mp3, genera un "bip" usando osciladores matemáticos (estoy craisi)
+   * Si no hay archivos .mp3, genera un "bip" usando osciladores matemáticos
    */
   const playClickFallback = useCallback(() => {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -221,12 +209,22 @@ export function SoundProvider({ children }) {
     }
   }, []);
 
+  /**
+   * Función para resetear los volúmenes a sus valores por defecto.
+   * Se debe llamar desde UserContext tras un inicio de sesión exitoso.
+   */
+  const resetVolumes = useCallback(() => {
+    setMusicVolume(0.5);
+    setSfxVolume(0.7);
+  }, []);
+
   // Empaquetado del valor del contexto
   const contextValue = {
     musicVolume,
     sfxVolume,
     setMusicVolume,
     setSfxVolume,
+    resetVolumes,   
     playClick,
     playType,
     playDisparo,
