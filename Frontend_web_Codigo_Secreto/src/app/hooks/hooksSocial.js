@@ -75,7 +75,8 @@ export function useSocialWebSockets(onAmigosActualizados, onGlobalActualizado,
       },
       onStompError: (frame) => {
         if (frame.headers?.message === "SESSION_INVALIDATED") {
-          window.location.href = "/login";
+          sessionStorage.removeItem('jwt_token'); 
+          window.location.href = "/login?error=session_invalidated";
           return;
         }
         console.error('STOMP error:', frame);

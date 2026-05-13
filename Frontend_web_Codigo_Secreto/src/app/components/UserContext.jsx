@@ -74,7 +74,7 @@ export function UserProvider({ children }) {
       onStompError: (frame) => {
         if (frame.headers?.message === "SESSION_INVALIDATED") {
           handleDesconexion();
-          window.location.href = "/login";
+          window.location.href = "/login?error=session_invalidated";
           return;
         }
         console.error("STOMP error en UserContext:", frame);

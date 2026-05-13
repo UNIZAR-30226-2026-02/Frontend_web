@@ -957,7 +957,8 @@ export function PantallaPartida() {
       },
       onStompError: (frame) => {
         if (frame.headers?.message === "SESSION_INVALIDATED") {
-          navigate("/login");
+          sessionStorage.removeItem('jwt_token');
+          navigate("/login?error=session_invalidated");
           return;
         }
         console.error("STOMP error en partida:", frame);
