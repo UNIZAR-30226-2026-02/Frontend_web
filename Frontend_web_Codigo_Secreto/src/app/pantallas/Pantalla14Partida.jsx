@@ -580,7 +580,7 @@ export function PantallaPartida() {
   useEffect(() => {
     const cargarTemasEquipados = async () => {
   try {
-    const perfil = await obtenerPerfil();
+    const perfil = await obtenerPerfil(navigate, showToast);
     
     if (perfil?.marco_carta_equipado) {
       let marco = perfil.marco_carta_equipado;
@@ -673,7 +673,12 @@ export function PantallaPartida() {
           credentials: "include"
         });
         if (!res.ok) {
-          const errBody = await res.text();
+          const data = await res.json().catch(() => ({}));
+          if (data?.error_code === "SESSION_INVALIDATED") {
+            showToast("Se ha iniciado sesión en otro dispositivo", "error");
+            navigate("/login");
+            return;
+          }
           throw new Error("No se ha podido obtener el rol");
         }
         const data = await res.json();
@@ -808,7 +813,15 @@ export function PantallaPartida() {
         const res = await fetch(`${API_BASE}/partidas/${idPartida}/estado`, {
           credentials: "include"
         });
-        if (!res.ok) return;
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (data?.error_code === "SESSION_INVALIDATED") {
+            showToast("Se ha iniciado sesión en otro dispositivo", "error");
+            navigate("/login");
+            return;
+          }
+          return;
+        }
         const data = await res.json();
         aplicarEstadoTablero(data);
       } catch (err) {
@@ -1032,7 +1045,7 @@ export function PantallaPartida() {
     playCancelar();
     try {
       // Se llama a la función de 'apiPartidas.js'.
-      await abandonarPartida(idPartida);
+      await abandonarPartida(idPartida, navigate, showToast);
 
       // Se borra el orden de cartas de este local storage porque ya ha terminado 
       // la partida para el usuario que ha abandonado.

@@ -51,10 +51,20 @@ export async function handleErrorResponse(response, navigate = null, mensajeDefe
     showToast(mensaje, 'error');
   }
   
-  // Si es un error de sesión, redirigir al login
+  // Si es un error de sesión, redirigir al login y limpiar token en client side
   const sessionErrors = ['SESSION_INVALIDATED', 'GOOGLE_TOKEN_EXPIRED', 'INACTIVE_ACCOUNT'];
   if (sessionErrors.includes(errorCode)) {
-    if (navigate) navigate('/login');
+    sessionStorage.removeItem('jwt_token');
+    if (showToast) {
+      showToast(mensaje, 'error');
+    } else {
+      alert(mensaje);
+    }
+    if (navigate) {
+      navigate('/login');
+    } else {
+      window.location.href = '/login';
+    }
   }
   
   throw new Error(mensaje);

@@ -7,6 +7,7 @@ import { createContext, useState, useEffect, useRef } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { logoutUsuario, desactivarCuentaUsuario } from "../api/apiLogin";
+import { handleErrorResponse } from "../api/errorHandler";
 import { useToast } from "../context/ToastContext";
 import { useSound } from "../hooks/useSound"; // Importamos el hook de sonido
 
@@ -115,6 +116,7 @@ export function UserProvider({ children }) {
         const data = await response.json();
         setUser(data); // Guardamos el perfil del agente (incluyendo sus balas)
       } else {
+        await handleErrorResponse(response, null, 'No se pudo validar la sesión');
         handleDesconexion(); // No hay sesión o caducó, limpiamos todo (React y sessionStorage)
       }
     } catch (error) {

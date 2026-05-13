@@ -15,6 +15,7 @@ import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { UserContext } from "../components/UserContext";
 import { obtenerTemasJugador } from "../api/apiPartidas";
+import { handleErrorResponse } from "../api/errorHandler";
 import { useToast } from "../context/ToastContext";
 
 const WS_URL = import.meta.env.VITE_WS_URL;
@@ -154,7 +155,10 @@ export function Pantalla07Lobby() {
         const res = await fetch(`${API_BASE}/partidas/${id_partida}/lobby`, {
           credentials: "include"
         });
-        if (!res.ok) throw new Error("No se pudo cargar el lobby");
+        if (!res.ok) {
+          await handleErrorResponse(res, null, "No se pudo cargar el lobby", showToast);
+          throw new Error("No se pudo cargar el lobby");
+        }
         const data = await res.json();
         aplicarLobby(data);
 
@@ -168,7 +172,7 @@ export function Pantalla07Lobby() {
       }
     };
     if (id_partida) fetchLobby();
-  }, [id_partida, aplicarLobby]);
+  }, [id_partida, aplicarLobby, showToast]);
 
   //2. Cargar temas del creador (para selector)
   useEffect(() => {
