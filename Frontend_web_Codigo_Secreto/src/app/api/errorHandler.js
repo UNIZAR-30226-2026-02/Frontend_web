@@ -1,31 +1,56 @@
 import { ERROR_CATALOG } from './errorCatalog';
 
+let globalNavigate = null;
+let globalShowToast = null;
+
 /**
- * Utility para extraer mensajes de error descriptivos del backend.
+ * Permite configurar handlers globales para evitar pasarlos en cada llamada.
  */
-export async function extraerMensajeError(response, mensajeDefecto) {
+export function setGlobalHandlers(navigate, showToast) {
+  globalNavigate = navigate;
+  globalShowToast = showToast;
+}
+
+/**
+ * Utility para extraer el cuerpo del error y el mensaje descriptivo del backend.
+ * Retorna { mensaje, errorCode, body }
+ */
+async function procesarRespuestaError(response, mensajeDefecto) {
   try {
     const errorBody = await response.json();
-    
-    if (errorBody.error_code && ERROR_CATALOG[errorBody.error_code]) {
-      return ERROR_CATALOG[errorBody.error_code];
-    }
+    const errorCode = errorBody.error_code || 'UNKNOWN';
+    let mensaje = mensajeDefecto || ERROR_CATALOG["DEFAULT"];
 
-    if (errorBody.details && typeof errorBody.details === 'object') {
+    if (errorBody.error_code && ERROR_CATALOG[errorBody.error_code]) {
+      mensaje = ERROR_CATALOG[errorBody.error_code];
+    } else if (errorBody.details && typeof errorBody.details === 'object') {
       const detalles = Object.entries(errorBody.details)
         .map(([campo, mensaje]) => `${campo}: ${mensaje}`)
         .join(', ');
-      return `Error de validación: ${detalles}`;
+      mensaje = `Error de validación: ${detalles}`;
+    } else if (errorBody.message) {
+      mensaje = errorBody.message;
     }
-    
-    if (errorBody.message) {
-      return errorBody.message;
-    }
-    
-    return mensajeDefecto || ERROR_CATALOG["DEFAULT"];
-  } catch (err) {
-    return mensajeDefecto || "Error desconocido";
+
+    return { mensaje, errorCode, body: errorBody };
+  } catch {
+    return { 
+      mensaje: mensajeDefecto || ERROR_CATALOG["DEFAULT"], 
+      errorCode: 'UNKNOWN', 
+      body: {} 
+    };
   }
+}
+
+/**
+ * Utility para extraer mensajes de error descriptivos del backend.
+ * Mantenemos la firma por compatibilidad si se usa en otros sitios, 
+ * pero internamente debe clonar para no agotar el stream.
+ */
+export async function extraerMensajeError(response, mensajeDefecto) {
+  const cloned = response.clone();
+  const { mensaje } = await procesarRespuestaError(cloned, mensajeDefecto);
+  return mensaje;
 }
 
 /**
@@ -38,30 +63,28 @@ export async function extraerMensajeError(response, mensajeDefecto) {
  * @returns {Promise<never>} Lanza un Error
  */
 export async function handleErrorResponse(response, navigate = null, mensajeDefecto = "", showToast = null) {
-  const mensaje = await extraerMensajeError(response, mensajeDefecto);
-  
-  let errorCode = 'UNKNOWN';
-  try {
-    const body = await response.clone().json();
-    errorCode = body.error_code || 'UNKNOWN';
-  } catch (e) {}
+  const { mensaje, errorCode } = await procesarRespuestaError(response, mensajeDefecto);
 
-  // Mostrar el error visualmente si showToast está disponible
-  if (showToast) {
-    showToast(mensaje, 'error');
+  const finalShowToast = showToast || globalShowToast;
+  const finalNavigate = navigate || globalNavigate;
+
+  // Mostrar el error visualmente si el toast está disponible
+  if (finalShowToast) {
+    finalShowToast(mensaje, 'error');
   }
   
   // Si es un error de sesión, redirigir al login y limpiar token en client side
   const sessionErrors = ['SESSION_INVALIDATED', 'GOOGLE_TOKEN_EXPIRED', 'INACTIVE_ACCOUNT'];
   if (sessionErrors.includes(errorCode)) {
     sessionStorage.removeItem('jwt_token');
-    if (showToast) {
-      showToast(mensaje, 'error');
-    } else {
+    
+    // Si no había toast, al menos un alert para que el usuario sepa qué pasó
+    if (!finalShowToast) {
       alert(mensaje);
     }
-    if (navigate) {
-      navigate('/login');
+    
+    if (finalNavigate) {
+      finalNavigate('/login');
     } else {
       window.location.href = '/login';
     }
@@ -74,14 +97,9 @@ export async function handleErrorResponse(response, navigate = null, mensajeDefe
  * Crea un objeto Error con el mensaje descriptivo del backend.
  */
 export async function crearErrorDescriptivo(response, mensajeDefecto) {
-  const mensaje = await extraerMensajeError(response, mensajeDefecto);
+  const { mensaje, errorCode } = await procesarRespuestaError(response, mensajeDefecto);
   const error = new Error(mensaje);
   error.status = response.status;
-  try {
-    const body = await response.clone().json();
-    error.code = body.error_code;
-  } catch (e) {
-    error.code = 'UNKNOWN';
-  }
+  error.code = errorCode;
   return error;
 }
