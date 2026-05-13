@@ -12,6 +12,15 @@ import { obtenerEstadoPartida } from "../api/apiPartidas";
 import { UserContext } from "../components/UserContext";
 
 export function Pantalla01Login() {
+    // Feedback visual si la sesión fue invalidada
+    import { useEffect } from 'react';
+    useEffect(() => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("error") === "session_invalidated") {
+        alert("Tu sesión ha sido cerrada porque has iniciado sesión en otro dispositivo.");
+        window.history.replaceState({}, document.title, "/");
+      }
+    }, []);
   const navigate = useNavigate();
   // Se extrae la función 'loginUsuario' del UserContext para poder acceder al contexto.
   const { loginUsuario } = useContext(UserContext);

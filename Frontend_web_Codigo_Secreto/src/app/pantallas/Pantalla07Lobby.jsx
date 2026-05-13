@@ -197,6 +197,10 @@ export function Pantalla07Lobby() {
         });
       },
       onStompError: (frame) => {
+        if (frame.headers?.message === "SESSION_INVALIDATED") {
+          window.location.href = "/login";
+          return;
+        }
         console.error("STOMP lobby error:", frame);
         showToast("Error de conexión en la sala de espera", "error");
       }

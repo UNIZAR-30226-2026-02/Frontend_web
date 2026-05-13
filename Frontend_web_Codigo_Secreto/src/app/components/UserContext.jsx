@@ -71,6 +71,11 @@ export function UserProvider({ children }) {
         console.log("Desconectado del WebSocket de UserContext");
       },
       onStompError: (frame) => {
+        if (frame.headers?.message === "SESSION_INVALIDATED") {
+          handleDesconexion();
+          window.location.href = "/login";
+          return;
+        }
         console.error("STOMP error en UserContext:", frame);
         showToast("Error de conexión con el servidor", "error");
       },

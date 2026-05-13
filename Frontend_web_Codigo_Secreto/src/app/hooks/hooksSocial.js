@@ -74,6 +74,10 @@ export function useSocialWebSockets(onAmigosActualizados, onGlobalActualizado,
         });
       },
       onStompError: (frame) => {
+        if (frame.headers?.message === "SESSION_INVALIDATED") {
+          window.location.href = "/login";
+          return;
+        }
         console.error('STOMP error:', frame);
         if (onError) onError('Conexión perdida con la central de comunicaciones.');
       },

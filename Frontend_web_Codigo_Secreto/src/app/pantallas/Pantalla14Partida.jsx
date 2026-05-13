@@ -943,6 +943,10 @@ export function PantallaPartida() {
         });*/
       },
       onStompError: (frame) => {
+        if (frame.headers?.message === "SESSION_INVALIDATED") {
+          navigate("/login");
+          return;
+        }
         console.error("STOMP error en partida:", frame);
         showToast("Error de comunicación en la partida", "error");
       },
