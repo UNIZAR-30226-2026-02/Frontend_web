@@ -360,15 +360,16 @@ export function Pantalla13Tienda() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  // Carga inicial
+  // ── Carga inicial ─────────────────────────────────────────────────────────
   const cargarTodo = useCallback(async () => {
     setCargando(true);
     setError(null);
     try {
+      const wrapperToast = (msg, tipo) => mostrarToast(tipo === 'error' ? 'error' : 'ok', msg);
       const [perfil, catalogoTemas, catalogoPers] = await Promise.all([
-        obtenerPerfil(),
-        obtenerTemasActivos(),
-        obtenerPersonalizacionesJugador(),
+        obtenerPerfil(navigate, wrapperToast),
+        obtenerTemasActivos(navigate, wrapperToast),
+        obtenerPersonalizacionesJugador(navigate, wrapperToast),
       ]);
 
       setBalas(perfil.balas ?? 0);

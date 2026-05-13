@@ -7,7 +7,7 @@ import { BookOpen } from "lucide-react";
 import woodTexture from '../../assets/wood.png';
 import { IconoBala } from "./iconoBala";
 import { UserContext } from "./UserContext";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 
 // Importaciones de todos los avatares disponibles
 import Magia from '../../assets/1_magia.jpeg';
@@ -21,6 +21,23 @@ import { BackgroundMusic } from '../context/MusicaFondo';
 import { GlobalSoundEffects } from '../context/GlobalSoundEffects';
 // Importación para las notificaciones globales del usuario.
 import { NotificacionesProvider } from '../context/NotificacionesContext';
+import { useToast } from "../context/ToastContext";
+import { setGlobalHandlers } from "../api/errorHandler";
+
+/**
+ * Componente auxiliar para configurar los handlers globales de error 
+ * aprovechando el contexto de React (navigate y toast).
+ */
+function GlobalErrorHandlerSetter() {
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    setGlobalHandlers(navigate, showToast);
+  }, [navigate, showToast]);
+
+  return null;
+}
 
 // Pantallas en las que NO se van a mostrar los iconos persistentes de las esquinas 
 // (foto de agente ni contador de balas).
@@ -70,6 +87,7 @@ export function Layout() {
     // Envolvemos toda la aplicación con NotificacionesProvider para que los componentes hijos
     // puedan acceder al contexto de notificaciones
     <NotificacionesProvider>
+      <GlobalErrorHandlerSetter />
 
       {/* Componente que gestiona la música de fondo (inicio automático tras primera interacción) */}
       <BackgroundMusic />

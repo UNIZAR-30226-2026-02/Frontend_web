@@ -7,12 +7,14 @@ import { useNavigate } from "react-router-dom";
 import "../components/Escritorio.css"; 
 import { unirsePartidaPrivada, abandonarPartida, obtenerEstadoPartida } from "../api/apiPartidas";
 import { obtenerPerfil } from "../api/apiJugador";
+import { useToast } from "../context/ToastContext";
 
 import { ManilaFolder, RedStamp, FBISeal } from "../components/ScreenFrame";
 import { Crosshair, ShoppingBag, MessageSquare, Trophy, Archive, ArrowRight, LogIn, Lock, Globe, Search} from "lucide-react";
 
 export function Pantalla02Home() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [joinOpen, setJoinOpen] = useState(false);
   const [privateCode, setPrivateCode] = useState("");
 
@@ -26,7 +28,7 @@ export function Pantalla02Home() {
         // Pequeño retardo para que el backend tenga tiempo de actualizar el estado
         await new Promise(resolve => setTimeout(resolve, 1500));
 
-        const perfil = await obtenerPerfil();
+        const perfil = await obtenerPerfil(navigate, showToast);
         const idPartida = perfil?.partida_activa_id || null;
         setPartidaActivaId(idPartida);
         
@@ -38,7 +40,7 @@ export function Pantalla02Home() {
           );
           if (confirmar) {
             // Obtener el estado actual de la partida
-            const estadoPartida = await obtenerEstadoPartida(idPartida);
+            const estadoPartida = await obtenerEstadoPartida(idPartida, navigate, showToast);
             // En función del estado se redirige al lobby, partida o al home.
             if (estadoPartida === "esperando") {
               navigate(`/lobby/${idPartida}`);
@@ -51,30 +53,29 @@ export function Pantalla02Home() {
             }
           } else {
             // Abortar misión
-            await abandonarPartida(idPartida);
+            await abandonarPartida(idPartida, navigate, showToast);
             // Limpiar localStorage del orden de cartas
             localStorage.removeItem(`card_order_${idPartida}`);
             // Actualizar perfil para limpiar 'partida_activa_id'.
-            const nuevoPerfil = await obtenerPerfil();
+            const nuevoPerfil = await obtenerPerfil(navigate, showToast);
             setPartidaActivaId(nuevoPerfil?.partida_activa_id || null);
           }
         }
       } catch (err) {
         console.error("Error al cargar perfil o verificar partida activa:", err);
-        alert("No se pudo abandonar la partida. Inténtalo de nuevo.");
       }
     };
   
     cargarYVerificarPartida();
-  }, [navigate]);
+  }, [navigate, showToast]);
 
   const handleJoinMission = async () => {
     if (!privateCode.trim()) return;
     try {
-      const data = await unirsePartidaPrivada(privateCode.trim());
+      const data = await unirsePartidaPrivada(privateCode.trim(), navigate, showToast);
       navigate(`/lobby/${data.id_partida}`);
     } catch (err) {
-      alert(err.message);
+      // Error ya manejado por showToast en API
     }
   };
 

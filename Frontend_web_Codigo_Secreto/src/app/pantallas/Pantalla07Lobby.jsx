@@ -156,7 +156,7 @@ export function Pantalla07Lobby() {
           credentials: "include"
         });
         if (!res.ok) {
-          await handleErrorResponse(res, null, "No se pudo cargar el lobby", showToast);
+          await handleErrorResponse(res, navigate, "No se pudo cargar el lobby", showToast);
           throw new Error("No se pudo cargar el lobby");
         }
         const data = await res.json();

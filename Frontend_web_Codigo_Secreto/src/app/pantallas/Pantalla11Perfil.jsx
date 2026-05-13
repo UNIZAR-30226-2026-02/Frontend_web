@@ -17,8 +17,9 @@ import {
 import { IconoBala } from "../components/iconoBala";
 
 // API
-import { obtenerPerfil, actualizarPerfil, obtenerPersonalizaciones, equiparPersonalizacion } from "../api/apiJugador";
+import { obtenerPerfil, actualizarPerfil, equiparPersonalizacion } from "../api/apiJugador";
 import { obtenerPersonalizacionesJugador } from "../api/apiTienda";
+import { useToast } from "../context/ToastContext";
 
 // Estilos
 import "../components/Perfil.css";
@@ -38,16 +39,9 @@ const OPCIONES_AVATAR = [
   { id: 5, src: Natur, alt: "Agente 5" },
 ];
 
-/*const TEMAS_VISUALES = [
-  { id: "gold", name: "Oro envejecido", color: "#d4af37", borderColor: "#b8941f", bgColor: "#2a2518" },
-  { id: "sage", name: "Verde salvia", color: "#8a9a5b", borderColor: "#6d7a45", bgColor: "#1a2218" },
-  { id: "terracotta", name: "Terracota cálida", color: "#c65d3b", borderColor: "#a04a2a", bgColor: "#2a1c18" },
-  { id: "purple", name: "Púrpura real", color: "#8b5a8b", borderColor: "#6d456d", bgColor: "#221822" },
-  { id: "rose", name: "Cuarzo rosa", color: "#c67b8a", borderColor: "#a05060", bgColor: "#2a1820" },
-];*/
-
 export function Pantalla11Perfil() {
   const navegar = useNavigate();
+  const { showToast } = useToast();
 
   // Extraemos la función de logout del contexto global.
   const { logout, setUser, desactivarCuenta } = useContext(UserContext);
@@ -55,7 +49,6 @@ export function Pantalla11Perfil() {
   // Estados del perfil
   const [perfil, setPerfil] = useState(null);
   const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(null);
 
   // Estados de edición
   const [tagEditado, setTagEditado] = useState('');
@@ -77,7 +70,7 @@ export function Pantalla11Perfil() {
   useEffect(() => {
     const cargar = async () => {
       try {
-        const data = await obtenerPerfil();
+        const data = await obtenerPerfil(navegar, showToast);
         setPerfil(data);
         setTagEditado(data.tag || '');
         
@@ -86,7 +79,6 @@ export function Pantalla11Perfil() {
         const idFoto = data.foto_perfil ? Number(data.foto_perfil) : 1;
         setAvatarSeleccionado(idFoto);
       } catch (err) {
-        setError("No se pudo cargar el expediente del agente.");
         console.error(err);
       } finally {
         setCargando(false);
@@ -107,8 +99,8 @@ export function Pantalla11Perfil() {
     try {
       setCargandoPersonalizaciones(true);
       // Cargar perfil aquí para asegurar que tenemos los datos actuales
-      const perfilActual = await obtenerPerfil();
-      const lista = await obtenerPersonalizacionesJugador();
+      const perfilActual = await obtenerPerfil(navegar, showToast);
+      const lista = await obtenerPersonalizacionesJugador(navegar, showToast);
       const items = Array.isArray(lista) ? lista : [];
       
       // Marcar como equipados según los valores del perfil
@@ -132,7 +124,7 @@ export function Pantalla11Perfil() {
 
     cargar();
     cargarPersonalizaciones();
-  }, []);
+  }, [navegar, showToast, perfil?.fondo_tablero_equipado, perfil?.marco_carta_equipado]);
 
   // Guardar cambios de tag
   const handleGuardarTag = async () => {

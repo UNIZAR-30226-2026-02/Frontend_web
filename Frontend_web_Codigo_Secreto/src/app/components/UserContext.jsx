@@ -116,7 +116,7 @@ export function UserProvider({ children }) {
         const data = await response.json();
         setUser(data); // Guardamos el perfil del agente (incluyendo sus balas)
       } else {
-        await handleErrorResponse(response, null, 'No se pudo validar la sesión');
+        await handleErrorResponse(response, null, 'No se pudo validar la sesión', showToast);
         handleDesconexion(); // No hay sesión o caducó, limpiamos todo (React y sessionStorage)
       }
     } catch (error) {
