@@ -5,22 +5,21 @@
 import { ScreenFrame, ManilaFolder, RedStamp, FBISeal, TapeStrip } from "../components/ScreenFrame";
 import { useNavigate } from "react-router-dom";
 import logo from '../../assets/logo.png';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { loginConGoogle } from "../api/apiLogin";
 import { obtenerEstadoPartida } from "../api/apiPartidas";
 import { UserContext } from "../components/UserContext";
 
 export function Pantalla01Login() {
-    // Feedback visual si la sesión fue invalidada
-    import { useEffect } from 'react';
-    useEffect(() => {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("error") === "session_invalidated") {
-        alert("Tu sesión ha sido cerrada porque has iniciado sesión en otro dispositivo.");
-        window.history.replaceState({}, document.title, "/");
-      }
-    }, []);
+  // Feedback visual si la sesión fue invalidada
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "session_invalidated") {
+      alert("Tu sesión ha sido cerrada porque has iniciado sesión en otro dispositivo.");
+      window.history.replaceState({}, document.title, "/");
+    }
+  }, []);
   const navigate = useNavigate();
   // Se extrae la función 'loginUsuario' del UserContext para poder acceder al contexto.
   const { loginUsuario } = useContext(UserContext);
