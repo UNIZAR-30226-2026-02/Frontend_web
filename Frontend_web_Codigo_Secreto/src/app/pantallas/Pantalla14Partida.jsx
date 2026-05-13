@@ -437,7 +437,7 @@ function PanelPistaJefe({ onEnviarPista, pistaEnviada, pista, esMiTurno }) {
  * Muestra la pista activa, los votos actuales, la carta seleccionada y permite votar (en función
  * de si es su turno o no).
  */
-function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, votosActuales, totalJugadores, onVotar, puedoVotar }) {
+function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, votosActuales, totalAgentes, onVotar, puedoVotar }) {
   // Corrección 3: spinner mientras el Jefe analiza el tablero (sin pista activa)
   if (!pista) {
     return (
@@ -472,7 +472,7 @@ function PanelVotacionAgente({ pista, cartaSeleccionada, palabraSeleccionada, vo
         <span className="voting-label-xs">
           {/* TODO: buscar del backend el número de jugadores en ese equipo, porque no tiene
           por qué coincidir con la mitad. */}
-          VOTOS ACTUALES: {votosActuales?.length || 0}/{totalJugadores - 1 || "?"} 
+          VOTOS ACTUALES: {votosActuales?.length || 0}/{totalAgentes || "?"} 
         </span>
         <div className="vote-dots-container">
           {(votosActuales || []).map((v, i) => (
@@ -618,8 +618,8 @@ export function PantallaPartida() {
   const [miVotoEnviado, setMiVotoEnviado] = useState(false);
   const [totalRojo, setTotalRojo] = useState(0);
   const [totalAzul, setTotalAzul] = useState(0);
-  const [totalJugadoresRojo, setTotalJugadoresRojo] = useState(0);
-  const [totalJugadoresAzul, setTotalJugadoresAzul] = useState(0);
+  const [totalAgentesRojo, setTotalAgentesRojo] = useState(0);
+  const [totalAgentesAzul, setTotalAgentesAzul] = useState(0);
   // Estados para la fase y el marcador
   const [faseTurno, setFaseTurno] = useState(null);
   const [cartasRojasRestantes, setCartasRojasRestantes] = useState(0);
@@ -762,9 +762,9 @@ export function PantallaPartida() {
     if (data.cartas_rojas_restantes !== undefined) setCartasRojasRestantes(data.cartas_rojas_restantes);
     if (data.cartas_azules_restantes !== undefined) setCartasAzulesRestantes(data.cartas_azules_restantes);
 
-    // Actualizar total de jugadores por equipo
-    if (data.total_jugadores_rojos !== undefined) setTotalJugadoresRojo(data.total_jugadores_rojos);
-    if (data.total_jugadores_azules !== undefined) setTotalJugadoresAzul(data.total_jugadores_azules);
+    // Actualizar total de agentes por equipo
+    if (data.total_agentes_rojos !== undefined) setTotalAgentesRojo(data.total_agentes_rojos);
+    if (data.total_agentes_azules !== undefined) setTotalAgentesAzul(data.total_agentes_azules);
 
     // Manejo de pista actual:
     // - Si el backend envía una pista, significa que estamos en medio de una votación.
@@ -1189,7 +1189,7 @@ export function PantallaPartida() {
               cartaSeleccionada={cartaSeleccionada}
               palabraSeleccionada={palabraSeleccionada}
               votosActuales={votosActuales}
-              totalJugadores={turnoActual === 'rojo' ? totalJugadoresRojo : totalJugadoresAzul}
+              totalAgentes={turnoActual === 'rojo' ? totalAgentesRojo : totalAgentesAzul}
               onVotar={handleVotar}
               puedoVotar={puedoVotar}
             />
