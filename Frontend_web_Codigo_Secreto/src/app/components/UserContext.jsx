@@ -55,8 +55,14 @@ export function UserProvider({ children }) {
       } else {
         // Primero desconectamos localmente para limpiar el token
         handleDesconexion();
-        // Luego manejamos el error (que puede redirigir si no estamos en login)
-        await handleErrorResponse(response, null, 'No se pudo validar la sesión', showToast);
+        
+        // Si no estamos en el login, y el error NO es un simple "no autorizado" (401/403),
+        // podríamos mostrar el error. Pero para checkSession inicial, lo más común 
+        // es que sea 401/403 si el usuario no ha entrado aún.
+        // En ese caso, NO llamamos a handleErrorResponse para evitar el Toast molesto.
+        if (response.status !== 401 && response.status !== 403) {
+          await handleErrorResponse(response, null, 'No se pudo validar la sesión', showToast);
+        }
       }
     } catch (error) {
       console.error("Error validando sesión:", error);
